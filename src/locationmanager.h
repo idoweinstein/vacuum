@@ -2,24 +2,22 @@
 #define VACUUM_LOCATIONMANAGER_H_
 
 #include <vector>
-#include <tuple>
+#include <utility>
 
 #include "batterysensor.h"
 #include "direction.h"
 #include "dirtsensor.h"
 
-using namespace std;
-
 class LocationManager : public BatterySensor, public DirtSensor
 {
-    vector<vector<bool>> &wall_map;
-    vector<vector<unsigned int>> &dirt_map;
-    tuple<unsigned int, unsigned int> current_position;
-    tuple<unsigned int, unsigned int> docking_station_position;
+    std::vector<std::vector<bool>> &wall_map;
+    std::vector<std::vector<unsigned int>> &dirt_map;
+    std::pair<unsigned int, unsigned int> current_position;
+    std::pair<unsigned int, unsigned int> docking_station_position;
     unsigned int total_dirt_count;
 
 public:
-    LocationManager(vector<vector<bool>> &, vector<vector<unsigned int>> &, tuple<unsigned int, unsigned int>);
+    LocationManager(std::vector<std::vector<bool>> &, std::vector<std::vector<unsigned int>> &, std::pair<unsigned int, unsigned int>);
     virtual int getTotalDirtCount() const
     {
         return total_dirt_count;

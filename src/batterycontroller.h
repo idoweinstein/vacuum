@@ -6,8 +6,6 @@
 
 #include "batterysensor.h"
 
-using namespace std;
-
 class BatteryController : public BatterySensor
 {
     const unsigned int full_amount;
@@ -21,13 +19,13 @@ public:
     }
     virtual void charge()
     {
-        current_amount = min(current_amount + 1, (float)full_amount);
+        current_amount = std::min(current_amount + 1, (float)full_amount);
     }
     virtual void discharge()
     {
         if (current_amount - 1 < 0)
         {
-            throw range_error("Empty battery");
+            throw std::range_error("Empty battery");
         }
 
         current_amount -= 1;
