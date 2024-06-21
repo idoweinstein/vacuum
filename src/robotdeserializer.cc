@@ -24,7 +24,7 @@ void RobotDeserializer::deserializeParameters(unsigned int* parameters, std::ist
         std::istringstream line_stream(line);
 
         std::string key;
-        if (std::getline(line_stream, key, ' '))
+        if (std::getline(line_stream, key, kParameterDelimiter))
         {
             std::string value;
             std::getline(line_stream, value);
