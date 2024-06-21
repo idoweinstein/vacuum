@@ -95,10 +95,10 @@ Robot RobotDeserializer::deserializeFromFile(std::vector<std::vector<bool>>& wal
     deserializeHouse(wall_map, dirt_map, docking_station_position, input_file);
 
     Robot robot(parameters[Parameter::MAX_BATTERY_STEPS],
-          parameters[Parameter::MAX_ROBOT_STEPS],
-          wall_map,
-          dirt_map,
-          docking_station_position);
+                parameters[Parameter::MAX_ROBOT_STEPS],
+                wall_map,
+                dirt_map,
+                docking_station_position);
 
     return robot;
 }
