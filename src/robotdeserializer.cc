@@ -41,11 +41,18 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
 {
     string house_block_row;
     unsigned int row_idx = 0;
+
     while (std::getline(input_file, house_block_row))
     {
+        wall_map.push_back({});
+        dirt_map.push_back({});
         unsigned int column_idx = 0;
+
         for (char block: house_block_row)
         {
+            wall_map[row_idx].push_back(false);
+            dirt_map[row_idx].push_back(0);
+
             switch (block)
             {
                 case BlockType::DOCKING_STATION:
