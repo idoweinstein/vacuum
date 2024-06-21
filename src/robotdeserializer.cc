@@ -2,7 +2,7 @@
 
 #include "robotdeserializer.h"
 
-void RobotDeserializer::storeParameter(int* parameters, const std::string& key, int value)
+void RobotDeserializer::storeParameter(unsigned int* parameters, const std::string& key, unsigned int value)
 {
     if (0 == key.compare("max_battery_steps"))
     {
@@ -15,7 +15,7 @@ void RobotDeserializer::storeParameter(int* parameters, const std::string& key, 
     }
 }
 
-void RobotDeserializer::deserializeParameters(int* parameters, std::istream& input_stream)
+void RobotDeserializer::deserializeParameters(unsigned int* parameters, std::istream& input_stream)
 {
     for (int i = 0; i < robot.kNumberOfParameters; i++)
     {
@@ -29,7 +29,7 @@ void RobotDeserializer::deserializeParameters(int* parameters, std::istream& inp
             std::string value;
             std::getline(line_stream, value);
 
-            RobotDeserializer::storeParameter(parameters, key, std::stoi(value));
+            RobotDeserializer::storeParameter(parameters, key, (unsigned int)std::stoi(value));
         }
     }
 }
@@ -75,22 +75,23 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
     }
 }
 
-void RobotDeserializer::deserializeFromFile(Robot& robot,
-                                            std::vector<std::vector<bool>>& wall_map,
-                                            std::vector<std::vector<unsigned int>>& dirt_map,
-                                            const std::string& input_file_path)
+Robot RobotDeserializer::deserializeFromFile(std::vector<std::vector<bool>>& wall_map,
+                                             std::vector<std::vector<unsigned int>>& dirt_map,
+                                             const std::string& input_file_path)
 {
     std::ifstream input_file(input_file_path);
 
-    int parameters[] = int[sizeof(Parameter)];
+    unsigned int parameters[] = unsigned int[sizeof(Parameter)];
     deserializeParameters(parameters, input_file);
 
     std::pair<unsigned int, unsigned int> docking_station_position;
     deserializeHouse(wall_map, dirt_map, docking_station_position, input_file);
 
-    robot = Robot(parameters[Parameter::MAX_BATTERY_STEPS],
-                  parameters[Parameter::MAX_ROBOT_STEPS],
-                  wall_map,
-                  dirt_map,
-                  docking_station_position);
+    Robot robot(parameters[Parameter::MAX_BATTERY_STEPS],
+          parameters[Parameter::MAX_ROBOT_STEPS],
+          wall_map,
+          dirt_map,
+          docking_station_position);
+
+    return robot;
 }

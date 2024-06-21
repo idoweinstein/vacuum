@@ -41,8 +41,7 @@ class RobotDeserializer
                                  std::pair<unsigned int, unsigned int>& docking_station_position,
                                  std::istream& input_stream)
 public:
-    static void deserializeFromFile(Robot& robot,
-                                    std::vector<std::vector<bool>>& wall_map,
+    static void deserializeFromFile(std::vector<std::vector<bool>>& wall_map,
                                     std::vector<std::vector<unsigned int>>& dirt_map,
                                     const std::string& input_file_path);
 };
