@@ -8,7 +8,7 @@
 #include "direction.h"
 #include "dirtsensor.h"
 
-class LocationManager : public BatterySensor, public DirtSensor
+class LocationManager : public WallSensor, public DirtSensor
 {
     std::vector<std::vector<bool>> &wall_map;
     std::vector<std::vector<unsigned int>> &dirt_map;
