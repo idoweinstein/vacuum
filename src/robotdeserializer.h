@@ -33,15 +33,16 @@ class RobotDeserializer
     };
 
     const int kNumberOfParameters = 2;
+    const char kParameterDelimiter = ' ';
 
-    static void storeParameter(int* parameters, const std::string& key, int value);
-    static void deserializeParameters(int* parameters, std::istream& input_stream)
+    static void storeParameter(unsigned int* parameters, const std::string& key, unsigned int value);
+    static void deserializeParameters(unsigned int* parameters, std::istream& input_stream)
     static void deserializeHouse(std::vector<std::vector<bool>>& wall_map,
                                  std::vector<std::vector<unsigned int>>& dirt_map,
                                  std::pair<unsigned int, unsigned int>& docking_station_position,
                                  std::istream& input_stream)
 public:
-    static void deserializeFromFile(std::vector<std::vector<bool>>& wall_map,
+    static Robot deserializeFromFile(std::vector<std::vector<bool>>& wall_map,
                                     std::vector<std::vector<unsigned int>>& dirt_map,
                                     const std::string& input_file_path);
 };
