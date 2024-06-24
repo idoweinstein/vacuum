@@ -3,7 +3,7 @@
 #include <map>
 #include <stdexcept>
 
-LocationManager::LocationManager(std::vector<std::vector<bool>>& wall_map, std::vector<std::vector<unsigned int>>& dirt_map, std::pair<unsigned int, unsigned int> docking_station_position) :
+LocationManager::LocationManager(std::vector<std::vector<bool>>& wall_map, std::vector<std::vector<unsigned int>>& dirt_map, UPosition docking_station_position) :
     wall_map(wall_map), dirt_map(dirt_map), current_position(docking_station_position), docking_station_position(docking_station_position), total_dirt_count(0)
 {
     /* Calculate total dirt count */
@@ -34,16 +34,7 @@ void LocationManager::cleanCurrentPoisition()
 
 bool LocationManager::isWall(Direction direction) const
 {
-    /* TODO: move the following calculation to a new method in
-             Position/UPosition */
-    static std::map<Direction, std::pair<int, int>> map = {
-        {Direction::NORTH, std::make_pair(-1, 0)},
-        {Direction::EAST, std::make_pair(0, 1)},
-        {Direction::SOUTH, std::make_pair(1, 0)},
-        {Direction::WEST, std::make_pair(0, -1)}};
-
-    std::pair<int, int> next_position = std::make_pair(current_position.first + map[direction].first,
-                                                       current_position.second + map[direction].second);
+    UPosition next_position = UPosition::computePosition(current_position, direction);
 
     return wall_map[next_position.first][next_position.second];
 }
@@ -55,14 +46,5 @@ void LocationManager::move(Direction direction)
         throw std::runtime_error("Cannot move to wall");
     }
 
-    /* TODO: move the following calculation to a new method in
-             Position/UPosition */
-    static std::map<Direction, std::pair<int, int>> map = {
-        {Direction::NORTH, std::make_pair(-1, 0)},
-        {Direction::EAST, std::make_pair(0, 1)},
-        {Direction::SOUTH, std::make_pair(1, 0)},
-        {Direction::WEST, std::make_pair(0, -1)}};
-
-    current_position.first += map[direction].first;
-    current_position.second += map[direction].second;
+    current_position = UPosition::computePosition(current_position, direction);
 }
