@@ -4,6 +4,7 @@
 #include "direction.h"
 
 #include <functional>
+#include <stdexcept>
 #include <utility>
 
 class Position : public std::pair<int, int> {
@@ -27,7 +28,7 @@ class UPosition : public std::pair<unsigned int, unsigned int> {
     public:
         UPosition() : std::pair<unsigned int, unsigned int>(0, 0) {}
         UPosition(unsigned int x, unsigned int y) : std::pair<unsigned int, unsigned int>(x, y) {} 
-        static Position computePosition(Position position, Direction direction)
+        static UPosition computePosition(UPosition position, Direction direction)
         {
             if (position.first == 0 &&  direction == Direction::NORTH) {
                 throw std::range_error("Cannot move off grid");
@@ -44,7 +45,7 @@ class UPosition : public std::pair<unsigned int, unsigned int> {
                 {Direction::EAST, std::make_pair(1, 0)},
                 {Direction::STAY, std::make_pair(0, 0)}
             };
-            return Position(position.first + direction_map[direction].first, position.second + direction_map[direction].second);
+            return UPosition(position.first + direction_map[direction].first, position.second + direction_map[direction].second);
         }
 };
 
