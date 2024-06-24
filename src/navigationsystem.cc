@@ -7,38 +7,20 @@
 #include "navigationsystem.h"
 
 NavigationSystem::NavigationSystem(BatterySensor &battery_sensor, DirtSensor &dirt_sensor, WallSensor &wall_sensor)
-    : battery_sensor(battery_sensor), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor), current_position(std::make_pair(0, 0))
+    : battery_sensor(battery_sensor), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor), current_position(0, 0)
 {
     /* Update current location (docking station) as non-wall */
     wall_map[current_position] = false;
-}
-
-Position NavigationSystem::computePosition(Position, Direction direction)
-{
-    static std::map<Direction, Position> map = {
-        {Direction::NORTH, std::make_pair(1, 0)},
-        {Direction::EAST, std::make_pair(0, 1)},
-        {Direction::SOUTH, std::make_pair(-1, 0)},
-        {Direction::WEST, std::make_pair(0, -1)}
-    };
-
-    return std::make_pair(current_position.first + map[direction].first,
-                          current_position.second + map[direction].second);
 }
 
 Direction NavigationSystem::suggestNextStep()
 {
     static const Direction directions[] = {
         Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST};
-    const Position positions[] = {
-        std::make_pair(current_position.first + 1, current_position.second),
-        std::make_pair(current_position.first, current_position.second + 1),
-        std::make_pair(current_position.first - 1, current_position.second),
-        std::make_pair(current_position.first, current_position.second - 1)};
 
     /* Map walls around */
     for (auto direction : directions) {
-        Position position = computePosition(current_position, direction);
+        Position position = Position::computePosition(current_position, direction);
 
         if (wall_map.contains(position)) {
             continue;
@@ -102,23 +84,7 @@ Direction NavigationSystem::suggestNextStep()
 
 void NavigationSystem::move(Direction direction)
 {
-    switch (direction)
-    {
-    case Direction::NORTH:
-        current_position.first += 1;
-        break;
-    case Direction::EAST:
-        current_position.second += 1;
-        break;
-    case Direction::SOUTH:
-        current_position.first -= 1;
-        break;
-    case Direction::WEST:
-        current_position.second -= 1;
-        break;
-    case Direction::STAY:
-        break;
-    }
+    current_position = Position::computePosition(current_position, direction);
 
     /* Update current location (docking station) as non-wall */
     wall_map[current_position] = false;
@@ -151,7 +117,7 @@ std::vector<Direction>* NavigationSystem::performBFS(Position start_position, st
         queue.pop();
 
         for (auto direction : directions) {
-            Position position = computePosition(current->position, direction);
+            Position position = Position::computePosition(current->position, direction);
 
             if (visited.contains(position) || wall_map.contains(position) && wall_map[position]) {
                 /* This position is a wall or already has been visited */

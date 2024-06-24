@@ -22,7 +22,6 @@ class NavigationSystem {
         WallSensor& wall_sensor;
 
         virtual std::vector<Direction>* performBFS(Position, std::function<bool(Position)>);
-        virtual Position computePosition(Position, Direction);
         virtual std::vector<Direction>* getPathToNearestTodo();
 
     public:
