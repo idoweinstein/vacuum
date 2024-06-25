@@ -116,7 +116,7 @@ std::vector<Direction>* NavigationSystem::performBFS(Position start_position, st
         struct node *current = queue.front();
         queue.pop();
 
-        for (auto direction : directions) {
+        for (Direction direction : directions) {
             Position position = Position::computePosition(current->position, direction);
 
             if (visited.contains(position) || wall_map.contains(position) && wall_map[position]) {
