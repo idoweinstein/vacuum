@@ -7,10 +7,11 @@
 #include "batterycontroller.h"
 #include "navigationsystem.h"
 #include "locationmanager.h"
+#include "position.h"
 
 class Robot
 {
-    unsigned int max_robot_steps;
+    unsigned int max_robot_steps = 0;
     BatteryController battery_controller;
     LocationManager location_manager;
     NavigationSystem navigation_system;
@@ -20,7 +21,7 @@ public:
           unsigned int max_battery_steps,
           std::vector<std::vector<bool>>& wall_map,
           std::vector<std::vector<unsigned int>>& dirt_map,
-          std::pair<unsigned int, unsigned int>& docking_station_position);
+          UPosition& docking_station_position);
 };
 
 #endif /* VACUUM_ROBOT_H_ */

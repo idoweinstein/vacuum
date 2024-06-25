@@ -5,15 +5,16 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <map>
  
 #include "robot.h"
+#include "Position.h"
 
 class RobotDeserializer
 {
     enum BlockType : char
     {
-        DOCKING_STATION = 'o',
-        WALL = 'x',
+        DOCKING_STATION = '@',
         DIRT_LEVEL_0 = '0',
         DIRT_LEVEL_1 = '1',
         DIRT_LEVEL_2 = '2',
@@ -29,17 +30,19 @@ class RobotDeserializer
     enum Parameter
     {
         MAX_BATTERY_STEPS = 0,
-        MAX_ROBOT_STEPS
+        MAX_ROBOT_STEPS,
+        NUMBER_OF_PARAMETERS
     };
 
-    const int kNumberOfParameters = 2;
-    const char kParameterDelimiter = ' ';
+    static const std::map<std::string, Parameter> parameter_map;
+
+    static const char kParameterDelimiter = ' ';
 
     static void storeParameter(unsigned int* parameters, const std::string& key, unsigned int value);
     static void deserializeParameters(unsigned int* parameters, std::istream& input_stream);
     static void deserializeHouse(std::vector<std::vector<bool>>& wall_map,
                                  std::vector<std::vector<unsigned int>>& dirt_map,
-                                 std::pair<unsigned int, unsigned int>& docking_station_position,
+                                 UPosition& docking_station_position,
                                  std::istream& input_stream);
 public:
     static Robot deserializeFromFile(std::vector<std::vector<bool>>& wall_map,
