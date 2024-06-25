@@ -29,7 +29,7 @@ Direction NavigationSystem::suggestNextStep()
         bool is_wall = wall_sensor.isWall(direction);
         wall_map[position] = is_wall;
 
-        if (!is_wall) {
+        if (is_wall) {
             continue;
         }
 
