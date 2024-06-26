@@ -9,23 +9,29 @@
 
 class RobotLogger: public Logger
 {
-    static const std::string kRobotStepFormat;
-    static const std::string kCleaningStatisticsFormat;
-
 public:
     static void logRobotStep(Direction direction_moved, UPosition current_position)
     {
-        const std::string step_log_message = std::format(kRobotStepFormat, direction_moved, current_position.first, current_position.right);
+        const std::string step_log_message = std::format("[STEP] Robot took step to {} - New Position ({},{})",
+                                                         direction_moved,
+                                                         current_position.first,
+                                                         current_position.second);
+
         logMessage(LogLevel::INFO, LogOutput::FILE, step_log_message);
     }
 
     static void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, bool is_battery_exhausted, bool is_mission_success)
     {
-        const std::string statistics_log_message = std::format(kCleaningStatisticsFormat,
+        const std::string statistics_log_message = std::format("### Program Terminated ###\n"
+                                                               "Total Steps Taken: {}\n"
+                                                               "Total Dirt Left: {}\n"
+                                                               "Is Vacuum Cleaner Dead: {}\n"
+                                                               "Mission Succeeded: {}",
                                                                total_steps,
                                                                total_dirt,
                                                                is_battery_exhausted,
                                                                is_mission_success);
+
         logMessage(LogLevel::INFO, LogOutput::FILE, statistics_log_message);
     }
 
@@ -38,6 +44,6 @@ public:
     {
         logMessage(LogLevel::ERROR, LogOutput::CONSOLE, error_message);
     }
-}
+};
 
 #endif /* VACUUM_ROBOTLOGGER_H_ */

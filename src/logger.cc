@@ -1,12 +1,6 @@
 #include "logger.h"
 
-const Logger::log_level_prefix = {
-    {LogLevel::INFO, ""},
-    {LogLevel::WARNING, "[WARN]"},
-    {LogLevel::ERROR, "[ERROR]"}
-};
-
-void logMessage(LogLevel log_level, LogOutput output, const std::string& message)
+void Logger::logMessage(LogLevel log_level, LogOutput output, const std::string& message)
 {
     const std::string log_prefix = log_level_prefix.at(log_level);
 
