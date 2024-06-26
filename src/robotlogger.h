@@ -10,6 +10,12 @@
 class RobotLogger: public Logger
 {
 public:
+    static void setLogFile(const std::string& input_file_name)
+    {
+        const std::string& log_file_name = "output_" + input_file_name;
+        Logger::setLogFile(log_file_name);
+    }
+
     static void logRobotStep(Direction direction_moved, UPosition current_position)
     {
         const std::string step_log_message = std::format("[STEP] Robot took step to {} - New Position ({},{})",
@@ -20,7 +26,7 @@ public:
         logMessage(LogLevel::INFO, LogOutput::FILE, step_log_message);
     }
 
-    static void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, bool is_battery_exhausted, bool is_mission_success)
+    static void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, bool is_battery_exhausted, bool is_mission_complete)
     {
         const std::string statistics_log_message = std::format("### Program Terminated ###\n"
                                                                "Total Steps Taken: {}\n"
@@ -30,7 +36,7 @@ public:
                                                                total_steps,
                                                                total_dirt,
                                                                is_battery_exhausted,
-                                                               is_mission_success);
+                                                               is_mission_complete);
 
         logMessage(LogLevel::INFO, LogOutput::FILE, statistics_log_message);
     }
