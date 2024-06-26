@@ -7,6 +7,7 @@
 #include "batterycontroller.h"
 #include "navigationsystem.h"
 #include "locationmanager.h"
+#include "direction.h"
 #include "position.h"
 
 class Robot
@@ -15,6 +16,15 @@ class Robot
     BatteryController battery_controller;
     LocationManager location_manager;
     NavigationSystem navigation_system;
+    
+    bool shouldStopCleaning(unsigned int steps_performed)
+    {
+        bool isCleaningFinished = this->location_manager.isFinished();
+        bool isMaxStepsPerformed = (steps_performed >= this->max_robot_steps);
+        return isCleaningFinished || isMaxStepsPerformed;
+    }
+
+    void move(void);
 
 public:
     Robot(unsigned int max_robot_steps,
@@ -22,6 +32,8 @@ public:
           std::vector<std::vector<bool>>& wall_map,
           std::vector<std::vector<unsigned int>>& dirt_map,
           UPosition& docking_station_position);
+
+    void run(void);
 };
 
 #endif /* VACUUM_ROBOT_H_ */
