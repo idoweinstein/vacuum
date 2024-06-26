@@ -4,6 +4,7 @@
 
 #include "robot.h"
 #include "position.h"
+#include "robotlogger.h"
 #include "robotdeserializer.h"
 
 const std::map<std::string, RobotDeserializer::Parameter> RobotDeserializer::parameter_map = {
@@ -17,6 +18,11 @@ void RobotDeserializer::storeParameter(unsigned int* parameters, const std::stri
     {
         unsigned int parameter_index = parameter_map.at(key);
         parameters[parameter_index] = value;
+    }
+
+    else
+    {
+        RobotLogger::logWarning("Invalid configuration parameter was given - Ignoring this line");
     }
 }
 
@@ -77,8 +83,13 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
                     docking_station_position = {row_idx, column_idx};
                     break;
 
+                case BlockType::WALL:
+                    wall_map[row_idx][column_idx] = true;
+                    break;
+
                 default:   /* We've decided to translate any other given character as a wall */
                     wall_map[row_idx][column_idx] = true;
+                    RobotLogger::logWarning("Invalid character was given in house table - Parsing as a wall.");
                     break;
             }
             column_idx++;
@@ -89,11 +100,17 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
 
 Robot RobotDeserializer::deserializeFromFile(std::vector<std::vector<bool>>& wall_map,
                                              std::vector<std::vector<unsigned int>>& dirt_map,
-                                             const std::string& input_file_path)
+                                             const std::string& input_file_name)
 {
-    std::ifstream input_file(input_file_path);
+    std::ifstream input_file;
+    input_file.open(input_file_name);
 
-    unsigned int parameters[Parameter::NUMBER_OF_PARAMETERS];
+    if (!input_file.is_open())
+    {
+        throw std::runtime_error("Couldn't open input file!");
+    }
+
+    unsigned int parameters[Parameter::NUMBER_OF_PARAMETERS] = {0};
     deserializeParameters(parameters, input_file);
 
     UPosition docking_station_position;

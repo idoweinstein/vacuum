@@ -15,6 +15,7 @@ class RobotDeserializer
     enum BlockType : char
     {
         DOCKING_STATION = '@',
+        WALL = 'x',
         DIRT_LEVEL_0 = '0',
         DIRT_LEVEL_1 = '1',
         DIRT_LEVEL_2 = '2',
@@ -47,7 +48,7 @@ class RobotDeserializer
 public:
     static Robot deserializeFromFile(std::vector<std::vector<bool>>& wall_map,
                                     std::vector<std::vector<unsigned int>>& dirt_map,
-                                    const std::string& input_file_path);
+                                    const std::string& input_file_name);
 };
 
 #endif /* VACUUM_DESERIALIZER_H_ */
