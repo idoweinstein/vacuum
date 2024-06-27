@@ -118,8 +118,10 @@ std::vector<Direction>* NavigationSystem::performBFS(Position start_position, st
 
         for (Direction direction : directions) {
             Position position = Position::computePosition(current->position, direction);
+            bool is_navigable = wall_map.contains(position) && !wall_map[position];
+            bool is_visited = visited.contains(position);
 
-            if (visited.contains(position) || wall_map.contains(position) && wall_map[position]) {
+            if (is_visited || !is_navigable) {
                 /* This position is a wall or already has been visited */
                 continue;
             }
