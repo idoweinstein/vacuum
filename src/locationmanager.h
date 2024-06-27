@@ -28,6 +28,7 @@ public:
     virtual bool isInDockingStation() const { return current_position == docking_station_position; }
     virtual bool isFinished() const { return total_dirt_count == 0; }
     virtual unsigned int getDirtLevel() const;
+    virtual UPosition getCurrentPosition() const { return current_position; }
     virtual bool isWall(Direction) const;
 };
 
