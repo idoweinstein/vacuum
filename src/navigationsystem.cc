@@ -13,13 +13,13 @@ NavigationSystem::NavigationSystem(BatterySensor &battery_sensor, DirtSensor &di
     wall_map[current_position] = false;
 }
 
-Direction NavigationSystem::suggestNextStep()
+void NavigationSystem::mapWallsAround()
 {
     static const Direction directions[] = {
         Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST};
 
     /* Map walls around */
-    for (auto direction : directions) {
+    for (Direction direction : directions) {
         Position position = Position::computePosition(current_position, direction);
 
         if (wall_map.contains(position)) {
@@ -35,16 +35,27 @@ Direction NavigationSystem::suggestNextStep()
 
         todo_positions.insert(position);
     }
+}
 
-    /* Dirt level */
-    unsigned int dirt_level = dirt_sensor.getDirtLevel();
-    if (dirt_level == 0) {
-        todo_positions.erase(current_position);
+void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, float& battery_steps)
+{
+    NavigationSystem::mapWallsAround();
+
+    /* Update dirt level */
+    dirt_level = dirt_sensor.getDirtLevel();
+    if (dirt_level > 0) {
+        todo_positions.insert(current_position);
     }
 
-    /* Battery */
-    float battery_steps = battery_sensor.getCurrentAmount();
+    /* Update battery level */
+    battery_steps = battery_sensor.getCurrentAmount();
+    if (battery_steps <= 0) {
+        throw std::runtime_error("Battery is empty");
+    }
+}
 
+Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float battery_steps)
+{
     std::vector<Direction> pathToStation = getPathToStation();
 
     /* If there's not enough battery, go to station */
@@ -80,6 +91,16 @@ Direction NavigationSystem::suggestNextStep()
     delete pathToNearestTodo;
 
     return nextStep;
+}
+
+Direction NavigationSystem::suggestNextStep()
+{
+    unsigned int dirt_level = 0;
+    float battery_steps = 0;
+
+    NavigationSystem::getSensorsInfo(dirt_level, battery_steps);
+
+    return NavigationSystem::decideNextStep(dirt_level, battery_steps);
 }
 
 void NavigationSystem::move(Direction direction)

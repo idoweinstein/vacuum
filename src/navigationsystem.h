@@ -24,6 +24,11 @@ class NavigationSystem {
         virtual std::vector<Direction>* performBFS(Position, std::function<bool(Position)>);
         virtual std::vector<Direction>* getPathToNearestTodo();
 
+        /* Subfunctions of suggestNextStep */
+        virtual void mapWallsAround();
+        virtual void getSensorsInfo(unsigned int& dirt_level, float& battery_steps);
+        virtual Direction decideNextStep(unsigned int dirt_level, float battery_steps);
+
     public:
         NavigationSystem(BatterySensor&, DirtSensor&, WallSensor&);
         virtual Direction suggestNextStep();
