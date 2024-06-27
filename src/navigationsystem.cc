@@ -1,16 +1,98 @@
-#include <cmath>
 #include <map>
+#include <cmath>
 #include <queue>
+#include <deque>
 #include <stdexcept>
 #include <unordered_set>
 
 #include "navigationsystem.h"
 
-NavigationSystem::NavigationSystem(BatterySensor &battery_sensor, DirtSensor &dirt_sensor, WallSensor &wall_sensor)
-    : battery_sensor(battery_sensor), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor), current_position(0, 0)
+NavigationSystem::NavigationSystem(BatterySensor& battery_sensor, DirtSensor& dirt_sensor, WallSensor& wall_sensor)
+    : current_position(0, 0), battery_sensor(battery_sensor), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor)
 {
     /* Update current location (docking station) as non-wall */
     wall_map[current_position] = false;
+}
+
+int NavigationSystem::performBFS(PathTree& path_tree, unsigned int start_index, std::function<bool(Position)> found_criteria)
+{
+    std::unordered_set<Position> visited_positions;
+    std::queue<unsigned int> index_queue;
+    static const Direction directions[] = {
+        Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST
+    };
+
+    index_queue.push(start_index);
+
+    /* Perform BFS */
+    while (!index_queue.empty())
+    {
+        unsigned int parent_index = index_queue.front();
+        index_queue.pop();
+
+        for (Direction direction : directions)
+        {
+            Position parent_position = path_tree.getPosition(parent_index);
+            Position child_position = Position::computePosition(parent_position, direction);
+
+            bool is_visited = visited_positions.contains(child_position);
+            bool is_navigable = wall_map.contains(child_position) && !wall_map[child_position];
+
+            if (is_visited || !is_navigable)
+            {
+                continue;
+            }
+
+            unsigned int child_index = path_tree.insertChild(parent_index, direction, child_position);
+            index_queue.push(child_index);
+            visited_positions.insert(child_position);
+
+            if (found_criteria(child_position))
+            {
+                return child_index; // Node index of path end
+            }
+        }
+    }
+
+    return kNotFound;
+}
+
+bool NavigationSystem::getPathByFoundCriteria(std::deque<Direction>& path, std::function<bool(Position)> found_criteria)
+{
+    PathTree path_tree;
+
+    unsigned int root_index = path_tree.insertRoot(current_position);
+
+    int path_end_index = performBFS(path_tree, root_index, found_criteria);
+    if (path_end_index == kNotFound)
+    {
+        return false;
+    }
+
+    unsigned int current_index = path_end_index;
+    while (path_tree.hasParent(current_index))
+    {
+        path.push_front(path_tree.getDirection(current_index));
+        current_index = path_tree.getParentIndex(current_index);
+    }
+
+    return true;
+}
+
+bool NavigationSystem::getPathToNearestTodo(std::deque<Direction>& path)
+{
+    return getPathByFoundCriteria(path,
+                                  [&](Position position)
+                                  { return todo_positions.contains(position); }
+    );
+}
+
+bool NavigationSystem::getPathToStation(std::deque<Direction>& path)
+{
+    return getPathByFoundCriteria(path,
+                                  [&](Position position)
+                                  { return position == std::make_pair(0, 0); }
+    );
 }
 
 void NavigationSystem::mapWallsAround()
@@ -56,17 +138,18 @@ void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, float& battery_s
 
 Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float battery_steps)
 {
-    std::vector<Direction> pathToStation = getPathToStation();
+    std::deque<Direction> path_to_station;
+    (void) getPathToStation(path_to_station); // TODO: Handle the case that path back home was not found...
 
     /* If there's not enough battery, go to station */
-    if (battery_steps <= pathToStation.size()) {
-        return pathToStation[0];
+    if (battery_steps <= path_to_station.size()) {
+        return path_to_station[0];
     }
 
     /* If the entire map is explored, go to station */
     if (todo_positions.empty()) {
         /* Go to docking station */
-        return pathToStation[0];
+        return path_to_station[0];
     }
 
     /* If the current position is dirty, stay to clean it */
@@ -76,21 +159,18 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
 
     /* If going one step further will cause the battery
        to drain before reaching the station, go to station */
-    if (battery_steps <= 1 + pathToStation.size()) {
-        return pathToStation[0];
+    if (battery_steps <= 1 + path_to_station.size()) {
+        return path_to_station[0];
     }
 
-    std::vector<Direction>* pathToNearestTodo = getPathToNearestTodo();
-    if (pathToNearestTodo == nullptr) {
-        /* All TODOs are non-reachable (should not happen) */
-        return pathToStation[0];
+    std::deque<Direction> path_to_nearest_todo;
+    bool is_found = getPathToNearestTodo(path_to_nearest_todo);
+    if (!is_found) // No path to a dirty block found
+    {
+        return path_to_station[0];
     }
 
-    Direction nextStep = (*pathToNearestTodo)[0];
-
-    delete pathToNearestTodo;
-
-    return nextStep;
+    return path_to_nearest_todo[0];
 }
 
 Direction NavigationSystem::suggestNextStep()
@@ -109,111 +189,4 @@ void NavigationSystem::move(Direction direction)
 
     /* Update current location (docking station) as non-wall */
     wall_map[current_position] = false;
-}
-
-struct node {
-    struct node *parent;
-    Direction direction;
-    Position position;
-};
-
-std::vector<Direction>* NavigationSystem::performBFS(Position start_position, std::function<bool(Position)> found)
-{
-    static const Direction directions[] = {
-        Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST};
-
-    std::unordered_set<Position> visited;
-    std::queue<struct node *> queue;
-    struct node *nearest = nullptr;
-
-    struct node *root = new node;
-    root->parent = nullptr;
-    root->direction = Direction::STAY;
-    root->position = start_position;
-    queue.push(root);
-
-    /* Perform BFS */
-    while (nearest == nullptr && !queue.empty()) {
-        struct node *current = queue.front();
-        queue.pop();
-
-        for (Direction direction : directions) {
-            Position position = Position::computePosition(current->position, direction);
-            bool is_navigable = wall_map.contains(position) && !wall_map[position];
-            bool is_visited = visited.contains(position);
-
-            if (is_visited || !is_navigable) {
-                /* This position is a wall or already has been visited */
-                continue;
-            }
-
-            struct node *child = new node;
-
-            child->parent = current;
-            child->direction = direction;
-            child->position = position;
-            queue.push(child);
-
-            if (found(child->position)) {
-                nearest = child;
-                break;
-            }
-        }
-    }
-
-    if (nearest == nullptr) {
-        /* No matching node */
-        return nullptr;
-    }
-
-    /* Reconstruct path */
-    std::vector<Direction> *path = new std::vector<Direction>;
-    struct node *current = nearest;
-    while (current->parent != nullptr)
-    {
-        path->insert(path->begin(), current->direction);
-        current = current->parent;
-    }
-
-    /* Free entire tree */
-    visited.clear();
-    while (!queue.empty())
-    {
-        struct node *current = queue.front();
-        queue.pop();
-        if (visited.contains(current->position))
-        {
-            continue;
-        }
-
-        visited.insert(current->position);
-        if (current->parent != nullptr)
-        {
-            queue.push(current->parent);
-        }
-        delete current;
-    }
-
-    return path;
-}
-
-std::vector<Direction>* NavigationSystem::getPathToNearestTodo()
-{
-    return performBFS(current_position, [&](Position position) {
-        return todo_positions.contains(position);
-    });
-}
-
-std::vector<Direction>& NavigationSystem::getPathToStation()
-{
-    std::vector<Direction>* path = performBFS(current_position, [&](Position position) {
-        return position == std::make_pair(0, 0);
-    });
-
-    if (path == nullptr) {
-        /* Should not happen */
-        throw std::runtime_error("No path to station");
-    }
-
-    return *path;
 }
