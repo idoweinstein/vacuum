@@ -22,6 +22,12 @@ int NavigationSystem::performBFS(PathTree& path_tree, unsigned int start_index, 
         Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST
     };
 
+    // If current position satisfies found_criteria - Return empty path
+    if (found_criteria(path_tree.getPosition(start_index))) 
+    {
+        return start_index;
+    }
+
     index_queue.push(start_index);
 
     /* Perform BFS */
@@ -125,13 +131,15 @@ void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, float& battery_s
 
     /* Update dirt level */
     dirt_level = dirt_sensor.getDirtLevel();
-    if (dirt_level > 0) {
+    if (dirt_level > 0)
+    {
         todo_positions.insert(current_position);
     }
 
     /* Update battery level */
     battery_steps = battery_sensor.getCurrentAmount();
-    if (battery_steps <= 0) {
+    if (battery_steps <= 0)
+    {
         throw std::runtime_error("Battery is empty");
     }
 }
@@ -142,35 +150,44 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
     (void) getPathToStation(path_to_station); // TODO: Handle the case that path back home was not found...
 
     /* If there's not enough battery, go to station */
-    if (battery_steps <= path_to_station.size()) {
-        return path_to_station[0];
+    if (battery_steps <= getPathDistance(path_to_station))
+    {
+        return getPathNextStep(path_to_station);
     }
 
     /* If the entire map is explored, go to station */
-    if (todo_positions.empty()) {
+    if (todo_positions.empty())
+    {
         /* Go to docking station */
-        return path_to_station[0];
+        return getPathNextStep(path_to_station);
     }
 
     /* If the current position is dirty, stay to clean it */
-    if (dirt_level > 0) {
+    if (dirt_level > 0)
+    {    
+        // If block to be cleaned
+        if (dirt_level == 1)
+        {
+            todo_positions.erase(current_position);
+        }
         return Direction::STAY;
     }
 
     /* If going one step further will cause the battery
        to drain before reaching the station, go to station */
-    if (battery_steps <= 1 + path_to_station.size()) {
-        return path_to_station[0];
+    if (battery_steps <= 1 + getPathDistance(path_to_station))
+    {
+        return getPathNextStep(path_to_station);
     }
 
     std::deque<Direction> path_to_nearest_todo;
     bool is_found = getPathToNearestTodo(path_to_nearest_todo);
     if (!is_found) // No path to a dirty block found
     {
-        return path_to_station[0];
+        return getPathNextStep(path_to_station);
     }
 
-    return path_to_nearest_todo[0];
+    return getPathNextStep(path_to_nearest_todo);
 }
 
 Direction NavigationSystem::suggestNextStep()
