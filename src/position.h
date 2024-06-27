@@ -50,17 +50,26 @@ class UPosition : public std::pair<unsigned int, unsigned int> {
 };
 
 namespace std {
-  template<> struct hash<Position> {
-    size_t operator()(Position const& p) const {
-      return size_t(p.first ^ p.second);
+    /* Source: http://szudzik.com/ElegantPairing.pdf */
+    static inline unsigned int elegantPair(unsigned int a, unsigned int b) {
+        return a >= b ? a * a + a + b : a + b * b;
     }
-  };
 
-  template<> struct hash<UPosition> {
-    size_t operator()(UPosition const& p) const {
-      return size_t(p.first ^ p.second);
-    }
-  };
+    template<> struct hash<Position> {
+        size_t operator()(Position const& p) const {
+            /* Map each integer to a unique unsigned integer */
+            unsigned int a = p.first >= 0 ? 2 * p.first : -2 * p.first - 1;
+            unsigned int b = p.second >= 0 ? 2 * p.second : -2 * p.second - 1;
+
+            return size_t(elegantPair(a, b));
+        }
+    };
+
+    template<> struct hash<UPosition> {
+        size_t operator()(UPosition const& p) const {
+            return size_t(elegantPair(p.first, p.second));
+        }
+    };
 };
 
 #endif /* VACUUM_POSITION_H_ */

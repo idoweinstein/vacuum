@@ -4,9 +4,9 @@
 #include <vector>
 #include <utility>
 
-#include "batterysensor.h"
 #include "direction.h"
 #include "dirtsensor.h"
+#include "wallsensor.h"
 #include "position.h"
 
 class LocationManager : public WallSensor, public DirtSensor
