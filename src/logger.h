@@ -25,8 +25,8 @@ class Logger
     inline static std::ofstream log_file;
     inline static const std::map<LogLevel, const std::string> log_level_prefix = {
         {LogLevel::INFO, ""},
-        {LogLevel::WARNING, "[WARN]"},
-        {LogLevel::ERROR, "[ERROR]"}
+        {LogLevel::WARNING, "[WARNING] "},
+        {LogLevel::ERROR, "[ERROR] "}
     };
 
 public:
