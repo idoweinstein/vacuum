@@ -18,7 +18,7 @@ void Robot::move(void)
 {
     Direction next_direction = this->navigation_system.suggestNextStep();
 
-    /* If no battery left - throws Empty Battery exception */
+    /* If no battery left - discharge() throws an Empty Battery exception */
     if (next_direction == Direction::STAY)
     {
         if (this->location_manager.isInDockingStation())
@@ -27,8 +27,8 @@ void Robot::move(void)
         }
         else
         {
-            this->location_manager.cleanCurrentPoisition();
             this->battery_controller.discharge();
+            this->location_manager.cleanCurrentPoisition();
         }
     }
     else
