@@ -27,6 +27,16 @@ class NavigationSystem {
         virtual int performBFS(PathTree& path_tree, 
                                unsigned int start_index,
                                std::function<bool(Position)> found_criteria);
+        virtual unsigned int getPathDistance(std::deque<Direction>& path) { return path.size(); }
+        virtual Direction getPathNextStep(std::deque<Direction>& path)
+        {
+            // Handle empty path
+            if (getPathDistance(path) == 0) 
+            {
+                return Direction::STAY;
+            }
+            return path[0];
+        }
         virtual bool getPathByFoundCriteria(std::deque<Direction>& path, std::function<bool(Position)> found_criteria);
         virtual bool getPathToNearestTodo(std::deque<Direction>& path);
         virtual bool getPathToStation(std::deque<Direction>& path);
