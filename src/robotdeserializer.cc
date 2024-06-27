@@ -9,29 +9,59 @@
 
 const std::map<std::string, RobotDeserializer::Parameter> RobotDeserializer::parameter_map = {
         {"max_battery_steps", Parameter::MAX_BATTERY_STEPS},
-        {"max_robot_steps", Parameter::MAX_ROBOT_STEPS}
+        {"max_robot_steps", Parameter::MAX_ROBOT_STEPS},
+        {"house", Parameter::END_OF_PARAMETER}
 };
 
-void RobotDeserializer::storeParameter(unsigned int* parameters, const std::string& key, unsigned int value)
+unsigned int RobotDeserializer::valueToUnsignedInt(const std::string& value)
+{
+    std::istringstream value_stream(value);
+    int numerical_value = 0;
+
+    value_stream >> numerical_value;
+    if (!value_stream)
+    {
+        RobotLogger::logWarning("Parameter with non-integer value given - Setting default value of '0'...");
+        numerical_value = 0;
+    }
+
+    if (numerical_value < 0)
+    {
+        RobotLogger::logWarning("Parameter with negative value given - Setting default value of '0'...");
+        numerical_value = 0;
+    }
+
+    return numerical_value;
+}
+
+bool RobotDeserializer::storeParameter(unsigned int* parameters, const std::string& key, const std::string& value)
 {
     if (parameter_map.contains(key))
     {
-        unsigned int parameter_index = parameter_map.at(key);
-        parameters[parameter_index] = value;
+        Parameter parameter_type = parameter_map.at(key);
+
+        if (Parameter::END_OF_PARAMETER == parameter_type)
+        {
+            return true;
+        }
+
+        unsigned int parameter_index = (unsigned int) parameter_type;
+        parameters[parameter_index] = valueToUnsignedInt(value);
     }
 
     else
     {
-        RobotLogger::logWarning("Invalid configuration parameter was given - Ignoring this line");
+        RobotLogger::logWarning("Invalid configuration parameter was given - Ignoring this line...");
     }
+
+    return false;
 }
 
 void RobotDeserializer::deserializeParameters(unsigned int* parameters, std::istream& input_stream)
 {
-    for (int i = 0; i < Parameter::NUMBER_OF_PARAMETERS; i++)
+    std::string line;
+    while (std::getline(input_stream, line))
     {
-        std::string line;
-        std::getline(input_stream, line);
         std::istringstream line_stream(line);
 
         std::string key;
@@ -39,8 +69,12 @@ void RobotDeserializer::deserializeParameters(unsigned int* parameters, std::ist
         {
             std::string value;
             std::getline(line_stream, value);
-
-            RobotDeserializer::storeParameter(parameters, key, (unsigned int)std::stoi(value));
+            
+            bool end_of_parameters = RobotDeserializer::storeParameter(parameters, key, value);
+            if (end_of_parameters)
+            {
+                break;
+            }
         }
     }
 }
@@ -52,6 +86,7 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
 {
     std::string house_block_row;
     unsigned int row_idx = 0;
+    bool is_docking_station_initialized = false;
 
     while (std::getline(input_stream, house_block_row))
     {
@@ -80,7 +115,12 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
                     break;
 
                 case BlockType::DOCKING_STATION:
+                    if (is_docking_station_initialized)
+                    {
+                        RobotLogger::logWarning("Docking Station defined more than once - Using latest definition...");
+                    }
                     docking_station_position = {row_idx, column_idx};
+                    is_docking_station_initialized = true;
                     break;
 
                 case BlockType::WALL:
@@ -89,7 +129,7 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
 
                 default:   /* We've decided to translate any other given character as a wall */
                     wall_map[row_idx][column_idx] = true;
-                    RobotLogger::logWarning("Invalid character was given in house table - Parsing as a wall.");
+                    RobotLogger::logWarning("Invalid character given in House - Parsing it as a wall...");
                     break;
             }
             column_idx++;

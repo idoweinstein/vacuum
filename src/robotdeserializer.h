@@ -30,6 +30,7 @@ class RobotDeserializer
 
     enum Parameter
     {
+        END_OF_PARAMETER = -1,
         MAX_BATTERY_STEPS = 0,
         MAX_ROBOT_STEPS,
         NUMBER_OF_PARAMETERS
@@ -39,7 +40,8 @@ class RobotDeserializer
 
     static const char kParameterDelimiter = ' ';
 
-    static void storeParameter(unsigned int* parameters, const std::string& key, unsigned int value);
+    static unsigned int valueToUnsignedInt(const std::string& value);
+    static bool storeParameter(unsigned int* parameters, const std::string& key, const std::string& value);
     static void deserializeParameters(unsigned int* parameters, std::istream& input_stream);
     static void deserializeHouse(std::vector<std::vector<bool>>& wall_map,
                                  std::vector<std::vector<unsigned int>>& dirt_map,
