@@ -121,7 +121,7 @@ void NavigationSystem::mapWallsAround()
 
 void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, float& battery_steps)
 {
-    NavigationSystem::mapWallsAround();
+    mapWallsAround();
 
     /* Update dirt level */
     dirt_level = dirt_sensor.getDirtLevel();
@@ -178,9 +178,9 @@ Direction NavigationSystem::suggestNextStep()
     unsigned int dirt_level = 0;
     float battery_steps = 0;
 
-    NavigationSystem::getSensorsInfo(dirt_level, battery_steps);
+    getSensorsInfo(dirt_level, battery_steps);
 
-    return NavigationSystem::decideNextStep(dirt_level, battery_steps);
+    return decideNextStep(dirt_level, battery_steps);
 }
 
 void NavigationSystem::move(Direction direction)
