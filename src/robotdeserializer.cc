@@ -142,9 +142,7 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
     }
 }
 
-Robot RobotDeserializer::deserializeFromFile(std::vector<std::vector<bool>>& wall_map,
-                                             std::vector<std::vector<unsigned int>>& dirt_map,
-                                             const std::string& input_file_name)
+Robot RobotDeserializer::deserializeFromFile(const std::string& input_file_name)
 {
     std::ifstream input_file;
     input_file.open(input_file_name);
@@ -157,7 +155,9 @@ Robot RobotDeserializer::deserializeFromFile(std::vector<std::vector<bool>>& wal
     unsigned int parameters[Parameter::NUMBER_OF_PARAMETERS] = {0};
     deserializeParameters(parameters, input_file);
 
-    UPosition docking_station_position;
+    Position docking_station_position;
+    std::vector<std::vector<bool>> wall_map;
+    std::vector<std::vector<unsigned int>> dirt_map;
     deserializeHouse(wall_map, dirt_map, docking_station_position, input_file);
 
     Robot robot(parameters[Parameter::MAX_ROBOT_STEPS],

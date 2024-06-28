@@ -48,9 +48,7 @@ class RobotDeserializer
                                  UPosition& docking_station_position,
                                  std::istream& input_stream);
 public:
-    static Robot deserializeFromFile(std::vector<std::vector<bool>>& wall_map,
-                                    std::vector<std::vector<unsigned int>>& dirt_map,
-                                    const std::string& input_file_name);
+    static Robot deserializeFromFile(const std::string& input_file_name);
 };
 
 #endif /* VACUUM_DESERIALIZER_H_ */
