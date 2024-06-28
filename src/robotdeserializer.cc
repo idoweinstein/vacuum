@@ -15,19 +15,20 @@ const std::map<std::string, RobotDeserializer::Parameter> RobotDeserializer::par
 
 unsigned int RobotDeserializer::valueToUnsignedInt(const std::string& value)
 {
+    RobotLogger& logger = RobotLogger::getInstance();
     std::istringstream value_stream(value);
     int numerical_value = 0;
 
     value_stream >> numerical_value;
     if (!value_stream)
     {
-        RobotLogger::logWarning("Parameter with non-integer value given - Setting default value of '0'...");
+        logger.logWarning("Parameter with non-integer value given - Setting default value of '0'...");
         numerical_value = 0;
     }
 
     if (numerical_value < 0)
     {
-        RobotLogger::logWarning("Parameter with negative value given - Setting default value of '0'...");
+        logger.logWarning("Parameter with negative value given - Setting default value of '0'...");
         numerical_value = 0;
     }
 
@@ -36,6 +37,8 @@ unsigned int RobotDeserializer::valueToUnsignedInt(const std::string& value)
 
 bool RobotDeserializer::storeParameter(unsigned int* parameters, const std::string& key, const std::string& value)
 {
+    RobotLogger& logger = RobotLogger::getInstace();
+
     if (parameter_map.contains(key))
     {
         Parameter parameter_type = parameter_map.at(key);
@@ -51,7 +54,7 @@ bool RobotDeserializer::storeParameter(unsigned int* parameters, const std::stri
 
     else
     {
-        RobotLogger::logWarning("Invalid configuration parameter was given - Ignoring this line...");
+        logger.logWarning("Invalid configuration parameter was given - Ignoring this line...");
     }
 
     return false;
@@ -84,6 +87,7 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
                                          UPosition& docking_station_position,
                                          std::istream& input_stream)
 {
+    RobotLogger& logger = Logger::getInstace();
     std::string house_block_row;
     unsigned int row_idx = 0;
     bool is_docking_station_initialized = false;
@@ -117,7 +121,7 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
                 case BlockType::DOCKING_STATION:
                     if (is_docking_station_initialized)
                     {
-                        RobotLogger::logWarning("Docking Station defined more than once - Using latest definition...");
+                        logger.logWarning("Docking Station defined more than once - Using latest definition...");
                     }
                     docking_station_position = {row_idx, column_idx};
                     is_docking_station_initialized = true;
@@ -129,7 +133,7 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
 
                 default:   /* We've decided to translate any other given character as a wall */
                     wall_map[row_idx][column_idx] = true;
-                    RobotLogger::logWarning("Invalid character given in House - Parsing it as a wall...");
+                    logger.logWarning("Invalid character given in House - Parsing it as a wall...");
                     break;
             }
             column_idx++;
