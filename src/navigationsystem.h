@@ -31,11 +31,11 @@ class NavigationSystem {
         virtual Direction getPathNextStep(std::deque<Direction>& path)
         {
             // Handle empty path
-            if (getPathDistance(path) == 0) 
+            if (path.empty()) 
             {
                 return Direction::STAY;
             }
-            return path[0];
+            return path.front();
         }
         virtual bool getPathByFoundCriteria(std::deque<Direction>& path, std::function<bool(Position)> found_criteria);
         virtual bool getPathToNearestTodo(std::deque<Direction>& path);
