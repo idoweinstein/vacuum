@@ -13,6 +13,8 @@ unsigned int PathTree::insertRoot(Position position)
 
 unsigned int PathTree::insertChild(unsigned int parent_index, Direction direction_to_child, Position child_position)
 {
+    validateIndex(parent_index);
+
     node_pool.emplace_back(
         (int)parent_index,  // PathNode.parent_index
         direction_to_child, // PathNode.direction
