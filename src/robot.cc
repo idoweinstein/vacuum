@@ -41,7 +41,7 @@ void Robot::move(void)
     this->navigation_system.move(next_direction);
     this->location_manager.move(next_direction);
 
-    UPosition next_position = this->location_manager.getCurrentPosition();
+    Position next_position = this->location_manager.getCurrentPosition();
     logger.logRobotStep(next_direction, next_position);
 }
 
