@@ -40,7 +40,7 @@ void LocationManager::cleanCurrentPoisition()
     total_dirt_count -= 1;
 }
 
-bool LocationManager::isOutOfBounds(Position position)
+bool LocationManager::isOutOfBounds(Position position) const
 {
     if (position.first < 0 || position.second < 0)
     {
