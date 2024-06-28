@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 
         Robot robot = RobotDeserializer::deserializeFromFile(wall_map, dirt_map, input_file_name);
 
-        robot.run();
+        robot.run(); // TODO: Handle exceptions
     }
 
     else
