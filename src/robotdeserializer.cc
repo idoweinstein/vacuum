@@ -37,7 +37,7 @@ unsigned int RobotDeserializer::valueToUnsignedInt(const std::string& value)
 
 bool RobotDeserializer::storeParameter(unsigned int* parameters, const std::string& key, const std::string& value)
 {
-    RobotLogger& logger = RobotLogger::getInstace();
+    RobotLogger& logger = RobotLogger::getInstance();
 
     if (parameter_map.contains(key))
     {
@@ -87,7 +87,7 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
                                          UPosition& docking_station_position,
                                          std::istream& input_stream)
 {
-    RobotLogger& logger = Logger::getInstace();
+    RobotLogger& logger = RobotLogger::getInstance();
     std::string house_block_row;
     unsigned int row_idx = 0;
     bool is_docking_station_initialized = false;
