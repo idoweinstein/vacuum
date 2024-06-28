@@ -9,8 +9,9 @@
 int main(int argc, char* argv[])
 {
     RobotLogger& logger = RobotLogger::getInstance();
+    constexpr int kNumberOfArguments = 2;
 
-    if (2 == argc)
+    if (argc == kNumberOfArguments)
     {
         std::vector<std::vector<bool>> wall_map;
         std::vector<std::vector<unsigned int>> dirt_map;
