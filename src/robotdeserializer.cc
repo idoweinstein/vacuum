@@ -123,7 +123,7 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
                     {
                         logger.logWarning("Docking Station defined more than once - Using latest definition...");
                     }
-                    docking_station_position = {row_idx, column_idx};
+                    docking_station_position = {(int)row_idx, (int)column_idx};
                     is_docking_station_initialized = true;
                     break;
 
