@@ -22,7 +22,7 @@ class RobotLogger: public Logger
 public:
     static RobotLogger& getInstance()
     {
-        static RobotLogger& robot_logger_instance; // Instantiated on first getInstance() call only
+        static RobotLogger robot_logger_instance; // Instantiated on first getInstance() call only
         return robot_logger_instance;
     }
 
