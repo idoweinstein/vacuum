@@ -165,11 +165,6 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
     /* If the current position is dirty, stay to clean it */
     if (dirt_level > 0)
     {    
-        // If block to be cleaned
-        if (dirt_level == 1)
-        {
-            todo_positions.erase(current_position);
-        }
         return Direction::STAY;
     }
 
@@ -204,6 +199,10 @@ void NavigationSystem::move(Direction direction)
 {
     current_position = Position::computePosition(current_position, direction);
 
+    if (dirt_sensor.getDirtLevel() == 0)
+    {
+        todo_positions.erase(current_position);
+    }
     /* Update current location (docking station) as non-wall */
     wall_map[current_position] = false;
 }
