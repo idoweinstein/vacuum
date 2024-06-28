@@ -47,12 +47,12 @@ bool LocationManager::isOutOfBounds(Position position)
         return true;
     }
 
-    if (position.first >= wall_map.size())
+    if ((size_t) position.first >= wall_map.size())
     {
         return true;
     }
 
-    if (position.second >= wall_map[position.first].size())
+    if ((size_t) position.second >= wall_map[position.first].size())
     {
         return true;
     }
