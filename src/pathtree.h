@@ -30,7 +30,7 @@ class PathTree
     PathNode& safeNodeAccess(unsigned int node_index)
     {
         validateIndex(node_index);
-        return node_pool[node_index]
+        return node_pool[node_index];
     }
 
 public:
