@@ -20,7 +20,7 @@ class LocationManager : public BatterySensor, public DirtSensor
     virtual template<T> bool isOutOfBounds(std::vector<std::vector<T>>& map, Position position);
 
 public:
-    LocationManager(std::vector<std::vector<bool>> wall_map, std::vector<std::vector<unsigned int>> dirt_map, Position docking_station_position);
+    LocationManager(std::vector<std::vector<bool>>& wall_map, std::vector<std::vector<unsigned int>>& dirt_map, Position docking_station_position);
     virtual int getTotalDirtCount() const
     {
         return total_dirt_count;

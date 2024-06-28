@@ -4,8 +4,8 @@
 #include <map>
 #include <stdexcept>
 
-LocationManager::LocationManager(std::vector<std::vector<bool>> wall_map,
-                                 std::vector<std::vector<unsigned int>> dirt_map,
+LocationManager::LocationManager(std::vector<std::vector<bool>>& wall_map,
+                                 std::vector<std::vector<unsigned int>>& dirt_map,
                                  Position docking_station_position)
                                  : wall_map(wall_map),
                                    dirt_map(dirt_map),
