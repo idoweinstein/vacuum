@@ -36,7 +36,7 @@ public:
         addLogFile(log_file_name);
     }
 
-    void logRobotStep(Direction direction_moved, UPosition current_position)
+    void logRobotStep(Direction direction_moved, Position current_position)
     {
         const std::string step_log_message = std::format(kStepFormat,
                                                          direction_moved,
