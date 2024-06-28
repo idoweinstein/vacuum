@@ -7,7 +7,7 @@
 #include "position.h"
 #include "direction.h"
 
-// A Singleton Class Inherits From Singleton Logger
+// A Non-Inheritable Singleton Class Inherits From Singleton Logger
 class RobotLogger: public Logger
 {
     // Constant RobotLogger strings
@@ -18,6 +18,10 @@ class RobotLogger: public Logger
                                                   "Total Dirt Left: {}\n"
                                                   "Is Vacuum Cleaner Dead: {}\n"
                                                   "Mission Succeeded: {}";
+
+    /* Private ctor & dtor - So it WON'T be used externally and WON'T be inherited */
+    RobotLogger() {}
+    ~RobotLogger()
 
 public:
     static RobotLogger& getInstance()
