@@ -6,17 +6,22 @@
 #include "robotlogger.h"
 #include "robotdeserializer.h"
 
+namespace Constants
+{
+    constexpr int kNumberOfArguments = 2;
+    constexpr int kInputFileIndex = 1;
+}
+
 int main(int argc, char* argv[])
 {
     RobotLogger& logger = RobotLogger::getInstance();
-    constexpr int kNumberOfArguments = 2;
 
-    if (argc == kNumberOfArguments)
+    if (argc == Constants::kNumberOfArguments)
     {
         std::vector<std::vector<bool>> wall_map;
         std::vector<std::vector<unsigned int>> dirt_map;
 
-        const std::string input_file_name(argv[1]);
+        const std::string input_file_name(argv[Constants::kInputFileIndex]);
 
         logger.addLogFileFromInput(input_file_name);
 
