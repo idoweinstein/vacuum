@@ -24,8 +24,23 @@ LocationManager::LocationManager(std::vector<std::vector<bool>>& wall_map,
     }
 }
 
-template <type T>
-bool LocationManager::isOutOfBounds(std::vector<std::vector<T>>& map, Position position)
+unsigned int LocationManager::getDirtLevel() const
+{
+    return dirt_map[current_position.first][current_position.second];
+}
+
+void LocationManager::cleanCurrentPoisition()
+{
+    if (getDirtLevel() == 0)
+    {
+        return;
+    }
+
+    dirt_map[current_position.first][current_position.second] -= 1;
+    total_dirt_count -= 1;
+}
+
+bool LocationManager::isOutOfBounds(Position position)
 {
     if (position.first < 0 || position.second < 0)
     {
@@ -43,29 +58,6 @@ bool LocationManager::isOutOfBounds(std::vector<std::vector<T>>& map, Position p
     }
 
     return false;
-}
-
-unsigned int LocationManager::getDirtLevel() const
-{
-    RobotLogger& logger = RobotLogger::getInstance();
-
-    if (isOutOfBounds(dirt_map, current_position))
-    {
-        logger.logWarning("Robot sampled dirt level in out of bound location!");
-        return 0;
-    }
-    return dirt_map[current_position.first][current_position.second];
-}
-
-void LocationManager::cleanCurrentPoisition()
-{
-    if (getDirtLevel() == 0)
-    {
-        return;
-    }
-
-    dirt_map[current_position.first][current_position.second] -= 1;
-    total_dirt_count -= 1;
 }
 
 bool LocationManager::isWall(Direction direction) const

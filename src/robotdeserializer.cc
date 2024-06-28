@@ -84,7 +84,7 @@ void RobotDeserializer::deserializeParameters(unsigned int* parameters, std::ist
 
 void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_map,
                                          std::vector<std::vector<unsigned int>>& dirt_map,
-                                         UPosition& docking_station_position,
+                                         Position& docking_station_position,
                                          std::istream& input_stream)
 {
     RobotLogger& logger = RobotLogger::getInstance();

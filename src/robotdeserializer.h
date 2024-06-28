@@ -45,7 +45,7 @@ class RobotDeserializer
     static void deserializeParameters(unsigned int* parameters, std::istream& input_stream);
     static void deserializeHouse(std::vector<std::vector<bool>>& wall_map,
                                  std::vector<std::vector<unsigned int>>& dirt_map,
-                                 UPosition& docking_station_position,
+                                 Position& docking_station_position,
                                  std::istream& input_stream);
 public:
     static Robot deserializeFromFile(const std::string& input_file_name);
