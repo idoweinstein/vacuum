@@ -17,6 +17,7 @@ Robot::Robot(unsigned int max_robot_steps,
 
 void Robot::move(void)
 {
+    RobotLogger& logger = RobotLogger::getInstace();
     Direction next_direction = this->navigation_system.suggestNextStep();
 
     /* If no battery left - discharge() throws an Empty Battery exception */
@@ -41,11 +42,12 @@ void Robot::move(void)
     this->location_manager.move(next_direction);
 
     UPosition next_position = this->location_manager.getCurrentPosition();
-    RobotLogger::logRobotStep(next_direction, next_position);
+    logger.logRobotStep(next_direction, next_position);
 }
 
 void Robot::run(void)
 {
+    RobotLogger& logger = RobotLogger::getInstance();
     unsigned int total_steps_performed = 0;
 
     while (!this->shouldStopCleaning(total_steps_performed))
@@ -58,8 +60,8 @@ void Robot::run(void)
     bool is_battery_exhausted = this->battery_controller.getCurrentAmount() < 1;
     bool is_mission_complete = total_dirt_count == 0 && this->location_manager.isInDockingStation();
 
-    RobotLogger::logCleaningStatistics(total_steps_performed,
-                                       total_dirt_count,
-                                       is_battery_exhausted,
-                                       is_mission_complete);
+    logger.logCleaningStatistics(total_steps_performed,
+                                 total_dirt_count,
+                                 is_battery_exhausted,
+                                 is_mission_complete);
 }
