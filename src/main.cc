@@ -8,6 +8,8 @@
 
 int main(int argc, char* argv[])
 {
+    RobotLogger& logger = RobotLogger::getInstance();
+
     if (2 == argc)
     {
         std::vector<std::vector<bool>> wall_map;
@@ -15,15 +17,22 @@ int main(int argc, char* argv[])
 
         const std::string input_file_name(argv[1]);
 
-        RobotLogger::setLogFile(input_file_name);
+        logger.addLogFileFromInput(input_file_name);
 
         Robot robot = RobotDeserializer::deserializeFromFile(wall_map, dirt_map, input_file_name);
 
-        robot.run(); // TODO: Handle exceptions
+        try
+        {
+            robot.run();
+        }
+        catch(const std::exception& exception)
+        {
+            logger.logError(exception.what());
+        }
     }
 
     else
     {
-        RobotLogger::logError("Invalid number of arguments!\nUsage: myrobot <input_file>");
+        logger.logError("Invalid number of arguments!\nUsage: myrobot <input_file>");
     }
 }
