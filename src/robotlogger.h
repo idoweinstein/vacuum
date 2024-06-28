@@ -7,18 +7,34 @@
 #include "position.h"
 #include "direction.h"
 
+// A Singleton Class Inherits From Singleton Logger
 class RobotLogger: public Logger
 {
+    // Constant RobotLogger strings
+    inline static std::string kOutputFilePrefix = "output_";
+    inline static std::string kStepFormat = "[STEP] Robot took step to {} - New Position ({},{})";
+    inline static std::string kStatisticsFormat = "### Program Terminated ###\n"
+                                                  "Total Steps Taken: {}\n"
+                                                  "Total Dirt Left: {}\n"
+                                                  "Is Vacuum Cleaner Dead: {}\n"
+                                                  "Mission Succeeded: {}";
+
 public:
-    static void setLogFile(const std::string& input_file_name)
+    static RobotLogger& getInstance()
     {
-        const std::string& log_file_name = "output_" + input_file_name;
-        Logger::setLogFile(log_file_name);
+        static RobotLogger& robot_logger_instance; // Instantiated on first getInstance() call only
+        return robot_logger_instance;
     }
 
-    static void logRobotStep(Direction direction_moved, UPosition current_position)
+    void addLogFileFromInput(const std::string& input_file_name)
     {
-        const std::string step_log_message = std::format("[STEP] Robot took step to {} - New Position ({},{})",
+        const std::string& log_file_name = kOutputFilePrefix + input_file_name;
+        addLogFile(log_file_name);
+    }
+
+    void logRobotStep(Direction direction_moved, UPosition current_position)
+    {
+        const std::string step_log_message = std::format(kStepFormat,
                                                          direction_moved,
                                                          current_position.first,
                                                          current_position.second);
@@ -26,13 +42,9 @@ public:
         logMessage(LogLevel::INFO, LogOutput::FILE, step_log_message);
     }
 
-    static void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, bool is_battery_exhausted, bool is_mission_complete)
+    void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, bool is_battery_exhausted, bool is_mission_complete)
     {
-        const std::string statistics_log_message = std::format("### Program Terminated ###\n"
-                                                               "Total Steps Taken: {}\n"
-                                                               "Total Dirt Left: {}\n"
-                                                               "Is Vacuum Cleaner Dead: {}\n"
-                                                               "Mission Succeeded: {}",
+        const std::string statistics_log_message = std::format(kStatisticsFormat,
                                                                total_steps,
                                                                total_dirt,
                                                                is_battery_exhausted,
@@ -41,12 +53,12 @@ public:
         logMessage(LogLevel::INFO, LogOutput::FILE, statistics_log_message);
     }
 
-    static void logWarning(const std::string warning_message)
+    void logWarning(const std::string warning_message)
     {
         logMessage(LogLevel::WARNING, LogOutput::CONSOLE, warning_message);
     }
 
-    static void logError(const std::string error_message)
+    void logError(const std::string error_message)
     {
         logMessage(LogLevel::ERROR, LogOutput::CONSOLE, error_message);
     }
