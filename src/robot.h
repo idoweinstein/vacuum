@@ -31,7 +31,7 @@ public:
           unsigned int max_battery_steps,
           std::vector<std::vector<bool>>& wall_map,
           std::vector<std::vector<unsigned int>>& dirt_map,
-          UPosition& docking_station_position);
+          Position& docking_station_position);
 
     void run(void);
 };
