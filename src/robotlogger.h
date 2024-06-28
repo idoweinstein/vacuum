@@ -21,7 +21,7 @@ class RobotLogger: public Logger
 
     /* Private ctor & dtor - So it WON'T be used externally and WON'T be inherited */
     RobotLogger() {}
-    ~RobotLogger()
+    ~RobotLogger() {}
 
 public:
     static RobotLogger& getInstance()
