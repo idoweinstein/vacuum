@@ -18,14 +18,11 @@ int main(int argc, char* argv[])
 
     if (argc == Constants::kNumberOfArguments)
     {
-        std::vector<std::vector<bool>> wall_map;
-        std::vector<std::vector<unsigned int>> dirt_map;
-
         const std::string input_file_name(argv[Constants::kInputFileIndex]);
 
         logger.addLogFileFromInput(input_file_name);
 
-        Robot robot = RobotDeserializer::deserializeFromFile(wall_map, dirt_map, input_file_name);
+        Robot robot = RobotDeserializer::deserializeFromFile(input_file_name);
 
         try
         {
