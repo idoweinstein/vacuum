@@ -16,12 +16,12 @@ class Robot
     BatteryController battery_controller;
     LocationManager location_manager;
     NavigationSystem navigation_system;
-    
+
+    bool isMissionComplete() { return (this->location_manager.isFinished() && this->location_manager.isInDockingStation()); }
     bool shouldStopCleaning(unsigned int steps_performed)
     {
-        bool isCleaningFinished = this->location_manager.isFinished();
-        bool isMaxStepsPerformed = (steps_performed >= this->max_robot_steps);
-        return isCleaningFinished || isMaxStepsPerformed;
+        bool is_max_steps_performed = (steps_performed >= this->max_robot_steps);
+        return (isMissionComplete() || is_max_steps_performed);
     }
 
     void move(void);
