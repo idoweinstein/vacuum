@@ -25,7 +25,7 @@ LocationManager::LocationManager(std::vector<std::vector<bool>>& wall_map,
 }
 
 template <type T>
-bool LocationManager::isOutOfBounds(std::vector<std::vecto<T>>& map, Position position)
+bool LocationManager::isOutOfBounds(std::vector<std::vector<T>>& map, Position position)
 {
     if (position.first < 0 || position.second < 0)
     {
