@@ -54,7 +54,7 @@ bool LocationManager::isOutOfBounds(Position position)
 
     if (position.second >= wall_map[position.first].size())
     {
-        return true
+        return true;
     }
 
     return false;
@@ -63,7 +63,7 @@ bool LocationManager::isOutOfBounds(Position position)
 bool LocationManager::isWall(Direction direction) const
 {
     Position suggested_position = Position::computePosition(current_position, direction);
-    if (isOutOfBounds(wall_map, suggested_position))
+    if (isOutOfBounds(suggested_position))
     {
         /* Off-grid positions are considered a wall */
         return true;
