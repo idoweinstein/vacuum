@@ -17,7 +17,7 @@ Robot::Robot(unsigned int max_robot_steps,
 
 void Robot::move(void)
 {
-    RobotLogger& logger = RobotLogger::getInstace();
+    RobotLogger& logger = RobotLogger::getInstance();
     Direction next_direction = this->navigation_system.suggestNextStep();
 
     /* If no battery left - throws Empty Battery exception */

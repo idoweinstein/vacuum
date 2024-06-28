@@ -11,9 +11,9 @@
 class RobotLogger: public Logger
 {
     // Constant RobotLogger strings
-    inline static constexpr std::string kOutputFilePrefix = "output_";
-    inline static constexpr std::string kStepFormat = "[STEP] Robot took step to {} - New Position ({},{})";
-    inline static constexpr std::string kStatisticsFormat = "### Program Terminated ###\n"
+    inline static constexpr const char kOutputFilePrefix[] = "output_";
+    inline static constexpr const char kStepFormat[] = "[STEP] Robot took step to {} - New Position ({},{})";
+    inline static constexpr const char kStatisticsFormat[] = "### Program Terminated ###\n"
                                                   "Total Steps Taken: {}\n"
                                                   "Total Dirt Left: {}\n"
                                                   "Is Vacuum Cleaner Dead: {}\n"

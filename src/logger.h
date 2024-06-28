@@ -38,12 +38,11 @@ protected:
     ~Logger();
 
 public:
-    static Logger& getInstace()
+    static Logger& getInstance()
     {
-        static Logger logger_instance; // Instantiated on first getInstance() call only
-        return logger_instance;
+        static Logger logger;
+        return logger;
     }
-
     /* To preserve Singleton property - Delete copy constructor & assignment operator */
     Logger(const Logger& logger) = delete;
     Logger& operator=(const Logger& logger) = delete;
