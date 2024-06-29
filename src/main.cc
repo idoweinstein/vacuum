@@ -20,12 +20,12 @@ int main(int argc, char* argv[])
     {
         const std::string input_file_name(argv[Constants::kInputFileIndex]);
 
-        logger.addLogFileFromInput(input_file_name);
-
-        Robot robot = RobotDeserializer::deserializeFromFile(input_file_name);
-
         try
         {
+            logger.addLogFileFromInput(input_file_name);
+
+            Robot robot = RobotDeserializer::deserializeFromFile(input_file_name);
+
             robot.run();
         }
         catch(const std::exception& exception)
