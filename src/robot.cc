@@ -25,7 +25,7 @@ void Robot::move(void)
     {
         if (this->location_manager.isInDockingStation())
         {
-            this->battery_controller.charge();            
+            this->battery_controller.charge();
         }
         else
         {
@@ -37,7 +37,7 @@ void Robot::move(void)
     {
         this->battery_controller.discharge();
     }
-    
+
     this->navigation_system.move(next_direction);
     this->location_manager.move(next_direction);
 
