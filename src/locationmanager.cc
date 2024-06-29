@@ -1,20 +1,21 @@
 #include "locationmanager.h"
+#include "robotlogger.h"
 
 #include <map>
 #include <stdexcept>
 
-LocationManager::LocationManager(std::vector<std::vector<bool>>& wall_map, std::vector<std::vector<unsigned int>>& dirt_map, UPosition docking_station_position) :
-    wall_map(wall_map), dirt_map(dirt_map), current_position(docking_station_position), docking_station_position(docking_station_position), total_dirt_count(0)
+LocationManager::LocationManager(std::vector<std::vector<bool>>& wall_map,
+                                 std::vector<std::vector<unsigned int>>& dirt_map,
+                                 Position docking_station_position)
+                                 : wall_map(wall_map),
+                                   dirt_map(dirt_map),
+                                   current_position(docking_station_position),
+                                   docking_station_position(docking_station_position),
+                                   total_dirt_count(0)
 {
 
     for (std::vector<unsigned int> row : dirt_map)
     {
-        /* Validate map shape */
-        if (row.size() != dirt_map[0].size())
-        {
-            throw std::invalid_argument("Dirt map is not a rectangle");
-        }
-
         /* Calculate total dirt count */
         for (unsigned int dirt : row)
         {
@@ -39,18 +40,34 @@ void LocationManager::cleanCurrentPoisition()
     total_dirt_count -= 1;
 }
 
+bool LocationManager::isOutOfBounds(Position position) const
+{
+    if (position.first < 0 || position.second < 0)
+    {
+        return true;
+    }
+
+    if ((size_t) position.first >= wall_map.size())
+    {
+        return true;
+    }
+
+    if ((size_t) position.second >= wall_map[position.first].size())
+    {
+        return true;
+    }
+
+    return false;
+}
+
 bool LocationManager::isWall(Direction direction) const
 {
-    if ((current_position.first == 0 &&  direction == Direction::NORTH)
-        || (current_position.second == 0 &&  direction == Direction::WEST)
-        || (current_position.first == wall_map.size() - 1 &&  direction == Direction::SOUTH)
-        || (current_position.second == wall_map[0].size() - 1 &&  direction == Direction::EAST))
+    Position suggested_position = Position::computePosition(current_position, direction);
+    if (isOutOfBounds(suggested_position))
     {
         /* Off-grid positions are considered a wall */
         return true;
     }
-
-    UPosition suggested_position = UPosition::computePosition(current_position, direction);
 
     return wall_map[suggested_position.first][suggested_position.second];
 }
@@ -62,5 +79,5 @@ void LocationManager::move(Direction direction)
         throw std::runtime_error("Cannot move to wall");
     }
 
-    current_position = UPosition::computePosition(current_position, direction);
+    current_position = Position::computePosition(current_position, direction);
 }
