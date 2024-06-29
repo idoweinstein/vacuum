@@ -19,7 +19,7 @@ public:
     }
     virtual void charge()
     {
-        current_amount = std::min(current_amount + 1, (float)full_amount);
+        current_amount = std::min(current_amount + full_amount / (float)20, (float)full_amount);
     }
     virtual void discharge()
     {

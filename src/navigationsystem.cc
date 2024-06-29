@@ -8,7 +8,7 @@
 #include "navigationsystem.h"
 
 NavigationSystem::NavigationSystem(BatterySensor& battery_sensor, DirtSensor& dirt_sensor, WallSensor& wall_sensor)
-    : current_position(0, 0), battery_sensor(battery_sensor), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor)
+    : current_position(0, 0), battery_sensor(battery_sensor), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor), full_battery(battery_sensor.getCurrentAmount())
 {
     /* Update current location (docking station) as non-wall */
     wall_map[current_position] = false;
@@ -23,7 +23,7 @@ int NavigationSystem::performBFS(PathTree& path_tree, unsigned int start_index, 
     };
 
     // If current position satisfies found_criteria - Return empty path
-    if (found_criteria(path_tree.getPosition(start_index))) 
+    if (found_criteria(path_tree.getPosition(start_index)))
     {
         return start_index;
     }
@@ -125,7 +125,7 @@ void NavigationSystem::mapWallsAround()
     }
 }
 
-void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, float& battery_steps)
+void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, float& battery_steps, bool& battery_is_full)
 {
     mapWallsAround();
 
@@ -138,16 +138,24 @@ void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, float& battery_s
 
     /* Update battery level */
     battery_steps = battery_sensor.getCurrentAmount();
-    if (battery_steps <= 0)
+    if (battery_steps < 0)
     {
         throw std::runtime_error("Battery is empty");
     }
+
+    battery_is_full = (battery_steps >= full_battery);
 }
 
-Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float battery_steps)
+Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float battery_steps, bool battery_is_full)
 {
     std::deque<Direction> path_to_station;
     (void) getPathToStation(path_to_station); // TODO: Handle the case that path back home was not found...
+
+    /* If charging, charge until battery is full */
+    if (path_to_station.empty() && !battery_is_full)
+    {
+        return Direction::STAY;
+    }
 
     /* If there's not enough battery, go to station */
     if (battery_steps <= getPathDistance(path_to_station))
@@ -164,7 +172,7 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
 
     /* If the current position is dirty, stay to clean it */
     if (dirt_level > 0)
-    {    
+    {
         return Direction::STAY;
     }
 
@@ -189,10 +197,11 @@ Direction NavigationSystem::suggestNextStep()
 {
     unsigned int dirt_level = 0;
     float battery_steps = 0;
+    bool is_battery_full = false;
 
-    getSensorsInfo(dirt_level, battery_steps);
+    getSensorsInfo(dirt_level, battery_steps, is_battery_full);
 
-    return decideNextStep(dirt_level, battery_steps);
+    return decideNextStep(dirt_level, battery_steps, is_battery_full);
 }
 
 void NavigationSystem::move(Direction direction)

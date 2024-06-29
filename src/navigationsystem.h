@@ -23,15 +23,16 @@ class NavigationSystem {
         WallSensor& wall_sensor;
 
         const int kNotFound = -1;
+        const unsigned int full_battery;
 
-        virtual int performBFS(PathTree& path_tree, 
+        virtual int performBFS(PathTree& path_tree,
                                unsigned int start_index,
                                std::function<bool(Position)> found_criteria);
         virtual unsigned int getPathDistance(std::deque<Direction>& path) { return path.size(); }
         virtual Direction getPathNextStep(std::deque<Direction>& path)
         {
             // Handle empty path
-            if (path.empty()) 
+            if (path.empty())
             {
                 return Direction::STAY;
             }
@@ -41,8 +42,8 @@ class NavigationSystem {
         virtual bool getPathToNearestTodo(std::deque<Direction>& path);
         virtual bool getPathToStation(std::deque<Direction>& path);
         virtual void mapWallsAround();
-        virtual void getSensorsInfo(unsigned int& dirt_level, float& battery_steps);
-        virtual Direction decideNextStep(unsigned int dirt_level, float battery_steps);
+        virtual void getSensorsInfo(unsigned int& dirt_level, float& battery_steps, bool& battery_is_full);
+        virtual Direction decideNextStep(unsigned int dirt_level, float battery_steps, bool battery_is_full);
 
     public:
         NavigationSystem(BatterySensor&, DirtSensor&, WallSensor&);
