@@ -1,11 +1,11 @@
+#include "navigationsystem.h"
+
 #include <map>
 #include <cmath>
 #include <queue>
 #include <deque>
 #include <stdexcept>
 #include <unordered_set>
-
-#include "navigationsystem.h"
 
 NavigationSystem::NavigationSystem(BatterySensor& battery_sensor, DirtSensor& dirt_sensor, WallSensor& wall_sensor)
     : current_position(0, 0), battery_sensor(battery_sensor), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor), full_battery(battery_sensor.getCurrentAmount())

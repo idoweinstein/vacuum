@@ -3,9 +3,9 @@
 
 #include <format>
 
-#include "logger.h"
-#include "position.h"
 #include "direction.h"
+#include "position.h"
+#include "logger.h"
 
 // A Non-Inheritable Singleton Class Inherits From Singleton Logger
 class RobotLogger: public Logger

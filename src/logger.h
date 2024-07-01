@@ -1,12 +1,12 @@
 #ifndef VACUUM_LOGGER_H_
 #define VACUUM_LOGGER_H_
 
-#include <exception>
-#include <iostream>
-#include <fstream>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
 
 enum class LogLevel
 {

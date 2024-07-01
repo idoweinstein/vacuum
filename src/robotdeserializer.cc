@@ -1,11 +1,12 @@
-#include <stdexcept>
+#include "robotdeserializer.h"
+
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 
-#include "robot.h"
-#include "position.h"
 #include "robotlogger.h"
-#include "robotdeserializer.h"
+#include "position.h"
+#include "robot.h"
 
 const std::map<std::string, RobotDeserializer::Parameter> RobotDeserializer::parameter_map = {
         {"max_battery_steps", Parameter::MAX_BATTERY_STEPS},

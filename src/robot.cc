@@ -1,4 +1,5 @@
 #include "robot.h"
+
 #include "robotlogger.h"
 
 Robot::Robot(unsigned int max_robot_steps,

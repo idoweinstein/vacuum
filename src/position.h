@@ -1,11 +1,11 @@
 #ifndef VACUUM_POSITION_H_
 #define VACUUM_POSITION_H_
 
-#include "direction.h"
-
-#include <functional>
-#include <stdexcept>
 #include <utility>
+#include <stdexcept>
+#include <functional>
+
+#include "direction.h"
 
 class Position : public std::pair<int, int> {
     public:
