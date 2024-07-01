@@ -27,8 +27,22 @@ target_link_libraries(pathtree_test
     GTest::gtest_main
 )
 
+add_executable(
+    locationmanager_test
+    locationmanager_test.cc
+)
+target_link_libraries(locationmanager_test
+    vacuum_cleaner
+    GTest::gtest_main
+)
+
 # Add unit test targets
 add_test(
     NAME pathtree_test
     COMMAND pathtree_test
+)
+
+add_test(
+    NAME locationmanager_test
+    COMMAND locationmanager_test
 )
