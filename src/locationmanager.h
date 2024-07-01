@@ -2,11 +2,10 @@
 #define VACUUM_LOCATIONMANAGER_H_
 
 #include <vector>
-#include <utility>
 
-#include "direction.h"
 #include "dirtsensor.h"
 #include "wallsensor.h"
+#include "direction.h"
 #include "position.h"
 
 class LocationManager : public WallSensor, public DirtSensor

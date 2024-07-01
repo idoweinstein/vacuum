@@ -1,7 +1,6 @@
 #ifndef VACUUM_ROBOT_H_
 #define VACUUM_ROBOT_H_
 
-#include <utility>
 #include <vector>
 
 #include "batterycontroller.h"

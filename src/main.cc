@@ -1,10 +1,9 @@
+#include <string>
 #include <exception>
-#include <iostream>
-#include <vector>
 
-#include "robot.h"
-#include "robotlogger.h"
 #include "robotdeserializer.h"
+#include "robotlogger.h"
+#include "robot.h"
 
 namespace Constants
 {

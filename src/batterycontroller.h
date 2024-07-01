@@ -1,10 +1,10 @@
 #ifndef VACUUM_BATTERYCONTROLLER_H_
 #define VACUUM_BATTERYCONTROLLER_H_
 
+#include "batterysensor.h"
+
 #include <algorithm>
 #include <stdexcept>
-
-#include "batterysensor.h"
 
 class BatteryController : public BatterySensor
 {

@@ -1,11 +1,11 @@
 #ifndef VACUUM_PATHTREE_H_
 #define VACUUM_PATHTREE_H_
 
-#include <stdexcept>
 #include <vector>
+#include <stdexcept>
 
-#include "position.h"
 #include "direction.h"
+#include "position.h"
 
 struct PathNode
 {

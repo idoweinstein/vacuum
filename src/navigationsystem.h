@@ -1,18 +1,18 @@
 #ifndef VACUUM_NAVIGATIONSYSTEM_H_
 #define VACUUM_NAVIGATIONSYSTEM_H_
 
+#include <deque>
+#include <utility>
+#include <functional>
+#include <unordered_set>
+#include <unordered_map>
+
 #include "batterysensor.h"
 #include "dirtsensor.h"
 #include "wallsensor.h"
 #include "direction.h"
 #include "position.h"
 #include "pathtree.h"
-
-#include <deque>
-#include <utility>
-#include <functional>
-#include <unordered_set>
-#include <unordered_map>
 
 class NavigationSystem {
         Position current_position;

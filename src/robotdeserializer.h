@@ -1,14 +1,13 @@
 #ifndef VACUUM_ROBOTDESERIALIZER_H_
 #define VACUUM_ROBOTDESERIALIZER_H_
 
-#include <istream>
-#include <utility>
+#include <map>
 #include <vector>
 #include <string>
-#include <map>
+#include <istream>
  
-#include "robot.h"
 #include "position.h"
+#include "robot.h"
 
 class RobotDeserializer
 {

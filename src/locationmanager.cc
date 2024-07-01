@@ -1,8 +1,8 @@
 #include "locationmanager.h"
-#include "robotlogger.h"
 
-#include <map>
 #include <stdexcept>
+
+#include "robotlogger.h"
 
 LocationManager::LocationManager(std::vector<std::vector<bool>>& wall_map,
                                  std::vector<std::vector<unsigned int>>& dirt_map,
