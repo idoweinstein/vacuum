@@ -31,7 +31,7 @@ void Robot::move(void)
         else
         {
             this->battery_controller.discharge();
-            this->location_manager.cleanCurrentPoisition();
+            this->location_manager.cleanCurrentPosition();
         }
     }
     else
