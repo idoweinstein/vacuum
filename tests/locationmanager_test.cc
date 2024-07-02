@@ -39,9 +39,9 @@ namespace
             inline static unsigned int row_num = 39;
             inline static unsigned int total_dirt_count = 0;
             inline static unsigned int direction_iterator = 0;
+            inline static Position docking_station_position = Position(3,9);
 
             inline static LocationManager* location_manager = nullptr;
-            static Position docking_station_position;
 
             static Direction getNextDirection()
             {
@@ -61,7 +61,6 @@ namespace
                 std::vector<std::vector<unsigned int>> dirt_map;
 
                 initializeMaps(wall_map, dirt_map);
-                docking_station_position = Position(3,9);
 
                 // Alocate LocationManager dynamically, since it has no empty ctor
                 location_manager = new LocationManager(
