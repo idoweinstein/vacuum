@@ -1,0 +1,8 @@
+max_robot_steps 500
+max_battery_steps 63
+house
+x0012361011xxxxxxx
+x85942001213@xxxxx
+x5013296300403x
+xx@xxxxxxxxxxxx
+xxxxxxx

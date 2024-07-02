@@ -17,6 +17,21 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+set(INPUT_FILES
+    inputs/input_sanity.txt
+    inputs/input_nohouse.txt
+    inputs/input_missvalue.txt
+    inputs/input_missparam.txt
+    inputs/input_invparam.txt
+    inputs/input_invchar.txt
+    inputs/input_dupdock.txt
+)
+
+file(
+    COPY ${INPUT_FILES}
+    DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/inputs/
+)
+
 # Create tests executables
 add_executable(
     pathtree_test
@@ -36,6 +51,25 @@ target_link_libraries(locationmanager_test
     GTest::gtest_main
 )
 
+add_executable(
+    robotdeserializer_test
+    robotdeserializer_test.cc
+)
+target_link_libraries(robotdeserializer_test
+    vacuum_cleaner
+    GTest::gtest_main
+)
+
+add_executable(
+    navigationsystem_test
+    navigationsystem_test.cc
+)
+target_link_libraries(navigationsystem_test
+    vacuum_cleaner
+    GTest::gtest_main
+    GTest::gmock_main
+)
+
 # Add unit test targets
 add_test(
     NAME pathtree_test
@@ -45,4 +79,14 @@ add_test(
 add_test(
     NAME locationmanager_test
     COMMAND locationmanager_test
+)
+
+add_test(
+    NAME robotdeserializer_test
+    COMMAND robotdeserializer_test
+)
+
+add_test(
+    NAME navigationsystem_test
+    COMMAND navigationsystem_test
 )
