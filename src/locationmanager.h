@@ -24,7 +24,7 @@ public:
     {
         return total_dirt_count;
     }
-    virtual void cleanCurrentPoisition();
+    virtual void cleanCurrentPosition();
     virtual void move(Direction);
     virtual bool isInDockingStation() const { return current_position == docking_station_position; }
     virtual bool isFinished() const { return total_dirt_count == 0; }

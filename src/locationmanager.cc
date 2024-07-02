@@ -29,7 +29,7 @@ unsigned int LocationManager::getDirtLevel() const
     return dirt_map[current_position.first][current_position.second];
 }
 
-void LocationManager::cleanCurrentPoisition()
+void LocationManager::cleanCurrentPosition()
 {
     if (getDirtLevel() == 0)
     {
