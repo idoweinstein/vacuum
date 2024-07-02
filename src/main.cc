@@ -1,9 +1,12 @@
 #include <string>
 #include <exception>
+#include <filesystem>
 
 #include "robotdeserializer.h"
 #include "robotlogger.h"
 #include "robot.h"
+
+namespace fs = std::filesystem;
 
 namespace Constants
 {
@@ -17,13 +20,14 @@ int main(int argc, char* argv[])
 
     if (argc == Constants::kNumberOfArguments)
     {
-        const std::string input_file_name(argv[Constants::kInputFileIndex]);
+        const std::string input_file_path(argv[Constants::kInputFileIndex]);
 
         try
         {
+            std::string input_file_name = fs::path(input_file_path).filename().string();
             logger.addLogFileFromInput(input_file_name);
 
-            Robot robot = RobotDeserializer::deserializeFromFile(input_file_name);
+            Robot robot = RobotDeserializer::deserializeFromFile(input_file_path);
 
             robot.run();
         }
