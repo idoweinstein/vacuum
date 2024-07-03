@@ -4,55 +4,43 @@
 
 #include "robotlogger.h"
 
-LocationManager::LocationManager(std::vector<std::vector<bool>>& wall_map,
-                                 std::vector<std::vector<unsigned int>>& dirt_map,
-                                 Position docking_station_position)
-                                 : wall_map(wall_map),
-                                   dirt_map(dirt_map),
-                                   current_position(docking_station_position),
-                                   docking_station_position(docking_station_position),
-                                   total_dirt_count(0)
+void LocationManager::setTotalDirtCount()
 {
-
-    for (std::vector<unsigned int> row : dirt_map)
+    for (std::vector<unsigned int>& row : dirt_map)
     {
-        /* Calculate total dirt count */
-        for (unsigned int dirt : row)
+        for (unsigned int& dirt : row)
         {
             total_dirt_count += dirt;
         }
     }
 }
 
-unsigned int LocationManager::getDirtLevel() const
+LocationManager::LocationManager(const std::vector<std::vector<bool>>& wall_map,
+                                 const std::vector<std::vector<unsigned int>>& dirt_map,
+                                 const Position& docking_station_position)
+                                 : wall_map(wall_map),
+                                   dirt_map(dirt_map),
+                                   current_position(docking_station_position),
+                                   docking_station_position(docking_station_position),
+                                   total_dirt_count(0)
 {
-    return dirt_map[current_position.first][current_position.second];
+    setTotalDirtCount();
 }
 
-void LocationManager::cleanCurrentPosition()
-{
-    if (getDirtLevel() == 0)
-    {
-        return;
-    }
-
-    dirt_map[current_position.first][current_position.second] -= 1;
-    total_dirt_count -= 1;
-}
-
-bool LocationManager::isOutOfBounds(Position position) const
+template <typename T>
+bool LocationManager::isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position) const
 {
     if (position.first < 0 || position.second < 0)
     {
         return true;
     }
 
-    if ((size_t) position.first >= wall_map.size())
+    if ((size_t) position.first >= map.size())
     {
         return true;
     }
 
-    if ((size_t) position.second >= wall_map[position.first].size())
+    if ((size_t) position.second >= map[position.first].size())
     {
         return true;
     }
@@ -60,12 +48,37 @@ bool LocationManager::isOutOfBounds(Position position) const
     return false;
 }
 
+template bool LocationManager::isOutOfBounds<bool>(const std::vector<std::vector<bool>>& wall_map, const Position& position) const;
+template bool LocationManager::isOutOfBounds<unsigned int>(const std::vector<std::vector<unsigned int>>& dirt_map, const Position& position) const;
+
+unsigned int LocationManager::getDirtLevel() const
+{
+    if (isOutOfBounds(dirt_map, current_position))
+    {
+        throw std::out_of_range("Robot sampled dirt level outside of the house grid!");
+    }
+
+    return dirt_map[current_position.first][current_position.second];
+}
+
+void LocationManager::cleanCurrentPosition()
+{
+    if (getDirtLevel() == 0) // getDirtLevel() calls isOutOfBounds() already
+    {
+        return;
+    }
+
+    dirt_map[current_position.first][current_position.second] -= kDirtCleaningUnit;
+    total_dirt_count -= kDirtCleaningUnit;
+}
+
 bool LocationManager::isWall(Direction direction) const
 {
     Position suggested_position = Position::computePosition(current_position, direction);
-    if (isOutOfBounds(suggested_position))
+
+    if (isOutOfBounds(wall_map, suggested_position))
     {
-        /* Off-grid positions are considered a wall */
+        // Off-grid positions are considered a wall
         return true;
     }
 
