@@ -11,16 +11,16 @@ namespace fs = std::filesystem;
 namespace Constants
 {
     constexpr int kNumberOfArguments = 2;
-    constexpr int kInputFileIndex = 1;
+    constexpr int kInputFileArgument = 1;
 }
 
 int main(int argc, char* argv[])
 {
     RobotLogger& logger = RobotLogger::getInstance();
 
-    if (argc == Constants::kNumberOfArguments)
+    if (Constants::kNumberOfArguments == argc)
     {
-        const std::string input_file_path(argv[Constants::kInputFileIndex]);
+        const std::string input_file_path(argv[Constants::kInputFileArgument]);
 
         try
         {
