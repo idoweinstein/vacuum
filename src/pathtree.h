@@ -16,10 +16,11 @@ struct PathNode
 
 class PathTree
 {
-    std::vector<PathNode> node_pool;
-    const int kNoParent = -1;
+    static constexpr const int kNoParent = -1;
 
-    void validateIndex(unsigned int node_index)
+    std::vector<PathNode> node_pool;
+
+    void validateIndex(unsigned int node_index) const
     {
         if (node_index >= node_pool.size())
         {
@@ -30,7 +31,7 @@ class PathTree
     PathNode& safeNodeAccess(unsigned int node_index)
     {
         validateIndex(node_index);
-        return node_pool[node_index];
+        return node_pool.at(node_index);
     }
 
 public:
