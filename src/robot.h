@@ -16,11 +16,11 @@ class Robot
     LocationManager location_manager;
     NavigationSystem navigation_system;
 
-    bool isMissionComplete() const { return (this->location_manager.isFinished() && this->location_manager.isInDockingStation()); }
+    bool isMissionComplete() const { return (location_manager.isFinished() && location_manager.isInDockingStation()); }
 
     bool shouldStopCleaning(unsigned int steps_performed) const
     {
-        bool is_max_steps_performed = (steps_performed >= this->max_robot_steps);
+        bool is_max_steps_performed = (steps_performed >= max_robot_steps);
         return (isMissionComplete() || is_max_steps_performed);
     }
 
