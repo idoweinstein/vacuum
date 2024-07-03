@@ -6,7 +6,7 @@
 
 enum class Direction{ NORTH, EAST, SOUTH, WEST, STAY };
 
-// Adapting Direction enum to be formatted in the Logger:
+// Adapting Direction enum class to be formattable (in std::format), for logging purposes:
 namespace std
 {
     template <>
