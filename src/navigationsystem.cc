@@ -142,6 +142,12 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
         throw std::runtime_error("Robot cannot find path back to the docking station!");
     }
 
+    // If left no dirty accessible places AND we're in docking station - finish cleaning
+    if (path_to_station.empty() && todo_positions.empty())
+    {
+        return Direction::FINISH;   
+    }
+
     // If charging - charge until battery is full
     if (path_to_station.empty() && !is_battery_full)
     {
@@ -191,11 +197,6 @@ Direction NavigationSystem::suggestNextStep()
     bool is_battery_full = false;
 
     getSensorsInfo(dirt_level, battery_left, is_battery_full);
-
-    if (todo_positions.empty())
-    {
-        return Direction::FINISH;
-    }
 
     return decideNextStep(dirt_level, battery_left, is_battery_full);
 }
