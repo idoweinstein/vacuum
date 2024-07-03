@@ -3,7 +3,8 @@
 
 #include "direction.h"
 
-class WallSensor {
+class WallSensor
+{
     public:
         virtual bool isWall(Direction) const = 0;
 };

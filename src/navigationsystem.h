@@ -14,7 +14,8 @@
 #include "position.h"
 #include "pathtree.h"
 
-class NavigationSystem {
+class NavigationSystem
+{
         static constexpr const int kNotFound = -1;
         inline static const Direction directions[] = {
             Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST

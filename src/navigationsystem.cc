@@ -100,17 +100,20 @@ bool NavigationSystem::getPathToStation(std::deque<Direction>& path)
 
 void NavigationSystem::mapWallsAround()
 {
-    for (Direction direction : directions) {
+    for (Direction direction : directions)
+    {
         Position position = Position::computePosition(current_position, direction);
 
-        if (wall_map.contains(position)) {
+        if (wall_map.contains(position))
+        {
             continue;
         }
 
         bool is_wall = wall_sensor.isWall(direction);
         wall_map[position] = is_wall;
 
-        if (is_wall) {
+        if (is_wall)
+        {
             continue;
         }
 
@@ -145,7 +148,7 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
     // If left no dirty accessible places AND we're in docking station - finish cleaning
     if (path_to_station.empty() && todo_positions.empty())
     {
-        return Direction::FINISH;   
+        return Direction::FINISH;
     }
 
     // If charging - charge until battery is full
