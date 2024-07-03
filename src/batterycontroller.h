@@ -34,7 +34,7 @@ public:
 
         if (updated_amount < 0)
         {
-            throw std::range_error("Empty battery");
+            throw std::range_error("Battery is Empty!");
         }
 
         current_amount = updated_amount;

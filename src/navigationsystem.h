@@ -15,20 +15,26 @@
 #include "pathtree.h"
 
 class NavigationSystem {
-        Position current_position;
+        static constexpr const int kNotFound = -1;
+
+        // wall_map := Internal algorithm's mapping of the house walls.
         std::unordered_map<Position, bool> wall_map;
+        // toodo_positions := Set of positions to visit / to clean. It's empty when we've visited & cleaned all accessible positions.
         std::unordered_set<Position> todo_positions;
+
+        Position current_position;
         BatterySensor& battery_sensor;
         DirtSensor& dirt_sensor;
         WallSensor& wall_sensor;
 
-        const int kNotFound = -1;
         const unsigned int full_battery;
 
         virtual int performBFS(PathTree& path_tree,
                                unsigned int start_index,
-                               std::function<bool(Position)> found_criteria);
+                               const std::function<bool(Position)>& found_criteria);
+
         virtual unsigned int getPathDistance(std::deque<Direction>& path) { return path.size(); }
+
         virtual Direction getPathNextStep(std::deque<Direction>& path)
         {
             // Handle empty path
@@ -38,7 +44,8 @@ class NavigationSystem {
             }
             return path.front();
         }
-        virtual bool getPathByFoundCriteria(std::deque<Direction>& path, std::function<bool(Position)> found_criteria);
+
+        virtual bool getPathByFoundCriteria(std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria);
         virtual bool getPathToNearestTodo(std::deque<Direction>& path);
         virtual bool getPathToStation(std::deque<Direction>& path);
         virtual void mapWallsAround();
