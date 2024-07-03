@@ -28,7 +28,7 @@ LocationManager::LocationManager(const std::vector<std::vector<bool>>& wall_map,
 }
 
 template <typename T>
-bool LocationManager::isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position) const
+bool LocationManager::isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position)
 {
     if (position.first < 0 || position.second < 0)
     {
@@ -48,8 +48,8 @@ bool LocationManager::isOutOfBounds(const std::vector<std::vector<T>>& map, cons
     return false;
 }
 
-template bool LocationManager::isOutOfBounds<bool>(const std::vector<std::vector<bool>>& wall_map, const Position& position) const;
-template bool LocationManager::isOutOfBounds<unsigned int>(const std::vector<std::vector<unsigned int>>& dirt_map, const Position& position) const;
+template bool LocationManager::isOutOfBounds<bool>(const std::vector<std::vector<bool>>& wall_map, const Position& position);
+template bool LocationManager::isOutOfBounds<unsigned int>(const std::vector<std::vector<unsigned int>>& dirt_map, const Position& position);
 
 unsigned int LocationManager::getDirtLevel() const
 {

@@ -19,7 +19,7 @@ class LocationManager : public WallSensor, public DirtSensor
     unsigned int total_dirt_count;
 
     virtual void setTotalDirtCount();
-    template <typename T> bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position) const;
+    template <typename T> static bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position);
 
 public:
     explicit LocationManager(const std::vector<std::vector<bool>>& wall_map,
