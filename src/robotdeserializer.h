@@ -15,7 +15,8 @@ class RobotDeserializer
     {
         DOCKING_STATION = '@',
         WALL = 'X',
-        DIRT_LEVEL_0 = ' ',
+        EMPTY = ' ',
+        DIRT_LEVEL_0 = '0',
         DIRT_LEVEL_1 = '1',
         DIRT_LEVEL_2 = '2',
         DIRT_LEVEL_3 = '3',

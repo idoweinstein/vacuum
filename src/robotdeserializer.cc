@@ -106,10 +106,12 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
 
             switch (block)
             {                
-                case BlockType::DIRT_LEVEL_0:
+                // Empty block (space character) means Dirt Level 0
+                case BlockType::EMPTY:
                     dirt_map[row_idx][column_idx] = 0;
                     break;
 
+                case BlockType::DIRT_LEVEL_0:
                 case BlockType::DIRT_LEVEL_1:
                 case BlockType::DIRT_LEVEL_2:
                 case BlockType::DIRT_LEVEL_3:
