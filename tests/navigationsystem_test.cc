@@ -59,7 +59,7 @@ namespace
     TEST_F(NavigationSystemTest, BlockedByWalls)
     {
         Direction suggested_direction = navigation_system.suggestNextStep();
-        EXPECT_EQ(Direction::STAY, suggested_direction);
+        EXPECT_EQ(Direction::FINISH, suggested_direction);
     }
 
     TEST_F(NavigationSystemTest, dirtyDockingStation)
@@ -127,6 +127,9 @@ namespace
     TEST_F(NavigationSystemTest, AlmostEmptyBattery)
     {
         setBatteryLevel(1.99); // If we will get further, we won't be able to return
+
+        EXPECT_CALL(wall_sensor, isWall(testing::_))
+            .WillRepeatedly(testing::Return(false));
 
         Direction suggested_direction = navigation_system.suggestNextStep();
         EXPECT_EQ(Direction::STAY, suggested_direction);

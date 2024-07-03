@@ -24,7 +24,7 @@ class Robot
         return (isMissionComplete() || is_max_steps_performed);
     }
 
-    void move();
+    void move(Direction next_direction);
 
 public:
     explicit Robot(unsigned int max_robot_steps,

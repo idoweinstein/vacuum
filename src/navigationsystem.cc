@@ -149,7 +149,7 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
     }
 
     // If there's not enough battery - go to station
-    if (battery_left <= getPathDistance(path_to_station))
+    if (battery_left < 1 + getPathDistance(path_to_station))
     {
         return getPathNextStep(path_to_station);
     }
@@ -168,7 +168,7 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
 
     /* If going one step further will cause the battery
        to drain before reaching the station - go to station */
-    if (battery_left <= 1 + getPathDistance(path_to_station))
+    if (battery_left < 2 + getPathDistance(path_to_station))
     {
         return getPathNextStep(path_to_station);
     }
@@ -191,6 +191,11 @@ Direction NavigationSystem::suggestNextStep()
     bool is_battery_full = false;
 
     getSensorsInfo(dirt_level, battery_left, is_battery_full);
+
+    if (todo_positions.empty())
+    {
+        return Direction::FINISH;
+    }
 
     return decideNextStep(dirt_level, battery_left, is_battery_full);
 }

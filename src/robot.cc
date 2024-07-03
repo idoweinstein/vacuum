@@ -15,10 +15,9 @@ Robot::Robot(unsigned int max_robot_steps,
                         static_cast<WallSensor&>(location_manager))
 { }
 
-void Robot::move()
+void Robot::move(Direction next_direction)
 {
     RobotLogger& logger = RobotLogger::getInstance();
-    Direction next_direction = navigation_system.suggestNextStep();
 
     /* If no battery left - discharge() throws an Empty Battery exception */
     if (Direction::STAY == next_direction)
@@ -51,11 +50,26 @@ void Robot::run()
 {
     RobotLogger& logger = RobotLogger::getInstance();
     unsigned int total_steps_performed = 0;
+    bool is_algorithm_finished = false;
 
     while (!shouldStopCleaning(total_steps_performed))
     {
-        move();
+        Direction next_direction = navigation_system.suggestNextStep();
+
+        if (Direction::FINISH == next_direction)
+        {
+            // In case Robot mapped all accessible positions and have nothing left to clean
+            is_algorithm_finished = true;
+            break;
+        }
+
+        move(next_direction);
         total_steps_performed++;
+    }
+
+    if (isMissionComplete() || is_algorithm_finished)
+    {
+        logger.logRobotFinish();
     }
 
     unsigned int total_dirt_count = location_manager.getTotalDirtCount();

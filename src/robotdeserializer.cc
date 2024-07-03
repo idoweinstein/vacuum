@@ -107,6 +107,9 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
             switch (block)
             {                
                 case BlockType::DIRT_LEVEL_0:
+                    dirt_map[row_idx][column_idx] = 0;
+                    break;
+
                 case BlockType::DIRT_LEVEL_1:
                 case BlockType::DIRT_LEVEL_2:
                 case BlockType::DIRT_LEVEL_3:
