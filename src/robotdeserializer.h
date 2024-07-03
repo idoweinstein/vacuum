@@ -14,8 +14,8 @@ class RobotDeserializer
     enum BlockType : char
     {
         DOCKING_STATION = '@',
-        WALL = 'x',
-        DIRT_LEVEL_0 = '0',
+        WALL = 'X',
+        DIRT_LEVEL_0 = ' ',
         DIRT_LEVEL_1 = '1',
         DIRT_LEVEL_2 = '2',
         DIRT_LEVEL_3 = '3',

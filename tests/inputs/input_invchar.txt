@@ -1,6 +1,6 @@
 max_robot_steps 500
 max_battery_steps 80
 house
-xxxx*xxxxx
-x00123@10x
-xxxx
+XXX*XXXXXX
+X  123@1 X
+XXXX
