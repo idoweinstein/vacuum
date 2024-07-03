@@ -22,15 +22,11 @@ class LocationManager : public WallSensor, public DirtSensor
     template <typename T> bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position) const;
 
 public:
-    LocationManager(const std::vector<std::vector<bool>>& wall_map,
-                    const std::vector<std::vector<unsigned int>>& dirt_map,
-                    const Position& docking_station_position);
+    explicit LocationManager(const std::vector<std::vector<bool>>& wall_map,
+                             const std::vector<std::vector<unsigned int>>& dirt_map,
+                             const Position& docking_station_position);
 
-    virtual int getTotalDirtCount() const
-    {
-        return total_dirt_count;
-    }
-
+    virtual int getTotalDirtCount() const { return total_dirt_count; }
     virtual void cleanCurrentPosition();
     virtual void move(Direction);
     virtual bool isInDockingStation() const { return current_position == docking_station_position; }

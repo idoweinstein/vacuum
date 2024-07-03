@@ -15,7 +15,7 @@ class BatteryController : public BatterySensor
     float current_amount;
 
 public:
-    BatteryController(unsigned int full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
+    explicit BatteryController(unsigned int full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
 
     virtual float getCurrentAmount() const
     {

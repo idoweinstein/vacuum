@@ -14,13 +14,10 @@ NavigationSystem::NavigationSystem(BatterySensor& battery_sensor, DirtSensor& di
     wall_map[current_position] = false;
 }
 
-int NavigationSystem::performBFS(PathTree& path_tree, unsigned int start_index, const std::function<bool(Position)>& found_criteria)
+int NavigationSystem::performBFS(PathTree& path_tree, unsigned int start_index, const std::function<bool(Position)>& found_criteria) const
 {
     std::unordered_set<Position> visited_positions;
     std::queue<unsigned int> index_queue;
-    static const Direction directions[] = {
-        Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST
-    };
 
     // If current position satisfies found_criteria - Return empty path
     if (found_criteria(path_tree.getPosition(start_index)))
@@ -42,7 +39,7 @@ int NavigationSystem::performBFS(PathTree& path_tree, unsigned int start_index, 
             Position child_position = Position::computePosition(parent_position, direction);
 
             bool is_visited = visited_positions.contains(child_position);
-            bool is_navigable = wall_map.contains(child_position) && !wall_map[child_position];
+            bool is_navigable = wall_map.contains(child_position) && !wall_map.at(child_position);
 
             if (is_visited || !is_navigable)
             {
@@ -103,9 +100,6 @@ bool NavigationSystem::getPathToStation(std::deque<Direction>& path)
 
 void NavigationSystem::mapWallsAround()
 {
-    static const Direction directions[] = {
-        Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST};
-
     for (Direction direction : directions) {
         Position position = Position::computePosition(current_position, direction);
 

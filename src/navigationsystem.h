@@ -16,6 +16,9 @@
 
 class NavigationSystem {
         static constexpr const int kNotFound = -1;
+        inline static const Direction directions[] = {
+            Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST
+        };
 
         // wall_map := Internal algorithm's mapping of the house walls.
         std::unordered_map<Position, bool> wall_map;
@@ -31,11 +34,11 @@ class NavigationSystem {
 
         virtual int performBFS(PathTree& path_tree,
                                unsigned int start_index,
-                               const std::function<bool(Position)>& found_criteria);
+                               const std::function<bool(Position)>& found_criteria) const;
 
-        virtual unsigned int getPathDistance(std::deque<Direction>& path) { return path.size(); }
+        virtual unsigned int getPathDistance(const std::deque<Direction>& path) const { return path.size(); }
 
-        virtual Direction getPathNextStep(std::deque<Direction>& path)
+        virtual Direction getPathNextStep(const std::deque<Direction>& path) const
         {
             // Handle empty path
             if (path.empty())
@@ -53,7 +56,7 @@ class NavigationSystem {
         virtual Direction decideNextStep(unsigned int dirt_level, float battery_steps, bool battery_is_full);
 
     public:
-        NavigationSystem(BatterySensor&, DirtSensor&, WallSensor&);
+        explicit NavigationSystem(BatterySensor&, DirtSensor&, WallSensor&);
         virtual Direction suggestNextStep();
         virtual void move(Direction);
 };
