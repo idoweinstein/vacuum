@@ -14,7 +14,8 @@ class Position : public std::pair<int, int>
             {Direction::SOUTH, std::make_pair(1, 0)},
             {Direction::WEST, std::make_pair(0, -1)},
             {Direction::EAST, std::make_pair(0, 1)},
-            {Direction::STAY, std::make_pair(0, 0)}
+            {Direction::STAY, std::make_pair(0, 0)},
+            {Direction::FINISH, std::make_pair(0,0)}
         };
 
     public:
