@@ -52,6 +52,16 @@ target_link_libraries(locationmanager_test
 )
 
 add_executable(
+    batterycontroller_test
+    batterycontroller_test.cc
+)
+
+target_link_libraries(batterycontroller_test
+    vacuum_cleaner
+    GTest::gtest_main
+)
+
+add_executable(
     robotdeserializer_test
     robotdeserializer_test.cc
 )
