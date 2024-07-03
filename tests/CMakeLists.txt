@@ -92,6 +92,11 @@ add_test(
 )
 
 add_test(
+    NAME batterycontroller_test
+    COMMAND batterycontroller_test
+)
+
+add_test(
     NAME robotdeserializer_test
     COMMAND robotdeserializer_test
 )
