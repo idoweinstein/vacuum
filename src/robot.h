@@ -16,23 +16,24 @@ class Robot
     LocationManager location_manager;
     NavigationSystem navigation_system;
 
-    bool isMissionComplete() { return (this->location_manager.isFinished() && this->location_manager.isInDockingStation()); }
-    bool shouldStopCleaning(unsigned int steps_performed)
+    bool isMissionComplete() const { return (this->location_manager.isFinished() && this->location_manager.isInDockingStation()); }
+
+    bool shouldStopCleaning(unsigned int steps_performed) const
     {
         bool is_max_steps_performed = (steps_performed >= this->max_robot_steps);
         return (isMissionComplete() || is_max_steps_performed);
     }
 
-    void move(void);
+    void move();
 
 public:
-    Robot(unsigned int max_robot_steps,
-          unsigned int max_battery_steps,
-          std::vector<std::vector<bool>>& wall_map,
-          std::vector<std::vector<unsigned int>>& dirt_map,
-          Position& docking_station_position);
+    explicit Robot(unsigned int max_robot_steps,
+                   unsigned int max_battery_steps,
+                   std::vector<std::vector<bool>>& wall_map,
+                   std::vector<std::vector<unsigned int>>& dirt_map,
+                   Position& docking_station_position);
 
-    void run(void);
+    void run();
 };
 
 #endif /* VACUUM_ROBOT_H_ */

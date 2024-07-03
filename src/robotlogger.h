@@ -32,7 +32,7 @@ public:
 
     void addLogFileFromInput(const std::string& input_file_name)
     {
-        const std::string& log_file_name = kOutputFilePrefix + input_file_name;
+        const std::string log_file_name = kOutputFilePrefix + input_file_name;
         addLogFile(log_file_name);
     }
 
