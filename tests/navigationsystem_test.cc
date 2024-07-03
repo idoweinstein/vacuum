@@ -124,7 +124,7 @@ namespace
         }
     }
 
-    TEST_F(NavigationSystemTest, AlmostEmptyBattery)
+    TEST_F(NavigationSystemTest, TooLowBatteryToGetFurther)
     {
         setBatteryLevel(1.99); // If we will get further, we won't be able to return
 
@@ -133,5 +133,25 @@ namespace
 
         Direction suggested_direction = navigation_system.suggestNextStep();
         EXPECT_EQ(Direction::STAY, suggested_direction);
+    }
+
+    TEST_F(NavigationSystemTest, TooLowBatteryToStay)
+    {
+        setBatteryLevel(2.99); // Whenever we will get further, we won't be able to stay
+
+        EXPECT_CALL(wall_sensor, isWall(testing::_))
+            .WillRepeatedly(testing::Return(false));
+
+        // At first, we will get further because we can
+        Direction suggested_direction = navigation_system.suggestNextStep();
+        EXPECT_NE(Direction::STAY, suggested_direction);
+        navigation_system.move(suggested_direction);
+
+        // Then, even though there will be dirt, we will have to return
+        EXPECT_CALL(dirt_sensor, getDirtLevel())
+            .WillOnce(testing::Return(9));
+
+        suggested_direction = navigation_system.suggestNextStep();
+        EXPECT_NE(Direction::STAY, suggested_direction);
     }
 }
