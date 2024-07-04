@@ -1,7 +1,8 @@
 #ifndef VACUUM_DIRTSENSOR_H_
 #define VACUUM_DIRTSENSOR_H_
 
-class DirtSensor {
+class DirtSensor
+{
     public:
         virtual unsigned int getDirtLevel() const = 0;
 };

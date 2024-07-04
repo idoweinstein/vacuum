@@ -73,7 +73,7 @@ void RobotDeserializer::deserializeParameters(unsigned int* parameters, std::ist
         {
             std::string value;
             std::getline(line_stream, value);
-            
+
             bool end_of_parameters = RobotDeserializer::storeParameter(parameters, key, value);
             if (end_of_parameters)
             {
@@ -105,7 +105,12 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
             dirt_map[row_idx].push_back(0);
 
             switch (block)
-            {                
+            {
+                // Empty block (space character) means Dirt Level 0
+                case BlockType::CLEAN:
+                    dirt_map[row_idx][column_idx] = 0;
+                    break;
+
                 case BlockType::DIRT_LEVEL_0:
                 case BlockType::DIRT_LEVEL_1:
                 case BlockType::DIRT_LEVEL_2:

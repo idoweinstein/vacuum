@@ -4,9 +4,9 @@
 #include <format>
 #include <string>
 
-enum class Direction{ NORTH, EAST, SOUTH, WEST, STAY };
+enum class Direction{ NORTH, EAST, SOUTH, WEST, STAY, FINISH };
 
-// Adapting Direction enum to be formatted in the Logger:
+// Adapting Direction enum class to be formattable (in std::format), for logging purposes:
 namespace std
 {
     template <>
@@ -36,6 +36,10 @@ namespace std
 
                 case Direction::STAY:
                     string_direction = "Stay";
+                    break;
+
+                case Direction::FINISH:
+                    string_direction = "Finish";
                     break;
             }
 

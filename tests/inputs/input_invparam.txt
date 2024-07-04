@@ -1,0 +1,7 @@
+max_robot_steps 500
+invalid_parameter 800
+max_battery_steps 80
+house
+XXXXXXXXXX
+X  123@1 X
+XXXX

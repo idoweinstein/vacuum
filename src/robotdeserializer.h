@@ -14,7 +14,8 @@ class RobotDeserializer
     enum BlockType : char
     {
         DOCKING_STATION = '@',
-        WALL = 'x',
+        WALL = 'X',
+        CLEAN = ' ',
         DIRT_LEVEL_0 = '0',
         DIRT_LEVEL_1 = '1',
         DIRT_LEVEL_2 = '2',
@@ -35,9 +36,9 @@ class RobotDeserializer
         NUMBER_OF_PARAMETERS
     };
 
-    static const std::map<std::string, Parameter> parameter_map;
+    static constexpr const char kParameterDelimiter = ' ';
 
-    static const char kParameterDelimiter = ' ';
+    static const std::map<std::string, Parameter> parameter_map;
 
     static unsigned int valueToUnsignedInt(const std::string& value);
     static bool storeParameter(unsigned int* parameters, const std::string& key, const std::string& value);
@@ -46,6 +47,7 @@ class RobotDeserializer
                                  std::vector<std::vector<unsigned int>>& dirt_map,
                                  Position& docking_station_position,
                                  std::istream& input_stream);
+
 public:
     static Robot deserializeFromFile(const std::string& input_file_name);
 };

@@ -11,6 +11,7 @@
 class RobotLogger: public Logger
 {
     // Constant RobotLogger strings
+    inline static constexpr const char kRobotFinishPrompt[] = "[FINISH] Robot finished cleaning all accessible places!";
     inline static constexpr const char kOutputFilePrefix[] = "output_";
     inline static constexpr const char kStepFormat[] = "[STEP] Robot took step to {} - New Position ({},{})";
     inline static constexpr const char kStatisticsFormat[] = "### Program Terminated ###\n"
@@ -32,8 +33,13 @@ public:
 
     void addLogFileFromInput(const std::string& input_file_name)
     {
-        const std::string& log_file_name = kOutputFilePrefix + input_file_name;
+        const std::string log_file_name = kOutputFilePrefix + input_file_name;
         addLogFile(log_file_name);
+    }
+
+    void logRobotFinish()
+    {
+        logMessage(LogLevel::INFO, LogOutput::FILE, kRobotFinishPrompt);
     }
 
     void logRobotStep(Direction direction_moved, Position current_position)
