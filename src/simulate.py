@@ -6,12 +6,14 @@ import time
 
 DOCKING_STATION = '@'
 CLEAR_BLOCK = ' '
-CLEAR_SCREEN = "\033c"
-COLOR_START = "\033["
-REGULAR_STYLE = "0;37;40m"
-CURRENT_STYLE = "0;30;43m"
-CURRENT_CHARGING_STYLE = "1;37;42m"
-COLOR_END = "\033[0m"
+ZERO_DIRT = '0'
+
+CLEAR_SCREEN = '\033c'
+COLOR_START = '\033['
+REGULAR_STYLE = '0;37;40m'
+CURRENT_STYLE = '0;30;43m'
+CURRENT_CHARGING_STYLE = '1;37;42m'
+COLOR_END = '\033[0m'
 
 
 def clear_screen():
@@ -19,7 +21,7 @@ def clear_screen():
 
 
 def print_empty_line():
-    print("")
+    print('')
 
 
 def get_character_style(on_current_position, is_charging):
@@ -35,27 +37,28 @@ def print_frame(map, current_position, current_battery, max_battery_steps, curre
     print_empty_line()
     print()
 
-    is_charging = False
+    is_robot_charging = False
     for y, row in enumerate(map):
-        print("\t", end="")
+        print('\t', end='')
         for x, cell in enumerate(row):
             on_current_position = (current_position == (y, x))
-            is_charging = on_current_position and is_stay and cell == DOCKING_STATION
-
-            style = get_character_style(on_current_position, is_charging)
+            is_current_position = on_current_position and is_stay and cell == DOCKING_STATION
+            is_robot_charging = is_robot_charging or is_current_position
+            style = get_character_style(on_current_position, is_current_position)
 
             print(COLOR_START + style + cell + COLOR_END, end='')
-    
-    print("") # Empty line
-    if is_charging:
-        print(f"\t[ Charging ]")
-    print(f"\tBattery: {current_battery}/{max_battery_steps}")
-    print(f"\tStep: {current_step}/{max_robot_steps}")
-    print("") # Empty line
+        print_empty_line()
+
+    print_empty_line() # Empty line
+    if is_robot_charging:
+        print(f'\t[ Charging ]')
+    print(f'\tBattery: {current_battery}/{max_battery_steps}')
+    print(f'\tStep: {current_step}/{max_robot_steps}')
+    print_empty_line() # Empty line
 
 
 def get_next_position(line):
-    groups = re.search(r"\(([0-9]+),([0-9]+)\)", line).groups()
+    groups = re.search(r'\(([0-9]+),([0-9]+)\)', line).groups()
     return (int(groups[0]), int(groups[1]))
 
 
@@ -88,12 +91,12 @@ def simulate(max_robot_steps, max_battery_steps, start_position, map, output_fil
                     current_battery = int(current_battery)
             else:
                 current_battery -= 1
-            # Update dirty
+            # Update dirt level
             if map[current_position[0]][current_position[1]].isnumeric() and is_stay:
                 updated_dirt_level = int(map[current_position[0]][current_position[1]]) - 1
-                updated_block_representation = ' '
+                updated_block_representation = CLEAR_BLOCK
                 if updated_dirt_level > 0:
-                    updated_block_representation = str(int(updated_dirt_level))
+                    updated_block_representation = str(updated_dirt_level)
                 map[current_position[0]][current_position[1]] = updated_block_representation
 
             # Print
@@ -120,6 +123,7 @@ def parse_input_file(input_file):
         else:
             if '@' in line:
                 start_position = (len(map), line.index('@'))
+            line = line.replace(ZERO_DIRT, CLEAR_BLOCK).strip('\r\n')
             map.append(list(line))
     return max_robot_steps, max_battery_steps, start_position, map
 
@@ -141,8 +145,8 @@ def main():
     args = parse_args()
     max_robot_steps, max_battery_steps, start_position, map = parse_input_file(args.input_file)
     simulate(max_robot_steps, max_battery_steps, start_position, map, args.output_file, args.fps)
-    input("[ Press enter to exit ]")
+    input('[ Press enter to exit ]')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
