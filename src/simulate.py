@@ -90,7 +90,11 @@ def simulate(max_robot_steps, max_battery_steps, start_position, map, output_fil
                 current_battery -= 1
             # Update dirty
             if map[current_position[0]][current_position[1]].isnumeric() and is_stay:
-                map[current_position[0]][current_position[1]] = str(int(map[current_position[0]][current_position[1]]) - 1)
+                updated_dirt_level = int(map[current_position[0]][current_position[1]]) - 1
+                updated_block_representation = ' '
+                if updated_dirt_level > 0:
+                    updated_block_representation = str(int(updated_dirt_level))
+                map[current_position[0]][current_position[1]] = updated_block_representation
 
             # Print
             print_frame(map, current_position, current_battery, max_battery_steps, current_step, max_robot_steps, is_stay)
