@@ -5,7 +5,7 @@ import time
 
 
 DOCKING_STATION = '@'
-
+CLEAR_BLOCK = ' '
 CLEAR_SCREEN = "\033c"
 COLOR_START = "\033["
 REGULAR_STYLE = "0;37;40m"
