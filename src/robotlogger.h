@@ -15,6 +15,9 @@
  * It inherits from the Singleton Logger class and implements methods to log robot steps,
  * cleaning statistics, warnings, and errors. The class also provides a method to add a log file
  * based on an input file name.
+ *
+ * Note: The RobotLogger class has no default copy constructor and default assignment operator,
+ * since, Logger, its base class deleted them.
  */
 class RobotLogger: public Logger
 {

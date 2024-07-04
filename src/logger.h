@@ -95,6 +95,7 @@ public:
      * This method logs a message with the specified log level and output.
      * The log level determines the prefix of the log message.
      * The output determines where the log message is written (file or console).
+     * In case the log message is written to file, it will be written to all files previously added.
      *
      * @param log_level The log level of the message.
      * @param output The log output (file or console).

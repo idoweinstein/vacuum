@@ -68,8 +68,10 @@ public:
     /**
      * @brief Runs the cleaning operation.
      *
-     * This method starts the cleaning operation and continues until the
-     * cleaning mission is complete or the maximum number of steps is reached.
+     * This method starts the cleaning operation and continues until one of the following conditions satisfied:
+     * 1. cleaning mission is complete.
+     * 2. the maximum number of steps is reached.
+     * 3. vacuum cleaner mapped and cleaned all accessible positions.
      */
     void run(void);
 };

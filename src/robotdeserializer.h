@@ -67,6 +67,8 @@ class RobotDeserializer
     /**
      * @brief Deserializes the parameters from an input stream.
      *
+     * In case a required parameter is missing, a default value of '0' will be used instead.
+     *
      * @param parameters The array to store the deserialized parameters.
      * @param input_stream The input stream to read the parameters from.
      */

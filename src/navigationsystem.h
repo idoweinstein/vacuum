@@ -28,7 +28,7 @@
 class NavigationSystem {
         Position current_position;                   // The current position of the vacuum cleaner.
         std::unordered_map<Position, bool> wall_map; // A map of positions with wall information.
-        std::unordered_set<Position> todo_positions; // A set of positions to visit.
+        std::unordered_set<Position> todo_positions; // A set of positions to visit (unvisited / dirty positions).
         BatterySensor& battery_sensor;               // Reference to the battery sensor.
         DirtSensor& dirt_sensor;                     // Reference to the dirt sensor.
         WallSensor& wall_sensor;                     // Reference to the wall sensor.
@@ -41,6 +41,7 @@ class NavigationSystem {
          *
          * This method performs a BFS starting from the specified start_index in the path_tree.
          * It stops the search when the found_criteria function returns true for a position.
+         * Note: All indices in the algorithm are indices of the path_tree data structure.
          *
          * @param path_tree The path tree to search in.
          * @param start_index The index to start the BFS from.
@@ -161,7 +162,7 @@ class NavigationSystem {
         virtual Direction suggestNextStep();
 
         /**
-         * @brief Moves the vacuum cleaner in the specified direction.
+         * @brief Moves the algorithm's vacuum cleaner representation in the specified direction.
          *
          * This method moves the vacuum cleaner in the specified direction.
          *

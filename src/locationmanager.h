@@ -51,7 +51,7 @@ public:
     }
 
     /**
-     * @brief Cleans the current position by reducing the dirt level.
+     * @brief Cleans the current position by reducing the dirt level (by reduction unit of 1).
      */
     virtual void cleanCurrentPoisition();
 
