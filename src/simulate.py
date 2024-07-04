@@ -71,6 +71,8 @@ def simulate(max_robot_steps, max_battery_steps, start_position, map, output_fil
     current_step = 0
     current_battery = max_battery_steps
 
+    # Make windows show ANSI colors
+    # Source: https://stackoverflow.com/questions/12492810/python-how-can-i-make-the-ansi-escape-codes-to-work-also-in-windows#answer-64222858
     os.system('')
     print('Start')
     print_frame(map, current_position, current_battery, max_battery_steps, current_step, max_robot_steps, False)
@@ -121,8 +123,8 @@ def parse_input_file(input_file):
         elif line.startswith('house'):
             continue
         else:
-            if '@' in line:
-                start_position = (len(map), line.index('@'))
+            if DOCKING_STATION in line:
+                start_position = (len(map), line.index(DOCKING_STATION))
             line = line.replace(ZERO_DIRT, CLEAR_BLOCK).strip('\r\n')
             map.append(list(line))
     return max_robot_steps, max_battery_steps, start_position, map
