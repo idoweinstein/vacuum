@@ -3,9 +3,9 @@
 
 #include <format>
 
-#include "logger.h"
-#include "position.h"
 #include "direction.h"
+#include "position.h"
+#include "logger.h"
 
 /**
  * @class RobotLogger
@@ -22,6 +22,7 @@
 class RobotLogger: public Logger
 {
     // Constant RobotLogger strings
+    inline static constexpr const char kRobotFinishPrompt[] = "[FINISH] Robot finished cleaning all accessible places!";
     inline static constexpr const char kOutputFilePrefix[] = "output_";
     inline static constexpr const char kStepFormat[] = "[STEP] Robot took step to {} - New Position ({},{})";
     inline static constexpr const char kStatisticsFormat[] = "### Program Terminated ###\n"
@@ -51,8 +52,16 @@ public:
      */
     void addLogFileFromInput(const std::string& input_file_name)
     {
-        const std::string& log_file_name = kOutputFilePrefix + input_file_name;
+        const std::string log_file_name = kOutputFilePrefix + input_file_name;
         addLogFile(log_file_name);
+    }
+
+    /**
+     * @brief Log a robot reaching its finish condition.
+     */
+    void logRobotFinish()
+    {
+        logMessage(LogLevel::INFO, LogOutput::FILE, kRobotFinishPrompt);
     }
 
     /**

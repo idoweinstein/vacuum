@@ -1,30 +1,33 @@
+#include <string>
 #include <exception>
-#include <iostream>
-#include <vector>
+#include <filesystem>
 
-#include "robot.h"
-#include "robotlogger.h"
 #include "robotdeserializer.h"
+#include "robotlogger.h"
+#include "robot.h"
+
+namespace fs = std::filesystem;
 
 namespace Constants
 {
     constexpr int kNumberOfArguments = 2;
-    constexpr int kInputFileIndex = 1;
+    constexpr int kInputFileArgument = 1;
 }
 
 int main(int argc, char* argv[])
 {
     RobotLogger& logger = RobotLogger::getInstance();
 
-    if (argc == Constants::kNumberOfArguments)
+    if (Constants::kNumberOfArguments == argc)
     {
-        const std::string input_file_name(argv[Constants::kInputFileIndex]);
+        const std::string input_file_path(argv[Constants::kInputFileArgument]);
 
         try
         {
+            std::string input_file_name = fs::path(input_file_path).filename().string();
             logger.addLogFileFromInput(input_file_name);
 
-            Robot robot = RobotDeserializer::deserializeFromFile(input_file_name);
+            Robot robot = RobotDeserializer::deserializeFromFile(input_file_path);
 
             robot.run();
         }

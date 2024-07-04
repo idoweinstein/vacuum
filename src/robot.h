@@ -1,7 +1,6 @@
 #ifndef VACUUM_ROBOT_H_
 #define VACUUM_ROBOT_H_
 
-#include <utility>
 #include <vector>
 
 #include "batterycontroller.h"
@@ -27,7 +26,7 @@ class Robot
      *
      * @return true if the cleaning mission is complete, false otherwise.
      */
-    bool isMissionComplete() { return (this->location_manager.isFinished() && this->location_manager.isInDockingStation()); }
+    bool isMissionComplete() const { return (location_manager.isFinished() && location_manager.isInDockingStation()); }
 
     /**
      * @brief Checks if the robot should stop cleaning.
@@ -38,16 +37,16 @@ class Robot
      * @param steps_performed The number of steps performed by the robot.
      * @return true if the robot should stop cleaning, false otherwise.
      */
-    bool shouldStopCleaning(unsigned int steps_performed)
+    bool shouldStopCleaning(unsigned int steps_performed) const
     {
-        bool is_max_steps_performed = (steps_performed >= this->max_robot_steps);
+        bool is_max_steps_performed = (steps_performed >= max_robot_steps);
         return (isMissionComplete() || is_max_steps_performed);
     }
 
-    /**
+     /**
      * @brief Moves the robot to the next position.
      */
-    void move(void);
+    void move(Direction next_direction);
 
 public:
     /**
@@ -59,11 +58,11 @@ public:
      * @param dirt_map The map representing the dirt in the environment.
      * @param docking_station_position The position of the docking station.
      */
-    Robot(unsigned int max_robot_steps,
-          unsigned int max_battery_steps,
-          std::vector<std::vector<bool>>& wall_map,
-          std::vector<std::vector<unsigned int>>& dirt_map,
-          Position& docking_station_position);
+    explicit Robot(unsigned int max_robot_steps,
+                   unsigned int max_battery_steps,
+                   std::vector<std::vector<bool>>& wall_map,
+                   std::vector<std::vector<unsigned int>>& dirt_map,
+                   Position& docking_station_position);
 
     /**
      * @brief Runs the cleaning operation.
@@ -73,7 +72,7 @@ public:
      * 2. the maximum number of steps is reached.
      * 3. vacuum cleaner mapped and cleaned all accessible positions.
      */
-    void run(void);
+    void run();
 };
 
 #endif /* VACUUM_ROBOT_H_ */

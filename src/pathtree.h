@@ -1,11 +1,11 @@
 #ifndef VACUUM_PATHTREE_H_
 #define VACUUM_PATHTREE_H_
 
-#include <stdexcept>
 #include <vector>
+#include <stdexcept>
 
-#include "position.h"
 #include "direction.h"
+#include "position.h"
 
 /**
  * @brief Represents a node in the path tree.
@@ -22,15 +22,16 @@ struct PathNode
  */
 class PathTree
 {
-    std::vector<PathNode> node_pool; // Pool of path nodes.
-    const int kNoParent = -1;        // Constant representing no parent index.
+    static constexpr const int kNoParent = -1; // Constant representing no parent index.
 
+    std::vector<PathNode> node_pool;           // Pool of path nodes.
+  
     /**
      * @brief Validates the given node index.
      * @param node_index The index of the node to validate.
      * @throws std::out_of_range if the node index is invalid.
      */
-    void validateIndex(unsigned int node_index)
+    void validateIndex(unsigned int node_index) const
     {
         if (node_index >= node_pool.size())
         {
@@ -47,7 +48,7 @@ class PathTree
     PathNode& safeNodeAccess(unsigned int node_index)
     {
         validateIndex(node_index);
-        return node_pool[node_index];
+        return node_pool.at(node_index);
     }
 
 public:

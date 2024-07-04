@@ -6,7 +6,8 @@
  *
  * This class provides an interface for getting the dirt level detected by the sensor.
  */
-class DirtSensor {
+class DirtSensor
+{
     public:
         /**
          * @brief Get the current dirt level detected by the sensor.

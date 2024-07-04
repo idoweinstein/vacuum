@@ -1,18 +1,18 @@
 #ifndef VACUUM_NAVIGATIONSYSTEM_H_
 #define VACUUM_NAVIGATIONSYSTEM_H_
 
+#include <deque>
+#include <utility>
+#include <functional>
+#include <unordered_set>
+#include <unordered_map>
+
 #include "batterysensor.h"
 #include "dirtsensor.h"
 #include "wallsensor.h"
 #include "direction.h"
 #include "position.h"
 #include "pathtree.h"
-
-#include <deque>
-#include <utility>
-#include <functional>
-#include <unordered_set>
-#include <unordered_map>
 
 /**
  * @class NavigationSystem
@@ -25,16 +25,22 @@
  *
  * The class provides methods for suggesting the next step and moving the vacuum cleaner in a specific direction.
  */
-class NavigationSystem {
-        Position current_position;                   // The current position of the vacuum cleaner.
-        std::unordered_map<Position, bool> wall_map; // A map of positions with wall information.
-        std::unordered_set<Position> todo_positions; // A set of positions to visit (unvisited / dirty positions).
-        BatterySensor& battery_sensor;               // Reference to the battery sensor.
-        DirtSensor& dirt_sensor;                     // Reference to the dirt sensor.
-        WallSensor& wall_sensor;                     // Reference to the wall sensor.
+class NavigationSystem
+{
+        static constexpr const int kNotFound = -1;     // Constant value representing path not found status.
+        inline static const Direction directions[] = { // Directions of movement.
+            Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST
+        };
 
-        const int kNotFound = -1;                    // Constant value representing path not found status.
-        const unsigned int full_battery;             // Full battery power (in steps).
+        std::unordered_map<Position, bool> wall_map;    // Internal algorithm's mapping of the house walls.
+        std::unordered_set<Position> todo_positions;    // A set of positions to visit (unvisited / dirty positions).
+
+        Position current_position;                      // The current position of the vacuum cleaner.
+        BatterySensor& battery_sensor;                  // Reference to the battery sensor.
+        DirtSensor& dirt_sensor;                        // Reference to the dirt sensor.
+        WallSensor& wall_sensor;                        // Reference to the wall sensor.
+
+        const unsigned int full_battery;                // Full battery power (in steps).
 
         /**
          * @brief Performs a breadth-first search (BFS) to find a path that satisfies the given criteria.
@@ -50,7 +56,7 @@ class NavigationSystem {
          */
         virtual int performBFS(PathTree& path_tree,
                                unsigned int start_index,
-                               std::function<bool(Position)> found_criteria);
+                               const std::function<bool(Position)>& found_criteria) const;
 
         /**
          * @brief Calculates the distance of a path.
@@ -60,7 +66,7 @@ class NavigationSystem {
          * @param path The path to calculate the distance for.
          * @return The distance of the path.
          */
-        virtual unsigned int getPathDistance(std::deque<Direction>& path) { return path.size(); }
+        virtual unsigned int getPathDistance(const std::deque<Direction>& path) const { return path.size(); }
 
         /**
          * @brief Gets the next step in a path.
@@ -71,7 +77,8 @@ class NavigationSystem {
          * @param path The path to get the next step from.
          * @return The next step in the path.
          */
-        virtual Direction getPathNextStep(std::deque<Direction>& path)
+        virtual Direction getPathNextStep(const std::deque<Direction>& path) const
+
         {
             // Handle empty path
             if (path.empty())
@@ -90,7 +97,7 @@ class NavigationSystem {
          * @param found_criteria The criteria function to determine if a position is found.
          * @return True if a path is found, false otherwise.
          */
-        virtual bool getPathByFoundCriteria(std::deque<Direction>& path, std::function<bool(Position)> found_criteria);
+        virtual bool getPathByFoundCriteria(std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria);
 
         /**
          * @brief Finds a path to the nearest position in the todo_positions set.
@@ -150,7 +157,7 @@ class NavigationSystem {
          * @param dirt_sensor The dirt sensor.
          * @param wall_sensor The wall sensor.
          */
-        NavigationSystem(BatterySensor&, DirtSensor&, WallSensor&);
+        explicit NavigationSystem(BatterySensor&, DirtSensor&, WallSensor&);
 
         /**
          * @brief Suggests the next step for the vacuum cleaner.

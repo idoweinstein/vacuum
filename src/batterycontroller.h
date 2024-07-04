@@ -1,10 +1,10 @@
 #ifndef VACUUM_BATTERYCONTROLLER_H_
 #define VACUUM_BATTERYCONTROLLER_H_
 
+#include "batterysensor.h"
+
 #include <algorithm>
 #include <stdexcept>
-
-#include "batterysensor.h"
 
 /**
  * @brief The BatteryController class represents a controller for a battery.
@@ -13,7 +13,10 @@
  */
 class BatteryController : public BatterySensor
 {
-    const unsigned int full_amount;
+    static constexpr const float kStepsToFullAmount = 20.0f;
+    static constexpr const float kDischargeUnit = 1.0f;
+
+    const float full_amount;
     float current_amount;
 
 public:
@@ -22,7 +25,7 @@ public:
      *
      * @param full_amount The full amount of the battery (in steps).
      */
-    BatteryController(unsigned int full_amount) : full_amount(full_amount), current_amount(full_amount) {}
+    explicit BatteryController(unsigned int full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
 
     /**
      * @brief Gets the current amount of the battery.
@@ -41,7 +44,8 @@ public:
      */
     virtual void charge()
     {
-        current_amount = std::min(current_amount + full_amount / (float)20, (float)full_amount);
+        float updated_amount = current_amount + full_amount / kStepsToFullAmount;
+        current_amount = std::min(updated_amount, full_amount);
     }
 
     /**
@@ -54,12 +58,14 @@ public:
      */
     virtual void discharge()
     {
-        if (current_amount - 1 < 0)
+        float updated_amount = current_amount - kDischargeUnit;
+
+        if (updated_amount < 0)
         {
-            throw std::range_error("Empty battery");
+            throw std::range_error("Battery is Empty!");
         }
 
-        current_amount -= 1;
+        current_amount = updated_amount;
     }
 };
 

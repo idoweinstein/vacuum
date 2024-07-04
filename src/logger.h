@@ -1,12 +1,12 @@
 #ifndef VACUUM_LOGGER_H_
 #define VACUUM_LOGGER_H_
 
-#include <exception>
-#include <iostream>
-#include <fstream>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
 
 /**
  * @brief Enumeration representing different log levels.
@@ -34,14 +34,14 @@ enum class LogOutput
  * It is designed as a singleton class to ensure only one instance of the logger exists.
  */
 class Logger
-{
-    std::vector<std::ofstream> log_files;  // Vector of log file streams
-
+{   
     inline static const std::map<LogLevel, const std::string> log_level_prefix = {
         {LogLevel::INFO, ""},              // Prefix for information level logs
         {LogLevel::WARNING, "[WARNING] "}, // Prefix for warning level logs
         {LogLevel::ERROR, "[ERROR] "}      // Prefix for error level logs
     };
+
+    std::vector<std::ofstream> log_files;  // Vector of log file streams
 
 protected:
     Logger() {}
@@ -83,6 +83,7 @@ public:
     {
         std::ofstream& new_file = log_files.emplace_back();
         new_file.open(log_file_name);
+
         if (!new_file.is_open())
         {
             throw std::runtime_error("Couldn't open log file");

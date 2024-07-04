@@ -6,7 +6,8 @@
 /**
  * @brief The WallSensor is a pure abstract class representing a sensor that detects walls in different directions.
  */
-class WallSensor {
+class WallSensor
+{
     public:
         /**
          * @brief Checks if there is a wall in the specified direction.

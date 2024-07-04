@@ -4,7 +4,8 @@
 /**
  * @brief The BatterySensor class is a pure abstract base class for battery sensors.
  */
-class BatterySensor {
+class BatterySensor
+{
     public:
         /**
          * @brief Get the current amount of battery power.

@@ -1,14 +1,13 @@
 #ifndef VACUUM_ROBOTDESERIALIZER_H_
 #define VACUUM_ROBOTDESERIALIZER_H_
 
-#include <istream>
-#include <utility>
+#include <map>
 #include <vector>
 #include <string>
-#include <map>
-
-#include "robot.h"
+#include <istream>
+ 
 #include "position.h"
+#include "robot.h"
 
 /**
  * @brief The RobotDeserializer class is responsible for deserializing robot data from a file.
@@ -21,7 +20,8 @@ class RobotDeserializer
     enum BlockType : char
     {
         DOCKING_STATION = '@',
-        WALL = 'x',
+        WALL = 'X',
+        CLEAN = ' ',
         DIRT_LEVEL_0 = '0',
         DIRT_LEVEL_1 = '1',
         DIRT_LEVEL_2 = '2',
@@ -42,9 +42,9 @@ class RobotDeserializer
         NUMBER_OF_PARAMETERS
     };
 
-    static const std::map<std::string, Parameter> parameter_map;
+    static constexpr const char kParameterDelimiter = ' ';
 
-    static const char kParameterDelimiter = ' ';
+    static const std::map<std::string, Parameter> parameter_map;
 
     /**
      * @brief Converts a string value to an unsigned integer.

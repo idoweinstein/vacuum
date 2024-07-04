@@ -4,4 +4,11 @@ project(VacuumCleaner)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
-add_executable(myrobot src/logger.cc src/robot.cc src/pathtree.cc src/locationmanager.cc src/navigationsystem.cc src/robotlogger.cc src/robotdeserializer.cc src/main.cc)
+add_subdirectory(src)
+
+option(BUILD_TESTS "Build Tests" OFF)
+
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
