@@ -80,7 +80,7 @@ namespace
 
         (void)RobotDeserializer::deserializeFromFile("inputs/input_missparam.txt");
 
-        assertNoWarnings(cout_capture);
+        assertWarning(cout_capture, "[WARNING] Missing parameters - Initializing missing ones with default value of '0'...\n");
     }
 
     TEST(RobotDeserializerTest, MissingParameterValue)
@@ -98,7 +98,17 @@ namespace
 
         (void)RobotDeserializer::deserializeFromFile("inputs/input_nohouse.txt");
 
-        assertNoWarnings(cout_capture);
+        assertWarning(cout_capture, "[WARNING] House grid is not given - Using an empty house...\n"
+                                    "[WARNING] Docking Station was not given - Adding a Docking Station at the end of first row...\n");
+    }
+
+    TEST(RobotDeserializerTest, MissingDockingStation)
+    {
+        CoutCapture cout_capture;
+
+        (void)RobotDeserializer::deserializeFromFile("inputs/input_nodock.txt");
+
+        assertWarning(cout_capture, "[WARNING] Docking Station was not given - Adding a Docking Station at the end of first row...\n");
     }
 
     TEST(RobotDeserializerTest, DuplicateDockingStation)

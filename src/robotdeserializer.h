@@ -11,6 +11,15 @@
 
 class RobotDeserializer
 {
+    static constexpr const char kParameterDelimiter = ' ';
+    static constexpr const int kDefaultParameterValue = 0;
+
+    struct Parameter
+    {
+        bool is_initialized = false;
+        unsigned int value = kDefaultParameterValue;
+    };
+
     enum BlockType : char
     {
         DOCKING_STATION = '@',
@@ -28,7 +37,7 @@ class RobotDeserializer
         DIRT_LEVEL_9 = '9'
     };
 
-    enum Parameter
+    enum ParameterType
     {
         END_OF_PARAMETER = -1,
         MAX_BATTERY_STEPS = 0,
@@ -36,13 +45,11 @@ class RobotDeserializer
         NUMBER_OF_PARAMETERS
     };
 
-    static constexpr const char kParameterDelimiter = ' ';
-
-    static const std::map<std::string, Parameter> parameter_map;
+    static const std::map<std::string, ParameterType> parameter_map;
 
     static unsigned int valueToUnsignedInt(const std::string& value);
-    static bool storeParameter(unsigned int* parameters, const std::string& key, const std::string& value);
-    static void deserializeParameters(unsigned int* parameters, std::istream& input_stream);
+    static bool storeParameter(Parameter* parameters, const std::string& key, const std::string& value);
+    static bool deserializeParameters(Parameter* parameters, std::istream& input_stream);
     static void deserializeHouse(std::vector<std::vector<bool>>& wall_map,
                                  std::vector<std::vector<unsigned int>>& dirt_map,
                                  Position& docking_station_position,

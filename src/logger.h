@@ -59,6 +59,15 @@ public:
         }
     }
 
+    void deleteAllLogFiles()
+    {
+        for (int i = log_files.size() - 1; i >= 0; i--)
+        {
+            log_files.at(i).close();
+            log_files.pop_back();
+        }
+    }
+
     void logMessage(LogLevel log_level, LogOutput output, const std::string& message);
 };
 

@@ -17,7 +17,7 @@ class RobotLogger: public Logger
     inline static constexpr const char kStatisticsFormat[] = "### Program Terminated ###\n"
                                                   "Total Steps Taken: {}\n"
                                                   "Total Dirt Left: {}\n"
-                                                  "Is Vacuum Cleaner Dead: {}\n"
+                                                  "Is Battery Exhausted: {}\n"
                                                   "Mission Succeeded: {}";
 
     /* Private ctor & dtor - So it WON'T be used externally and WON'T be inherited */

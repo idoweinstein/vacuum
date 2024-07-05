@@ -8,10 +8,12 @@
 #include "position.h"
 #include "robot.h"
 
-const std::map<std::string, RobotDeserializer::Parameter> RobotDeserializer::parameter_map = {
-        {"max_battery_steps", Parameter::MAX_BATTERY_STEPS},
-        {"max_robot_steps", Parameter::MAX_ROBOT_STEPS},
-        {"house", Parameter::END_OF_PARAMETER}
+
+
+const std::map<std::string, RobotDeserializer::ParameterType> RobotDeserializer::parameter_map = {
+        {"max_battery_steps", ParameterType::MAX_BATTERY_STEPS},
+        {"max_robot_steps", ParameterType::MAX_ROBOT_STEPS},
+        {"house", ParameterType::END_OF_PARAMETER}
 };
 
 unsigned int RobotDeserializer::valueToUnsignedInt(const std::string& value)
@@ -24,33 +26,34 @@ unsigned int RobotDeserializer::valueToUnsignedInt(const std::string& value)
     if (!value_stream)
     {
         logger.logWarning("Parameter with non-integer value given - Setting default value of '0'...");
-        numerical_value = 0;
+        numerical_value = kDefaultParameterValue;
     }
 
     if (numerical_value < 0)
     {
         logger.logWarning("Parameter with negative value given - Setting default value of '0'...");
-        numerical_value = 0;
+        numerical_value = kDefaultParameterValue;
     }
 
-    return numerical_value;
+    return (unsigned int)numerical_value;
 }
 
-bool RobotDeserializer::storeParameter(unsigned int* parameters, const std::string& key, const std::string& value)
+bool RobotDeserializer::storeParameter(Parameter* parameters, const std::string& key, const std::string& value)
 {
     RobotLogger& logger = RobotLogger::getInstance();
 
     if (parameter_map.contains(key))
     {
-        Parameter parameter_type = parameter_map.at(key);
+        ParameterType parameter_type = parameter_map.at(key);
 
-        if (Parameter::END_OF_PARAMETER == parameter_type)
+        if (ParameterType::END_OF_PARAMETER == parameter_type)
         {
             return true;
         }
 
         unsigned int parameter_index = (unsigned int) parameter_type;
-        parameters[parameter_index] = valueToUnsignedInt(value);
+        parameters[parameter_index].is_initialized = true;
+        parameters[parameter_index].value = valueToUnsignedInt(value);
     }
 
     else
@@ -61,7 +64,7 @@ bool RobotDeserializer::storeParameter(unsigned int* parameters, const std::stri
     return false;
 }
 
-void RobotDeserializer::deserializeParameters(unsigned int* parameters, std::istream& input_stream)
+bool RobotDeserializer::deserializeParameters(Parameter* parameters, std::istream& input_stream)
 {
     std::string line;
     while (std::getline(input_stream, line))
@@ -77,10 +80,12 @@ void RobotDeserializer::deserializeParameters(unsigned int* parameters, std::ist
             bool end_of_parameters = RobotDeserializer::storeParameter(parameters, key, value);
             if (end_of_parameters)
             {
-                break;
+                return true;
             }
         }
     }
+
+    return false;
 }
 
 void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_map,
@@ -146,10 +151,29 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
         }
         row_idx++;
     }
+
+    if (!is_docking_station_initialized)
+    {
+        logger.logWarning("Docking Station was not given - Adding a Docking Station at the end of first row...");
+
+        if (0 == row_idx)
+        {
+            wall_map.push_back({});
+            dirt_map.push_back({});
+        }
+
+        wall_map[0].push_back(false);
+        dirt_map[0].push_back(0);
+
+        int new_column_idx = wall_map[0].size() - 1;
+
+        docking_station_position = {0, new_column_idx};
+    }
 }
 
 Robot RobotDeserializer::deserializeFromFile(const std::string& input_file_name)
 {
+    RobotLogger& logger = RobotLogger::getInstance();
     std::ifstream input_file;
     input_file.open(input_file_name);
 
@@ -158,16 +182,30 @@ Robot RobotDeserializer::deserializeFromFile(const std::string& input_file_name)
         throw std::runtime_error("Couldn't open input file!");
     }
 
-    unsigned int parameters[Parameter::NUMBER_OF_PARAMETERS] = {0};
-    deserializeParameters(parameters, input_file);
+    Parameter parameters[ParameterType::NUMBER_OF_PARAMETERS];
+    bool is_house_given = deserializeParameters(parameters, input_file);
+
+    for (Parameter& parameter : parameters)
+    {
+        if (!parameter.is_initialized)
+        {
+            logger.logWarning("Missing parameters - Initializing missing ones with default value of '0'...");
+            break;
+        }
+    }
+
+    if (!is_house_given)
+    {
+        logger.logWarning("House grid is not given - Using an empty house...");
+    }
 
     Position docking_station_position;
     std::vector<std::vector<bool>> wall_map;
     std::vector<std::vector<unsigned int>> dirt_map;
     deserializeHouse(wall_map, dirt_map, docking_station_position, input_file);
 
-    Robot robot(parameters[Parameter::MAX_ROBOT_STEPS],
-                parameters[Parameter::MAX_BATTERY_STEPS],
+    Robot robot(parameters[ParameterType::MAX_ROBOT_STEPS].value,
+                parameters[ParameterType::MAX_BATTERY_STEPS].value,
                 wall_map,
                 dirt_map,
                 docking_station_position);

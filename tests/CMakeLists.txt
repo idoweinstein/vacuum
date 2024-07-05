@@ -25,6 +25,13 @@ set(INPUT_FILES
     inputs/input_invparam.txt
     inputs/input_invchar.txt
     inputs/input_dupdock.txt
+    inputs/input_trappeddirt.txt
+    inputs/input_maze.txt
+    inputs/input_minbattery.txt
+    inputs/input_nodirt.txt
+    inputs/input_distantdirt.txt
+    inputs/input_allchars.txt
+    inputs/input_nodock.txt
 )
 
 file(
@@ -80,6 +87,15 @@ target_link_libraries(navigationsystem_test
     GTest::gmock_main
 )
 
+add_executable(
+    robot_test
+    robot_test.cc
+)
+target_link_libraries(robot_test
+    vacuum_cleaner
+    GTest::gtest_main
+)
+
 # Add unit test targets
 add_test(
     NAME pathtree_test
@@ -104,4 +120,9 @@ add_test(
 add_test(
     NAME navigationsystem_test
     COMMAND navigationsystem_test
+)
+
+add_test(
+    NAME robot_test
+    COMMAND robot_test
 )

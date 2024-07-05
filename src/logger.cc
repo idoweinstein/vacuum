@@ -2,10 +2,7 @@
 
 Logger::~Logger()
 {
-    for (std::ofstream& file : log_files)
-    {
-        file.close();
-    }
+    deleteAllLogFiles();
 }
 
 void Logger::logMessage(LogLevel log_level, LogOutput output, const std::string& message)

@@ -1,0 +1,6 @@
+max_robot_steps 500
+max_battery_steps 80
+house
+!
+@0 0123456789
+#

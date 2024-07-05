@@ -1,0 +1,8 @@
+max_robot_steps 500
+max_battery_steps 80
+house
+XXXXXXXXXXXX
+X    X   @ X
+X 12 X     X
+X    X 9   X
+XXXXXXXXXXXX
