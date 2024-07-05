@@ -5,10 +5,16 @@
 #include <vector>
 #include <string>
 #include <istream>
- 
+
 #include "position.h"
 #include "robot.h"
 
+/**
+ * @brief The RobotDeserializer class is responsible for deserializing robot data from a file.
+ *
+ * It provides methods to deserialize parameters and the house layout from an input stream.
+ * The deserialized data is used to create a Robot object.
+ */
 class RobotDeserializer
 {
     static constexpr const char kParameterDelimiter = ' ';
@@ -47,15 +53,54 @@ class RobotDeserializer
 
     static const std::map<std::string, ParameterType> parameter_map;
 
+    /**
+     * @brief Converts a string value to an unsigned integer.
+     *
+     * @param value The string value to convert.
+     * @return The converted unsigned integer value.
+     */
     static unsigned int valueToUnsignedInt(const std::string& value);
-    static bool storeParameter(Parameter* parameters, const std::string& key, const std::string& value);
-    static bool deserializeParameters(Parameter* parameters, std::istream& input_stream);
+
+    /**
+     * @brief Stores a parameter value in the parameters array.
+     *
+     * @param parameters The array to store the parameter value.
+     * @param key The parameter key.
+     * @param value The parameter value.
+     * @return True if the parameter was stored successfully, false otherwise.
+     */
+    static bool storeParameter(unsigned int* parameters, const std::string& key, const std::string& value);
+
+    /**
+     * @brief Deserializes the parameters from an input stream.
+     *
+     * In case a required parameter is missing, a default value of '0' will be used instead.
+     *
+     * @param parameters The array to store the deserialized parameters.
+     * @param input_stream The input stream to read the parameters from.
+     */
+    static void deserializeParameters(unsigned int* parameters, std::istream& input_stream);
+
+    /**
+     * @brief Deserializes the house layout from an input stream.
+     *
+     * @param wall_map The 2D vector to store the wall layout.
+     * @param dirt_map The 2D vector to store the dirt level layout.
+     * @param docking_station_position The position of the docking station.
+     * @param input_stream The input stream to read the house layout from.
+     */
     static void deserializeHouse(std::vector<std::vector<bool>>& wall_map,
                                  std::vector<std::vector<unsigned int>>& dirt_map,
                                  Position& docking_station_position,
                                  std::istream& input_stream);
 
 public:
+    /**
+     * @brief Deserializes robot data from a file.
+     *
+     * @param input_file_name The name of the input file.
+     * @return The deserialized Robot object.
+     */
     static Robot deserializeFromFile(const std::string& input_file_name);
 };
 
