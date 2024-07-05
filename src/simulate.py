@@ -125,8 +125,11 @@ def parse_input_file(input_file):
             continue
         else:
             if DOCKING_STATION in line:
-                is_station_found = True
-                start_position = (len(map), line.index(DOCKING_STATION))
+                if not is_station_found:
+                    is_station_found = True
+                    start_position = (len(map), line.index(DOCKING_STATION))
+                else:
+                    line = line.replace(DOCKING_STATION, CLEAR_BLOCK)
             line = line.replace(ZERO_DIRT, CLEAR_BLOCK).strip('\r\n')
             map.append(list(line))
 

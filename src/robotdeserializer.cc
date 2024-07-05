@@ -132,10 +132,13 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
                 case BlockType::DOCKING_STATION:
                     if (is_docking_station_initialized)
                     {
-                        logger.logWarning("Docking Station defined more than once - Using latest definition...");
+                        logger.logWarning("Docking Station defined more than once - Using first definition...");
                     }
-                    docking_station_position = {(int)row_idx, (int)column_idx};
-                    is_docking_station_initialized = true;
+                    else
+                    {
+                        docking_station_position = {(int)row_idx, (int)column_idx};
+                        is_docking_station_initialized = true;
+                    }
                     break;
 
                 case BlockType::WALL:

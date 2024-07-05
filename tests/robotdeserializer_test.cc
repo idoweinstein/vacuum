@@ -117,7 +117,7 @@ namespace
 
         (void)RobotDeserializer::deserializeFromFile("inputs/input_dupdock.txt");
 
-        assertWarning(cout_capture, "[WARNING] Docking Station defined more than once - Using latest definition...\n");
+        assertWarning(cout_capture, "[WARNING] Docking Station defined more than once - Using first definition...\n");
     }
 
     TEST(RobotDeserializerTest, InvalidHouseCharacter)
