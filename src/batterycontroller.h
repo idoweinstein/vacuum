@@ -13,11 +13,11 @@
  */
 class BatteryController : public BatterySensor
 {
-    static constexpr const float kStepsToFullAmount = 20.0f;
-    static constexpr const float kDischargeUnit = 1.0f;
+    static constexpr const float kStepsToFullAmount = 20.0f; // Charging rate (in steps).
+    static constexpr const float kDischargeUnit = 1.0f;      // Discharging rate (in steps).
 
-    const float full_amount;
-    float current_amount;
+    const float full_amount;                                 // Full capacity of the battery (in steps).
+    float current_amount;                                    // Remaining capacity of the battery (in steps).
 
 public:
     /**

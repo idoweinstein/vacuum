@@ -12,7 +12,7 @@
  * @brief Represents a position in a two-dimensional space.
  * @details The Position class is derived from std::pair<int, int> and provides additional functionality for computing positions based on directions.
  */
-class Position : public std::pair<int, int> 
+class Position : public std::pair<int, int>
 {
         inline static const std::unordered_map<Direction, std::pair<int, int>> direction_map = {
             {Direction::NORTH, std::make_pair(-1, 0)},
@@ -52,8 +52,23 @@ class Position : public std::pair<int, int>
 
 namespace std
 {
-    // Source: http://szudzik.com/ElegantPairing.pdf
-    static inline unsigned int elegantPair(unsigned int a, unsigned int b) 
+    /**
+     * @brief Computes an elegant pairing of two integers.
+     *
+     * This function computes a unique unsigned integer for a pair of integers (a, b).
+     * The function satisifies the following properties:
+     * - It is injective (one-to-one).
+     * - It tends to yield smaller values for smaller integers.
+     * - It favors grid-locality - pairs with the same first/second element tend to
+     *  have similar values.
+     *
+     * Source: http://szudzik.com/ElegantPairing.pdf
+     *
+     * @param a The first integer.
+     * @param b The second integer.
+     * @return The unique unsigned integer representing the pair (a, b).
+     */
+    static inline unsigned int elegantPair(unsigned int a, unsigned int b)
     {
         return a >= b ? a * a + a + b : a + b * b;
     }
@@ -61,12 +76,12 @@ namespace std
     /**
      * @brief Hash function specialization for Position.
      */
-    template<> struct hash<Position> 
+    template<> struct hash<Position>
     {
         /**
          * @brief Computes the hash value for a Position object.
          */
-        size_t operator()(Position const& p) const 
+        size_t operator()(Position const& p) const
         {
             // Map each integer to a unique unsigned integer
             unsigned int a = p.first >= 0 ? 2 * p.first : -2 * p.first - 1;

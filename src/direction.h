@@ -7,7 +7,7 @@
 /**
  * @brief The Direction enum represents the possible directions for the vacuum cleaner.
  */
-enum class Direction{ NORTH, EAST, SOUTH, WEST, STAY, FINISH  };
+enum class Direction{ NORTH, EAST, SOUTH, WEST, STAY, FINISH };
 
 // Adapting Direction enum class to be formattable (in std::format), for logging purposes:
 namespace std

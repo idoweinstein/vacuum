@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <istream>
- 
+
 #include "position.h"
 #include "robot.h"
 

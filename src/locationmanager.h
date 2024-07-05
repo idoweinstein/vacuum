@@ -15,7 +15,7 @@
  */
 class LocationManager : public WallSensor, public DirtSensor
 {
-    static constexpr const unsigned int kDirtCleaningUnit = 1; // Units of dirt to clean when cleaning a position 
+    static constexpr const unsigned int kDirtCleaningUnit = 1; // Units of dirt to clean when cleaning a position
 
     std::vector<std::vector<bool>> wall_map;                   // The map representing the walls in the environment.
     std::vector<std::vector<unsigned int>> dirt_map;           // The map representing the dirt levels in the environment.

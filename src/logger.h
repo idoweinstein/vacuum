@@ -34,7 +34,7 @@ enum class LogOutput
  * It is designed as a singleton class to ensure only one instance of the logger exists.
  */
 class Logger
-{   
+{
     inline static const std::map<LogLevel, const std::string> log_level_prefix = {
         {LogLevel::INFO, ""},              // Prefix for information level logs
         {LogLevel::WARNING, "[WARNING] "}, // Prefix for warning level logs

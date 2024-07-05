@@ -25,7 +25,7 @@ class PathTree
     static constexpr const int kNoParent = -1; // Constant representing no parent index.
 
     std::vector<PathNode> node_pool;           // Pool of path nodes.
-  
+
     /**
      * @brief Validates the given node index.
      * @param node_index The index of the node to validate.
