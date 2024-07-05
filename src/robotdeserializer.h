@@ -56,6 +56,8 @@ class RobotDeserializer
     /**
      * @brief Converts a string value to an unsigned integer.
      *
+     * If a non-integer / negative string is given, returns a default value (of '0'), instead.
+     *
      * @param value The string value to convert.
      * @return The converted unsigned integer value.
      */
@@ -67,9 +69,9 @@ class RobotDeserializer
      * @param parameters The array to store the parameter value.
      * @param key The parameter key.
      * @param value The parameter value.
-     * @return True if the parameter was stored successfully, false otherwise.
+     * @return true if ParameterType::END_OF_PARAMETER ('house') was reached in input stream, false otherwise.
      */
-    static bool storeParameter(unsigned int* parameters, const std::string& key, const std::string& value);
+    static bool storeParameter(Parameter* parameters, const std::string& key, const std::string& value);
 
     /**
      * @brief Deserializes the parameters from an input stream.
@@ -78,8 +80,9 @@ class RobotDeserializer
      *
      * @param parameters The array to store the deserialized parameters.
      * @param input_stream The input stream to read the parameters from.
+     * @return true if house grid was given in input stream, false otherwise.
      */
-    static void deserializeParameters(unsigned int* parameters, std::istream& input_stream);
+    static bool deserializeParameters(Parameter* parameters, std::istream& input_stream);
 
     /**
      * @brief Deserializes the house layout from an input stream.
