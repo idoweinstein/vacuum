@@ -33,8 +33,6 @@ namespace
 
     TEST_F(PathTreeTest, BadParentIndex)
     {
-        unsigned int child_index;
-
         // Check negative parent index
         EXPECT_THROW({
             path_tree.insertChild(-1, Direction::NORTH, Position(5,-9));

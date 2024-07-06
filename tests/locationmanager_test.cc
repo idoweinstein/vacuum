@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
 #include <vector>
+#include <memory>
 #include <cstdlib>
 
 #include "locationmanager.h"
@@ -22,7 +23,7 @@ namespace
                     dirt_map.push_back({});
                     dirt_map[i].reserve(row_num);
 
-                    for (int j = 0; j < row_num; j++)
+                    for (unsigned int j = 0; j < row_num; j++)
                     {
                         bool random_bool = (bool)(rand() % 2);
                         unsigned int random_level = (unsigned int)(rand() % 10);
@@ -41,7 +42,7 @@ namespace
             inline static unsigned int direction_iterator = 0;
             inline static Position docking_station_position = Position(3,9);
 
-            inline static LocationManager* location_manager = nullptr;
+            inline static std::unique_ptr<LocationManager> location_manager;
 
             static Direction getNextDirection()
             {
@@ -62,18 +63,16 @@ namespace
 
                 initializeMaps(wall_map, dirt_map);
 
-                // Alocate LocationManager dynamically, since it has no empty ctor
-                location_manager = new LocationManager(
+                location_manager = std::unique_ptr<LocationManager>(new LocationManager(
                     wall_map,
                     dirt_map,
                     docking_station_position
-                );
+                ));
             }
             
             static void TearDownTestCase()
             {
-                delete location_manager;
-                location_manager = nullptr;
+                location_manager.reset();
             }
     };
 

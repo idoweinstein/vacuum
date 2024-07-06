@@ -236,7 +236,7 @@ namespace
             return;
         }
 
-        for (int i = 0; i < expected_steps_num; i++)
+        for (unsigned int i = 0; i < expected_steps_num; i++)
         {
             EXPECT_EQ(expected_steps[i], robot_state.runtime_steps.at(i));
         }
