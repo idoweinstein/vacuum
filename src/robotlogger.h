@@ -92,7 +92,8 @@ public:
     {
         std::ostringstream stringStream;
         stringStream << kStatisticsFormat1 << kStatisticsFormat2 << total_steps << kStatisticsFormat3 \
-            << total_dirt << kStatisticsFormat4 << is_battery_exhausted << kStatisticsFormat5 << is_mission_complete;
+            << total_dirt << kStatisticsFormat4 << std::boolalpha << is_battery_exhausted << kStatisticsFormat5 \
+            << is_mission_complete;
 
         logMessage(LogLevel::INFO, LogOutput::FILE, stringStream.str());
     }

@@ -26,4 +26,4 @@
   ```
   ./myrobot <inputfile>
   ```
-  * Example input and output files can be found in `tests` and `tests/inputs`.
+  * Example input and output files can be found in `examples`, `tests`, and `tests/inputs`.
