@@ -1,0 +1,6 @@
+max_robot_steps 100
+max_battery_steps 4
+house
+000
+0@001
+000
