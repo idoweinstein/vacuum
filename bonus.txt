@@ -27,7 +27,7 @@ To run the tests, run the following commands from the root dir of the project:
 mkdir build
 cd build
 cmake .. -DBUILD_TESTS=ON
-ls tests/*_test | xargs -0 bash -c
+ctest
 
 More details about testing and validation can be found in the HLD file.
 
