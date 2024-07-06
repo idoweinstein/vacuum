@@ -1,7 +1,7 @@
 #ifndef VACUUM_DIRECTION_H_
 #define VACUUM_DIRECTION_H_
 
-#include <format>
+#include <ostream>
 #include <string>
 
 /**
@@ -9,52 +9,46 @@
  */
 enum class Direction{ NORTH, EAST, SOUTH, WEST, STAY, FINISH };
 
-// Adapting Direction enum class to be formattable (in std::format), for logging purposes:
+// Adapting Direction enum class to be streamable, for logging purposes:
 namespace std
 {
     /**
-     * @brief Specialization of the std::formatter for the Direction enum.
+     * @brief Overload of the stream operator for the Direction enum.
      */
-    template <>
-    struct formatter<Direction> : formatter<string>
+    inline std::ostream& operator<<(std::ostream& ostream, const Direction& direction)
     {
-        /**
-         * @brief Formats the Direction enum value as a string.
-         */
-        auto format(const Direction direction, format_context& ctx) const
+        std::string string_direction;
+
+        switch (direction)
         {
-            string string_direction;
+            case Direction::NORTH:
+                string_direction = "North";
+                break;
 
-            switch (direction)
-            {
-                case Direction::NORTH:
-                    string_direction = "North";
-                    break;
+            case Direction::EAST:
+                string_direction = "East";
+                break;
 
-                case Direction::EAST:
-                    string_direction = "East";
-                    break;
+            case Direction::SOUTH:
+                string_direction = "South";
+                break;
 
-                case Direction::SOUTH:
-                    string_direction = "South";
-                    break;
+            case Direction::WEST:
+                string_direction = "West";
+                break;
 
-                case Direction::WEST:
-                    string_direction = "West";
-                    break;
+            case Direction::STAY:
+                string_direction = "Stay";
+                break;
 
-                case Direction::STAY:
-                    string_direction = "Stay";
-                    break;
-
-                case Direction::FINISH:
-                    string_direction = "Finish";
-                    break;
-            }
-
-            return formatter<string>::format(string_direction, ctx);
+            case Direction::FINISH:
+                string_direction = "Finish";
+                break;
         }
-    };
+
+        ostream << string_direction;
+        return ostream;
+    }
 }
 
 #endif /* VACUUM_DIRECTION_H_ */

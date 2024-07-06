@@ -1,7 +1,7 @@
 #ifndef VACUUM_ROBOTLOGGER_H_
 #define VACUUM_ROBOTLOGGER_H_
 
-#include <format>
+#include <sstream>
 
 #include "direction.h"
 #include "position.h"
@@ -24,12 +24,15 @@ class RobotLogger: public Logger
     // Constant RobotLogger strings
     inline static constexpr const char kRobotFinishPrompt[] = "[FINISH] Robot finished cleaning all accessible places!";
     inline static constexpr const char kOutputFilePrefix[] = "output_";
-    inline static constexpr const char kStepFormat[] = "[STEP] Robot took step to {} - New Position ({},{})";
-    inline static constexpr const char kStatisticsFormat[] = "### Program Terminated ###\n"
-                                                  "Total Steps Taken: {}\n"
-                                                  "Total Dirt Left: {}\n"
-                                                  "Is Battery Exhausted: {}\n"
-                                                  "Mission Succeeded: {}";
+    inline static constexpr const char kStepFormat1[] = "[STEP] Robot took step to ";
+    inline static constexpr const char kStepFormat2[] = " - New Position (";
+    inline static constexpr const char kStepFormat3[] = ",";
+    inline static constexpr const char kStepFormat4[] = ")";
+    inline static constexpr const char kStatisticsFormat1[] = "### Program Terminated ###";
+    inline static constexpr const char kStatisticsFormat2[] = "\nTotal Steps Taken: ";
+    inline static constexpr const char kStatisticsFormat3[] = "\nTotal Dirt Left: ";
+    inline static constexpr const char kStatisticsFormat4[] = "\nIs Battery Exhausted: ";
+    inline static constexpr const char kStatisticsFormat5[] = "\nMission Succeeded: ";
 
     /* Private ctor & dtor - So it WON'T be used externally and WON'T be inherited */
     RobotLogger() {}
@@ -71,12 +74,11 @@ public:
      */
     void logRobotStep(Direction direction_moved, Position current_position)
     {
-        const std::string step_log_message = std::format(kStepFormat,
-                                                         direction_moved,
-                                                         current_position.first,
-                                                         current_position.second);
+        std::ostringstream stringStream;
+        stringStream << kStepFormat1 << direction_moved << kStepFormat2 \
+            << current_position.first << kStepFormat3 << current_position.second << kStepFormat4;
 
-        logMessage(LogLevel::INFO, LogOutput::FILE, step_log_message);
+        logMessage(LogLevel::INFO, LogOutput::FILE, stringStream.str());
     }
 
     /**
@@ -88,13 +90,11 @@ public:
      */
     void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, bool is_battery_exhausted, bool is_mission_complete)
     {
-        const std::string statistics_log_message = std::format(kStatisticsFormat,
-                                                               total_steps,
-                                                               total_dirt,
-                                                               is_battery_exhausted,
-                                                               is_mission_complete);
+        std::ostringstream stringStream;
+        stringStream << kStatisticsFormat1 << kStatisticsFormat2 << total_steps << kStatisticsFormat3 \
+            << total_dirt << kStatisticsFormat4 << is_battery_exhausted << kStatisticsFormat5 << is_mission_complete;
 
-        logMessage(LogLevel::INFO, LogOutput::FILE, statistics_log_message);
+        logMessage(LogLevel::INFO, LogOutput::FILE, stringStream.str());
     }
 
     /**
