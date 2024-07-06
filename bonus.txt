@@ -6,6 +6,8 @@ This file contains brief information about:
 
 - Automatic testing
 
+- Logging system
+
 - Interesting implementation details:
 
   - Position hashing functions
