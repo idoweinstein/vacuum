@@ -1,7 +1,7 @@
 <h3 align="center">Vacuum</h3>
 <h5 align="center">Tel Aviv University - Advanced Topics in Programming (03683058)</h5>
 <p align="center">
-  A simulator of an automatic cleaner
+  A simulator of an automatic vacuum cleaner
 </p>
 
 # Vacuum
