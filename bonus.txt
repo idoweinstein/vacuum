@@ -1,0 +1,44 @@
+BONUS
+
+This file contains brief information about:
+
+- Visual simulation
+
+- Automatic testing
+
+- Interesting implementation details:
+
+  - Position hashing functions
+
+Visual simulation
+=================
+
+Written in python3 and can be found in src/simulate.py.
+Receives both input file as output file (previously created by myrobot) as inputs.
+To run it, enter the following command: python3 src/simulate.py <inputfile> <outputfile>.
+FPS can also be adjusted using the --fps flag.
+
+Automatic testing
+=================
+
+Written in C++ using the GTest framework.
+Contains both system and unit tests, with fixtures, mocking, and extra infrastructure as needed.
+To run the tests, run the following commands from the root dir of the project:
+mkdir build
+cd build
+cmake .. -DBUILD_TESTS=ON
+ls tests/*_test | xargs -0 bash -c
+
+More details about testing and validation can be found in the HLD file.
+
+Interesting implementation details
+==================================
+
+Position hashing function
+-------------------------
+
+Simply put, Position is a pair of integers (coordiantes) which represent a place in the house.
+In our implementation, we use unordered collections of Position objects.
+To do so, we must implement a hashing function, and we chose elegant pairing which is injective
+and has a few more desired properties.
+More information about it can be found in: src/position.h+63
