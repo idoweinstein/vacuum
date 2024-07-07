@@ -88,13 +88,13 @@ namespace
 
     TEST_F(LocationManagerTest, OverCleaningPosition)
     {
-        while(location_manager->getDirtLevel() > 0)
+        while(location_manager->dirtLevel() > 0)
         {
             location_manager->cleanCurrentPosition();
         }
 
         location_manager->cleanCurrentPosition(); // Redundant cleaning
-        EXPECT_EQ(0, location_manager->getDirtLevel());
+        EXPECT_EQ(0, location_manager->dirtLevel());
     }
 
     TEST_F(LocationManagerTest, RandomNavigation)

@@ -12,7 +12,7 @@ Robot::Robot(unsigned int max_robot_steps,
       location_manager(wall_map, dirt_map, docking_station_position),
       navigation_system(static_cast<BatteryMeter&>(battery_controller),
                         static_cast<DirtSensor&>(location_manager),
-                        static_cast<WallSensor&>(location_manager))
+                        static_cast<WallsSensor&>(location_manager))
 { }
 
 void Robot::move(Direction next_direction)
@@ -73,7 +73,7 @@ void Robot::run()
     }
 
     unsigned int total_dirt_count = location_manager.getTotalDirtCount();
-    bool is_battery_exhausted = battery_controller.getCurrentAmount() < 1;
+    bool is_battery_exhausted = battery_controller.getBatteryState() < 1;
     bool is_mission_complete = (0 == total_dirt_count) && location_manager.isInDockingStation();
 
     logger.logCleaningStatistics(total_steps_performed,

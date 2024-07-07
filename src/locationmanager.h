@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "dirtsensor.h"
-#include "wallsensor.h"
+#include "wallssensor.h"
 #include "direction.h"
 #include "position.h"
 
@@ -13,7 +13,7 @@
  *
  * It keeps track of the wall map, dirt map, current position, docking station position, and total dirt count.
  */
-class LocationManager : public WallSensor, public DirtSensor
+class LocationManager : public WallsSensor, public DirtSensor
 {
     static constexpr const unsigned int kDirtCleaningUnit = 1; // Units of dirt to clean when cleaning a position
 
@@ -83,7 +83,7 @@ public:
      *
      * @return The dirt level at the current position.
      */
-    virtual unsigned int getDirtLevel() const;
+    virtual int dirtLevel() const;
 
     /**
      * @brief Gets the current position of the vacuum cleaner.

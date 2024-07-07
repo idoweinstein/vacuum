@@ -4,6 +4,7 @@
 #include "batterymeter.h"
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 /**
@@ -25,16 +26,16 @@ public:
      *
      * @param full_amount The full amount of the battery (in steps).
      */
-    explicit BatteryController(unsigned int full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
+    explicit BatteryController(std::size_t full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
 
     /**
-     * @brief Gets the current amount of the battery.
+     * @brief Gets the current remaining battery capacity.
      *
-     * @return The current amount of the battery (in steps).
+     * @return The current remaining capacity (in steps).
      */
-    virtual float getCurrentAmount() const
+    virtual std::size_t getBatteryState() const
     {
-        return current_amount;
+        return floor(current_amount);
     }
 
     /**

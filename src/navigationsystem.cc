@@ -7,8 +7,8 @@
 #include <stdexcept>
 #include <unordered_set>
 
-NavigationSystem::NavigationSystem(BatteryMeter& battery_meter, DirtSensor& dirt_sensor, WallSensor& wall_sensor)
-    : current_position(0, 0), battery_meter(battery_meter), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor), full_battery(battery_meter.getCurrentAmount())
+NavigationSystem::NavigationSystem(BatteryMeter& battery_meter, DirtSensor& dirt_sensor, WallsSensor& wall_sensor)
+    : current_position(0, 0), battery_meter(battery_meter), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor), full_battery(battery_meter.getBatteryState())
 {
     // Update current location (docking station) as non-wall
     wall_map[current_position] = false;
@@ -121,22 +121,22 @@ void NavigationSystem::mapWallsAround()
     }
 }
 
-void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, float& battery_left, bool& is_battery_full)
+void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, std::size_t& battery_left, bool& is_battery_full)
 {
     mapWallsAround();
 
-    dirt_level = dirt_sensor.getDirtLevel();
+    dirt_level = dirt_sensor.dirtLevel();
     if (dirt_level > 0)
     {
         todo_positions.insert(current_position);
     }
 
-    battery_left = battery_meter.getCurrentAmount();
+    battery_left = battery_meter.getBatteryState();
 
     is_battery_full = (battery_left >= full_battery);
 }
 
-Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float battery_left, bool is_battery_full)
+Direction NavigationSystem::decideNextStep(unsigned int dirt_level, std::size_t battery_left, bool is_battery_full)
 {
     std::deque<Direction> path_to_station;
     bool is_found = getPathToStation(path_to_station);
@@ -196,7 +196,7 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
 Direction NavigationSystem::suggestNextStep()
 {
     unsigned int dirt_level = 0;
-    float battery_left = 0;
+    std::size_t battery_left = 0;
     bool is_battery_full = false;
 
     getSensorsInfo(dirt_level, battery_left, is_battery_full);
@@ -208,7 +208,7 @@ void NavigationSystem::move(Direction direction)
 {
     current_position = Position::computePosition(current_position, direction);
 
-    if (0 == dirt_sensor.getDirtLevel())
+    if (0 == dirt_sensor.dirtLevel())
     {
         todo_positions.erase(current_position);
     }

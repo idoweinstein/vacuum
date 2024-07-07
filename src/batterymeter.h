@@ -8,11 +8,16 @@ class BatteryMeter
 {
     public:
         /**
-         * @brief Get the current amount of battery power.
-         *
-         * @return The current amount of battery power as a float value (in steps).
+         * @brief Virtual destructor for the BatteryMeter class.
          */
-        virtual float getCurrentAmount() const = 0;
+        virtual ~BatteryMeter() {}
+
+        /**
+         * @brief Get the current amount of remaining battery capacity.
+         *
+         * @return The current amount of remaining capacity (in steps).
+         */
+        virtual std::size_t getBatteryState() const = 0;
 };
 
 #endif /* VACUUM_BATTERYMETER_H_ */

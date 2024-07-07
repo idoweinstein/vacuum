@@ -9,7 +9,7 @@
 
 #include "batterymeter.h"
 #include "dirtsensor.h"
-#include "wallsensor.h"
+#include "wallssensor.h"
 #include "direction.h"
 #include "position.h"
 #include "pathtree.h"
@@ -19,7 +19,7 @@
  * @brief The NavigationSystem class represents the navigation algorithm of a vacuum cleaner.
  *
  * The NavigationSystem class is responsible for managing the movement and navigation of the vacuum cleaner.
- * It uses various sensors such as BatteryMeter, DirtSensor, and WallSensor to make decisions about the next step.
+ * It uses various sensors such as BatteryMeter, DirtSensor, and WallsSensor to make decisions about the next step.
  * The navigation system keeps track of the current position, wall map, and a set of positions to visit.
  * It uses a path tree to store the paths explored during navigation.
  *
@@ -38,7 +38,7 @@ class NavigationSystem
         Position current_position;                      // The current position of the vacuum cleaner.
         BatteryMeter& battery_meter;                    // Reference to the battery meter.
         DirtSensor& dirt_sensor;                        // Reference to the dirt sensor.
-        WallSensor& wall_sensor;                        // Reference to the wall sensor.
+        WallsSensor& wall_sensor;                        // Reference to the wall sensor.
 
         const unsigned int full_battery;                // Full battery power (in steps).
 
@@ -135,7 +135,7 @@ class NavigationSystem
          * @param battery_steps The variable to store the battery level in steps.
          * @param battery_is_full The variable to store the battery full status.
          */
-        virtual void getSensorsInfo(unsigned int& dirt_level, float& battery_steps, bool& battery_is_full);
+        virtual void getSensorsInfo(unsigned int& dirt_level, std::size_t& battery_steps, bool& battery_is_full);
 
         /**
          * @brief Decides the next step based on the sensor information.
@@ -147,7 +147,7 @@ class NavigationSystem
          * @param battery_is_full The battery full status.
          * @return The next step to take.
          */
-        virtual Direction decideNextStep(unsigned int dirt_level, float battery_steps, bool battery_is_full);
+        virtual Direction decideNextStep(unsigned int dirt_level, std::size_t battery_steps, bool battery_is_full);
 
     public:
         /**
@@ -157,7 +157,7 @@ class NavigationSystem
          * @param dirt_sensor The dirt sensor.
          * @param wall_sensor The wall sensor.
          */
-        explicit NavigationSystem(BatteryMeter&, DirtSensor&, WallSensor&);
+        explicit NavigationSystem(BatteryMeter&, DirtSensor&, WallsSensor&);
 
         /**
          * @brief Suggests the next step for the vacuum cleaner.

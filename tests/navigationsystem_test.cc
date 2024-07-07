@@ -6,7 +6,7 @@
 
 namespace
 {
-    class MockWallSensor : public WallSensor
+    class MockWallsSensor : public WallsSensor
     {
     public:
         MOCK_METHOD(bool, isWall, (Direction direction), (const, override));
@@ -15,13 +15,13 @@ namespace
     class MockDirtSensor : public DirtSensor
     {
     public:
-        MOCK_METHOD(unsigned int, getDirtLevel, (), (const, override));
+        MOCK_METHOD(int, dirtLevel, (), (const, override));
     };
 
     class MockBatteryMeter : public BatteryMeter
     {
     public:
-        MOCK_METHOD(float, getCurrentAmount, (), (const, override));
+        MOCK_METHOD(std::size_t, getBatteryState, (), (const, override));
     };
 
     class NavigationSystemTest : public testing::Test
@@ -31,19 +31,19 @@ namespace
 
         MockBatteryMeter battery_meter;
         MockDirtSensor dirt_sensor;
-        MockWallSensor wall_sensor;
+        MockWallsSensor wall_sensor;
 
         NavigationSystem navigation_system;
 
         NavigationSystemTest() : navigation_system(battery_meter, dirt_sensor, wall_sensor)
         {
-            ON_CALL(battery_meter, getCurrentAmount())
+            ON_CALL(battery_meter, getBatteryState())
                 .WillByDefault(testing::Invoke([&]()
                 {
                     return battery_level--;
                 }));
 
-            ON_CALL(dirt_sensor, getDirtLevel())
+            ON_CALL(dirt_sensor, dirtLevel())
                 .WillByDefault(testing::Return(0));
 
             ON_CALL(wall_sensor, isWall(testing::_))
@@ -64,7 +64,7 @@ namespace
 
     TEST_F(NavigationSystemTest, dirtyDockingStation)
     {
-        EXPECT_CALL(dirt_sensor, getDirtLevel())
+        EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillOnce(testing::Return(1));
         
         EXPECT_CALL(wall_sensor, isWall(testing::_))
@@ -81,7 +81,7 @@ namespace
         bool isAtLimit = false;
         Direction suggested_direction;
 
-        EXPECT_CALL(dirt_sensor, getDirtLevel())
+        EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillRepeatedly(testing::Invoke([&isAtLimit]()
             {
                 if (isAtLimit)
@@ -148,7 +148,7 @@ namespace
         navigation_system.move(suggested_direction);
 
         // Then, even though there will be dirt, we will have to return
-        EXPECT_CALL(dirt_sensor, getDirtLevel())
+        EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillOnce(testing::Return(9));
 
         suggested_direction = navigation_system.suggestNextStep();
