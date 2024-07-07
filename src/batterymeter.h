@@ -1,10 +1,10 @@
-#ifndef VACUUM_BATTERYSENSOR_H_
-#define VACUUM_BATTERYSENSOR_H_
+#ifndef VACUUM_BATTERYMETER_H_
+#define VACUUM_BATTERYMETER_H_
 
 /**
- * @brief The BatterySensor class is a pure abstract base class for battery sensors.
+ * @brief The BatteryMeter class is a pure abstract base class for battery meters (sensors).
  */
-class BatterySensor
+class BatteryMeter
 {
     public:
         /**
@@ -15,4 +15,4 @@ class BatterySensor
         virtual float getCurrentAmount() const = 0;
 };
 
-#endif /* VACUUM_BATTERYSENSOR_H_ */
+#endif /* VACUUM_BATTERYMETER_H_ */

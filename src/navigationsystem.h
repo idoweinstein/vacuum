@@ -7,7 +7,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include "batterysensor.h"
+#include "batterymeter.h"
 #include "dirtsensor.h"
 #include "wallsensor.h"
 #include "direction.h"
@@ -19,7 +19,7 @@
  * @brief The NavigationSystem class represents the navigation algorithm of a vacuum cleaner.
  *
  * The NavigationSystem class is responsible for managing the movement and navigation of the vacuum cleaner.
- * It uses various sensors such as BatterySensor, DirtSensor, and WallSensor to make decisions about the next step.
+ * It uses various sensors such as BatteryMeter, DirtSensor, and WallSensor to make decisions about the next step.
  * The navigation system keeps track of the current position, wall map, and a set of positions to visit.
  * It uses a path tree to store the paths explored during navigation.
  *
@@ -36,7 +36,7 @@ class NavigationSystem
         std::unordered_set<Position> todo_positions;    // A set of positions to visit (unvisited / dirty positions).
 
         Position current_position;                      // The current position of the vacuum cleaner.
-        BatterySensor& battery_sensor;                  // Reference to the battery sensor.
+        BatteryMeter& battery_meter;                    // Reference to the battery meter.
         DirtSensor& dirt_sensor;                        // Reference to the dirt sensor.
         WallSensor& wall_sensor;                        // Reference to the wall sensor.
 
@@ -153,11 +153,11 @@ class NavigationSystem
         /**
          * @brief Constructs a new NavigationSystem object.
          *
-         * @param battery_sensor The battery sensor.
+         * @param battery_meter The battery meter (sensor).
          * @param dirt_sensor The dirt sensor.
          * @param wall_sensor The wall sensor.
          */
-        explicit NavigationSystem(BatterySensor&, DirtSensor&, WallSensor&);
+        explicit NavigationSystem(BatteryMeter&, DirtSensor&, WallSensor&);
 
         /**
          * @brief Suggests the next step for the vacuum cleaner.

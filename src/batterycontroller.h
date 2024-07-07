@@ -1,7 +1,7 @@
 #ifndef VACUUM_BATTERYCONTROLLER_H_
 #define VACUUM_BATTERYCONTROLLER_H_
 
-#include "batterysensor.h"
+#include "batterymeter.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -9,9 +9,9 @@
 /**
  * @brief The BatteryController class represents a controller for a battery.
  *
- * It inherits from the BatterySensor class and provides functionality to charge and discharge the battery.
+ * It inherits from the BatteryMeter class and provides functionality to charge and discharge the battery.
  */
-class BatteryController : public BatterySensor
+class BatteryController : public BatteryMeter
 {
     static constexpr const float kStepsToFullAmount = 20.0f; // Charging rate (in steps).
     static constexpr const float kDischargeUnit = 1.0f;      // Discharging rate (in steps).

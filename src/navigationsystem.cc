@@ -7,8 +7,8 @@
 #include <stdexcept>
 #include <unordered_set>
 
-NavigationSystem::NavigationSystem(BatterySensor& battery_sensor, DirtSensor& dirt_sensor, WallSensor& wall_sensor)
-    : current_position(0, 0), battery_sensor(battery_sensor), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor), full_battery(battery_sensor.getCurrentAmount())
+NavigationSystem::NavigationSystem(BatteryMeter& battery_meter, DirtSensor& dirt_sensor, WallSensor& wall_sensor)
+    : current_position(0, 0), battery_meter(battery_meter), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor), full_battery(battery_meter.getCurrentAmount())
 {
     // Update current location (docking station) as non-wall
     wall_map[current_position] = false;
@@ -131,7 +131,7 @@ void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, float& battery_l
         todo_positions.insert(current_position);
     }
 
-    battery_left = battery_sensor.getCurrentAmount();
+    battery_left = battery_meter.getCurrentAmount();
 
     is_battery_full = (battery_left >= full_battery);
 }

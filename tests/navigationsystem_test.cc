@@ -18,7 +18,7 @@ namespace
         MOCK_METHOD(unsigned int, getDirtLevel, (), (const, override));
     };
 
-    class MockBatterySensor : public BatterySensor
+    class MockBatteryMeter : public BatteryMeter
     {
     public:
         MOCK_METHOD(float, getCurrentAmount, (), (const, override));
@@ -29,15 +29,15 @@ namespace
     protected:
         float battery_level = 100.0;
 
-        MockBatterySensor battery_sensor;
+        MockBatteryMeter battery_meter;
         MockDirtSensor dirt_sensor;
         MockWallSensor wall_sensor;
 
         NavigationSystem navigation_system;
 
-        NavigationSystemTest() : navigation_system(battery_sensor, dirt_sensor, wall_sensor)
+        NavigationSystemTest() : navigation_system(battery_meter, dirt_sensor, wall_sensor)
         {
-            ON_CALL(battery_sensor, getCurrentAmount())
+            ON_CALL(battery_meter, getCurrentAmount())
                 .WillByDefault(testing::Invoke([&]()
                 {
                     return battery_level--;
