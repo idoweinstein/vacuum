@@ -121,7 +121,7 @@ void NavigationSystem::mapWallsAround()
     }
 }
 
-void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, std::size_t& battery_left, bool& is_battery_full)
+void NavigationSystem::getSensorsInfo(int& dirt_level, std::size_t& battery_left, bool& is_battery_full)
 {
     mapWallsAround();
 
@@ -136,7 +136,7 @@ void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, std::size_t& bat
     is_battery_full = (battery_left >= full_battery);
 }
 
-Direction NavigationSystem::decideNextStep(unsigned int dirt_level, std::size_t battery_left, bool is_battery_full)
+Step NavigationSystem::decideNextStep(int dirt_level, std::size_t battery_left, bool is_battery_full)
 {
     std::deque<Direction> path_to_station;
     bool is_found = getPathToStation(path_to_station);
@@ -148,13 +148,13 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, std::size_t 
     // If left no dirty accessible places AND we're in docking station - finish cleaning
     if (path_to_station.empty() && todo_positions.empty())
     {
-        return Direction::FINISH;
+        return Step::FINISH;
     }
 
     // If charging - charge until battery is full
     if (path_to_station.empty() && !is_battery_full)
     {
-        return Direction::STAY;
+        return Step::STAY;
     }
 
     // If there's not enough battery - go to station
@@ -172,7 +172,7 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, std::size_t 
     // If the current position is dirty, stay to clean it
     if (dirt_level > 0)
     {
-        return Direction::STAY;
+        return Step::STAY;
     }
 
     /* If going one step further will cause the battery
@@ -193,9 +193,9 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, std::size_t 
     return getPathNextStep(path_to_nearest_todo);
 }
 
-Direction NavigationSystem::suggestNextStep()
+Step NavigationSystem::suggestNextStep()
 {
-    unsigned int dirt_level = 0;
+    int dirt_level = 0;
     std::size_t battery_left = 0;
     bool is_battery_full = false;
 
@@ -204,9 +204,13 @@ Direction NavigationSystem::suggestNextStep()
     return decideNextStep(dirt_level, battery_left, is_battery_full);
 }
 
-void NavigationSystem::move(Direction direction)
+void NavigationSystem::move(Step step)
 {
-    current_position = Position::computePosition(current_position, direction);
+    if (Step::STAY != step && Step::FINISH != step)
+    {
+        Direction direction = stepToDirection(step);
+        current_position = Position::computePosition(current_position, direction);
+    }
 
     if (0 == dirt_sensor.dirtLevel())
     {

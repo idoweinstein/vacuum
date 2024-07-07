@@ -69,13 +69,13 @@ public:
 
     /**
      * @brief Log a robot step.
-     * @param direction_moved The direction the robot moved.
+     * @param step_moved The step the robot moved.
      * @param current_position The current position of the robot.
      */
-    void logRobotStep(Direction direction_moved, Position current_position)
+    void logRobotStep(Step step_moved, Position current_position)
     {
         std::ostringstream stringStream;
-        stringStream << kStepFormat1 << direction_moved << kStepFormat2 \
+        stringStream << kStepFormat1 << step_moved << kStepFormat2 \
             << current_position.first << kStepFormat3 << current_position.second << kStepFormat4;
 
         logMessage(LogLevel::INFO, LogOutput::FILE, stringStream.str());

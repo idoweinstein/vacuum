@@ -58,8 +58,8 @@ namespace
 
     TEST_F(NavigationSystemTest, BlockedByWalls)
     {
-        Direction suggested_direction = navigation_system.suggestNextStep();
-        EXPECT_EQ(Direction::FINISH, suggested_direction);
+        Step suggested_step = navigation_system.suggestNextStep();
+        EXPECT_EQ(Step::FINISH, suggested_step);
     }
 
     TEST_F(NavigationSystemTest, dirtyDockingStation)
@@ -70,8 +70,8 @@ namespace
         EXPECT_CALL(wall_sensor, isWall(testing::_))
             .WillRepeatedly(testing::Return(false));
 
-        Direction suggested_direction = navigation_system.suggestNextStep();
-        EXPECT_EQ(Direction::STAY, suggested_direction);
+        Step suggested_step = navigation_system.suggestNextStep();
+        EXPECT_EQ(Step::STAY, suggested_step);
     }
 
     TEST_F(NavigationSystemTest, ReturnToDockingStation)
@@ -79,7 +79,7 @@ namespace
         setBatteryLevel(5.0);
 
         bool isAtLimit = false;
-        Direction suggested_direction;
+        Step suggested_step;
 
         EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillRepeatedly(testing::Invoke([&isAtLimit]()
@@ -106,21 +106,21 @@ namespace
 
         for (int i = 0; i < 2; i++)
         {
-            suggested_direction = navigation_system.suggestNextStep();
-            EXPECT_EQ(Direction::NORTH, suggested_direction);
-            navigation_system.move(suggested_direction);
+            suggested_step = navigation_system.suggestNextStep();
+            EXPECT_EQ(Step::NORTH, suggested_step);
+            navigation_system.move(suggested_step);
         }
 
         isAtLimit = true;
-        suggested_direction = navigation_system.suggestNextStep();
-        EXPECT_EQ(Direction::STAY, suggested_direction);
-        navigation_system.move(suggested_direction);
+        suggested_step = navigation_system.suggestNextStep();
+        EXPECT_EQ(Step::STAY, suggested_step);
+        navigation_system.move(suggested_step);
         
         for (int i = 0; i < 2; i++)
         {
-            suggested_direction = navigation_system.suggestNextStep();
-            EXPECT_EQ(Direction::SOUTH, suggested_direction);
-            navigation_system.move(suggested_direction);
+            suggested_step = navigation_system.suggestNextStep();
+            EXPECT_EQ(Step::SOUTH, suggested_step);
+            navigation_system.move(suggested_step);
         }
     }
 
@@ -131,8 +131,8 @@ namespace
         EXPECT_CALL(wall_sensor, isWall(testing::_))
             .WillRepeatedly(testing::Return(false));
 
-        Direction suggested_direction = navigation_system.suggestNextStep();
-        EXPECT_EQ(Direction::STAY, suggested_direction);
+        Step suggested_step = navigation_system.suggestNextStep();
+        EXPECT_EQ(Step::STAY, suggested_step);
     }
 
     TEST_F(NavigationSystemTest, TooLowBatteryToStay)
@@ -143,15 +143,15 @@ namespace
             .WillRepeatedly(testing::Return(false));
 
         // At first, we will get further because we can
-        Direction suggested_direction = navigation_system.suggestNextStep();
-        EXPECT_NE(Direction::STAY, suggested_direction);
-        navigation_system.move(suggested_direction);
+        Step suggested_step = navigation_system.suggestNextStep();
+        EXPECT_NE(Step::STAY, suggested_step);
+        navigation_system.move(suggested_step);
 
         // Then, even though there will be dirt, we will have to return
         EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillOnce(testing::Return(9));
 
-        suggested_direction = navigation_system.suggestNextStep();
-        EXPECT_NE(Direction::STAY, suggested_direction);
+        suggested_step = navigation_system.suggestNextStep();
+        EXPECT_NE(Step::STAY, suggested_step);
     }
 }

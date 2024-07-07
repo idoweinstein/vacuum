@@ -44,15 +44,15 @@ namespace
 
             inline static std::unique_ptr<LocationManager> location_manager;
 
-            static Direction getNextDirection()
+            static Step getNextStep()
             {
-                static Direction directions[] = {
-                    Direction::NORTH, Direction::SOUTH, Direction::EAST, Direction::WEST
+                static Step steps[] = {
+                    Step::NORTH, Step::SOUTH, Step::WEST, Step::EAST, Step::STAY, Step::FINISH
                 };
 
-                Direction next_direction = directions[direction_iterator % 4];
+                Step next_step = steps[direction_iterator % 6];
                 direction_iterator++;
-                return next_direction;
+                return next_step;
             }
 
             static void SetUpTestCase()
@@ -103,12 +103,20 @@ namespace
         {
             location_manager->cleanCurrentPosition();
 
-            Direction next_direction = getNextDirection();
-            if(location_manager->isWall(next_direction))
+            Step next_step = getNextStep();
+            bool is_wall = false;
+
+            if (Step::FINISH != next_step && Step::STAY != next_step)
+            {
+                is_wall = location_manager->isWall(stepToDirection(next_step));
+            }
+
+            if(is_wall)
             {
                 continue;
             }
-            location_manager->move(next_direction); // Should never throw an error
+
+            location_manager->move(next_step); // Should never throw an error
         }
     }
 
@@ -123,19 +131,19 @@ namespace
         LocationManager simple_location(wall_map, dirt_map, Position(0,0));
 
         EXPECT_THROW({
-            simple_location.move(Direction::NORTH);
+            simple_location.move(Step::NORTH);
         }, std::runtime_error);
 
         EXPECT_THROW({
-            simple_location.move(Direction::SOUTH);
+            simple_location.move(Step::SOUTH);
         }, std::runtime_error);
  
         EXPECT_THROW({
-            simple_location.move(Direction::EAST);
+            simple_location.move(Step::EAST);
         }, std::runtime_error);
 
         EXPECT_THROW({
-            simple_location.move(Direction::WEST);
+            simple_location.move(Step::WEST);
         }, std::runtime_error);
     }
 }

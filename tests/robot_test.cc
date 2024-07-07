@@ -18,7 +18,7 @@ namespace
 {
     struct RobotState
     {
-        std::vector<Direction> runtime_steps;
+        std::vector<Step> runtime_steps;
         bool is_robot_finished;
         bool is_battery_exhausted;
         bool is_mission_succeeded;
@@ -32,12 +32,12 @@ namespace
         inline static const std::string kStepPrefix = "[STEP]";
         inline static const std::string kFinishPrefix = "[FINISH]";
         inline static const std::string kProgramTerminationPrefix = "###";
-        inline static const std::map<std::string, Direction> direction_map = {
-            {"North", Direction::NORTH},
-            {"East", Direction::EAST},
-            {"South", Direction::SOUTH},
-            {"West", Direction::WEST},
-            {"Stay", Direction::STAY}
+        inline static const std::map<std::string, Step> step_map = {
+            {"North", Step::NORTH},
+            {"East", Step::EAST},
+            {"South", Step::SOUTH},
+            {"West", Step::WEST},
+            {"Stay", Step::STAY}
         };
 
         std::ifstream output_file;
@@ -46,10 +46,10 @@ namespace
         std::string getNextValue();
         void deserializeStatistics();
 
-        static Direction stringToDirection(const std::string& direction_string)
+        static Step stringToStep(const std::string& step_string)
         {
-            EXPECT_TRUE(direction_map.contains(direction_string));
-            return direction_map.at(direction_string);
+            EXPECT_TRUE(step_map.contains(step_string));
+            return step_map.at(step_string);
         }
  
     public:
@@ -117,15 +117,15 @@ namespace
             std::string prefix;
             line_stream >> prefix;
 
-            std::string direction;
+            std::string step;
             if (kStepPrefix == prefix)
             {
                 for (int i = 0; i < 5; i++)
                 {
-                    line_stream >> direction;
+                    line_stream >> step;
                 }
 
-                robot_state.runtime_steps.push_back(stringToDirection(direction));
+                robot_state.runtime_steps.push_back(stringToStep(step));
             }
 
             else if (kFinishPrefix == prefix)
@@ -180,7 +180,7 @@ namespace
 
         // Make sure robot did 'total_steps_taken' steps, and its first step wasn't Direction::STAY
         EXPECT_EQ(robot_state.total_steps_taken, robot_state.runtime_steps.size());
-        EXPECT_NE(Direction::STAY, robot_state.runtime_steps.at(0));
+        EXPECT_NE(Step::STAY, robot_state.runtime_steps.at(0));
 
         // Assert the expected program results (Robot is not dead and cleaned all dirt)
         EXPECT_TRUE(robot_state.is_robot_finished);
@@ -223,10 +223,10 @@ namespace
         EXPECT_TRUE(robot_state.is_battery_exhausted);
         EXPECT_TRUE(robot_state.is_mission_succeeded);
 
-        Direction expected_steps[] = {
-            Direction::EAST,
-            Direction::STAY,
-            Direction::WEST,
+        Step expected_steps[] = {
+            Step::EAST,
+            Step::STAY,
+            Step::WEST,
         };
         size_t expected_steps_num = 3;
 

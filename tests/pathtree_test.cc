@@ -23,7 +23,6 @@ namespace
     TEST_F(PathTreeTest, InsertRootSanity)
     {
         EXPECT_EQ(false, path_tree.hasParent(root_index));
-        EXPECT_EQ(Direction::STAY, path_tree.getDirection(root_index));
 
         // Check Root Position
         Position root_position = path_tree.getPosition(root_index);
@@ -71,10 +70,10 @@ namespace
             0, // Root index
             (int)path_tree.insertChild(0, Direction::EAST, Position(3,7)),
             (int)path_tree.insertChild(1, Direction::NORTH, Position(0,0)),
-            (int)path_tree.insertChild(2, Direction::STAY, Position(-1,9)),
+            (int)path_tree.insertChild(2, Direction::EAST, Position(-1,9)),
             (int)path_tree.insertChild(3, Direction::WEST, Position(2,2564)),
             (int)path_tree.insertChild(4, Direction::EAST, Position(0,0)),
-            (int)path_tree.insertChild(5, Direction::STAY, Position(1,-99))
+            (int)path_tree.insertChild(5, Direction::SOUTH, Position(1,-99))
         };
 
         for (unsigned int i = 1; i < 7; i++)
@@ -90,7 +89,7 @@ namespace
             children[1],
             children[2],
             (int)path_tree.insertChild(children[2], Direction::NORTH, Position(0,0)),
-            (int)path_tree.insertChild(7, Direction::STAY, Position(-1,9)),
+            (int)path_tree.insertChild(7, Direction::SOUTH, Position(-1,9)),
             (int)path_tree.insertChild(8, Direction::WEST, Position(2,2564))
         };
 

@@ -58,11 +58,11 @@ public:
     virtual void cleanCurrentPosition();
 
     /**
-     * @brief Moves the vacuum cleaner in the specified direction.
+     * @brief Moves the vacuum cleaner one step in the specified direction.
      *
-     * @param direction The direction to move.
+     * @param direction The direction to move (or stay/finish).
      */
-    virtual void move(Direction);
+    virtual void move(Step);
 
     /**
      * @brief Checks if the vacuum cleaner is in the docking station.

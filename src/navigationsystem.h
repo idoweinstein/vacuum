@@ -13,6 +13,7 @@
 #include "direction.h"
 #include "position.h"
 #include "pathtree.h"
+#include "step.h"
 
 /**
  * @class NavigationSystem
@@ -77,15 +78,14 @@ class NavigationSystem
          * @param path The path to get the next step from.
          * @return The next step in the path.
          */
-        virtual Direction getPathNextStep(const std::deque<Direction>& path) const
-
+        virtual Step getPathNextStep(const std::deque<Direction>& path) const
         {
             // Handle empty path
             if (path.empty())
             {
-                return Direction::STAY;
+                return Step::STAY;
             }
-            return path.front();
+            return directionToStep(path.front());
         }
 
         /**
@@ -135,7 +135,7 @@ class NavigationSystem
          * @param battery_steps The variable to store the battery level in steps.
          * @param battery_is_full The variable to store the battery full status.
          */
-        virtual void getSensorsInfo(unsigned int& dirt_level, std::size_t& battery_steps, bool& battery_is_full);
+        virtual void getSensorsInfo(int& dirt_level, std::size_t& battery_steps, bool& battery_is_full);
 
         /**
          * @brief Decides the next step based on the sensor information.
@@ -147,7 +147,7 @@ class NavigationSystem
          * @param battery_is_full The battery full status.
          * @return The next step to take.
          */
-        virtual Direction decideNextStep(unsigned int dirt_level, std::size_t battery_steps, bool battery_is_full);
+        virtual Step decideNextStep(int dirt_level, std::size_t battery_steps, bool battery_is_full);
 
     public:
         /**
@@ -166,16 +166,16 @@ class NavigationSystem
          *
          * @return The suggested next step.
          */
-        virtual Direction suggestNextStep();
+        virtual Step suggestNextStep();
 
         /**
-         * @brief Moves the algorithm's vacuum cleaner representation in the specified direction.
+         * @brief Moves the algorithm's vacuum cleaner representation one step in the specified direction.
          *
          * This method moves the vacuum cleaner in the specified direction.
          *
-         * @param direction The direction to move in.
+         * @param step The direction to move in (or stay/finish).
          */
-        virtual void move(Direction);
+        virtual void move(Step);
 };
 
 #endif /* VACUUM_NAVIGATIONSYSTEM_H_ */

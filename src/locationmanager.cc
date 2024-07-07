@@ -85,8 +85,14 @@ bool LocationManager::isWall(Direction direction) const
     return wall_map[suggested_position.first][suggested_position.second];
 }
 
-void LocationManager::move(Direction direction)
+void LocationManager::move(Step step)
 {
+    if (Step::STAY == step || Step::FINISH == step) {
+        return;
+    }
+
+    Direction direction = stepToDirection(step);
+
     if (isWall(direction))
     {
         throw std::runtime_error("Cannot move to wall");
