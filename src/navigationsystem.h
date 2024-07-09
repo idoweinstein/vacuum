@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include "abstractalgorithm.h"
 #include "batterymeter.h"
 #include "dirtsensor.h"
 #include "wallssensor.h"
@@ -26,22 +27,45 @@
  *
  * The class provides methods for suggesting the next step and moving the vacuum cleaner in a specific direction.
  */
-class NavigationSystem
+class NavigationSystem : public AbstractAlgorithm
 {
         static constexpr const int kNotFound = -1;     // Constant value representing path not found status.
         inline static const Direction directions[] = { // Directions of movement.
             Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST
         };
 
+        std::size_t steps_taken = 0;                    // Number of steps taken so far.
+
+        bool is_max_steps_inited;                       // Flag indicating if max_steps is initialized.
+        std::size_t max_steps;                          // Maximum number of steps to take.
+
         std::unordered_map<Position, bool> wall_map;    // Internal algorithm's mapping of the house walls.
         std::unordered_set<Position> todo_positions;    // A set of positions to visit (unvisited / dirty positions).
 
         Position current_position;                      // The current position of the vacuum cleaner.
-        BatteryMeter& battery_meter;                    // Reference to the battery meter.
-        DirtSensor& dirt_sensor;                        // Reference to the dirt sensor.
-        WallsSensor& wall_sensor;                        // Reference to the wall sensor.
 
-        const unsigned int full_battery;                // Full battery power (in steps).
+        bool is_battery_meter_inited;                    // Flag indicating if battery_meter is initialized.
+        const BatteryMeter* battery_meter;                    // Reference to the battery meter.
+        unsigned int full_battery;                      // Full battery power (in steps).
+
+        bool is_dirt_sensor_inited;                     // Flag indicating if dirt_sensor is initialized.
+        const DirtSensor* dirt_sensor;                        // Reference to the dirt sensor.
+
+        bool is_walls_sensor_inited;                    // Flag indicating if walls_sensor is initialized.
+        const WallsSensor* walls_sensor;                      // Reference to the walls sensor.
+
+        /**
+         * @brief Checks if the algorithm is fully initialized.
+         *
+         * This method checks if the algorithm is fully initialized by checking if all the required components are initialized.
+         */
+        void checkInited() const 
+        { 
+            if (!(is_max_steps_inited && is_battery_meter_inited 
+                && is_dirt_sensor_inited && is_walls_sensor_inited)) {
+                    throw std::runtime_error("NavigationSystem is not fully initialized.");
+            }
+        }
 
         /**
          * @brief Performs a breadth-first search (BFS) to find a path that satisfies the given criteria.
@@ -149,25 +173,6 @@ class NavigationSystem
          */
         virtual Step decideNextStep(int dirt_level, std::size_t battery_steps, bool battery_is_full);
 
-    public:
-        /**
-         * @brief Constructs a new NavigationSystem object.
-         *
-         * @param battery_meter The battery meter (sensor).
-         * @param dirt_sensor The dirt sensor.
-         * @param wall_sensor The wall sensor.
-         */
-        explicit NavigationSystem(BatteryMeter&, DirtSensor&, WallsSensor&);
-
-        /**
-         * @brief Suggests the next step for the vacuum cleaner.
-         *
-         * This method suggests the next step for the vacuum cleaner based on the sensor information.
-         *
-         * @return The suggested next step.
-         */
-        virtual Step suggestNextStep();
-
         /**
          * @brief Moves the algorithm's vacuum cleaner representation one step in the specified direction.
          *
@@ -176,6 +181,47 @@ class NavigationSystem
          * @param step The direction to move in (or stay/finish).
          */
         virtual void move(Step);
+
+    public:
+        /**
+         * @brief Constructs a new NavigationSystem object.
+         */
+        NavigationSystem();
+
+        /**
+         * @brief Set the maximum number of steps the algorithm can take.
+         *
+         * @param maxSteps The maximum number of steps.
+         */
+        virtual void setMaxSteps(std::size_t);
+
+        /**
+         * @brief Set the walls sensor for the algorithm.
+         *
+         * @param wallsSensor The walls sensor to use.
+         */
+        virtual void setWallsSensor(const WallsSensor&);
+
+        /**
+         * @brief Set the dirt sensor for the algorithm.
+         *
+         * @param dirtSensor The dirt sensor to use.
+         */
+        virtual void setDirtSensor(const DirtSensor&);
+
+        /**
+         * @brief Set the battery meter for the algorithm.
+         *
+         * @param batteryMeter The battery meter to use.
+         */
+        virtual void setBatteryMeter(const BatteryMeter&);
+
+        /**
+         * @brief Get the next step to take.
+         *
+         * @return The next step to take.
+         */
+        virtual Step nextStep();
 };
 
 #endif /* VACUUM_NAVIGATIONSYSTEM_H_ */

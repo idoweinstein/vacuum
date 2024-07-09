@@ -10,10 +10,13 @@ Robot::Robot(unsigned int max_robot_steps,
     : max_robot_steps(max_robot_steps),
       battery_controller(max_battery_steps),
       location_manager(wall_map, dirt_map, docking_station_position),
-      navigation_system(static_cast<BatteryMeter&>(battery_controller),
-                        static_cast<DirtSensor&>(location_manager),
-                        static_cast<WallsSensor&>(location_manager))
-{ }
+      navigation_system()
+{
+    navigation_system.setMaxSteps(max_robot_steps);
+    navigation_system.setWallsSensor(static_cast<WallsSensor&>(location_manager));
+    navigation_system.setDirtSensor(static_cast<DirtSensor&>(location_manager));
+    navigation_system.setBatteryMeter(static_cast<BatteryMeter&>(battery_controller));
+}
 
 void Robot::move(Step next_step)
 {
@@ -45,7 +48,6 @@ void Robot::move(Step next_step)
         battery_controller.discharge();
     }
  
-    navigation_system.move(next_step);
     location_manager.move(next_step);
 
     Position next_position = location_manager.getCurrentPosition();
@@ -60,7 +62,7 @@ void Robot::run()
 
     while (!shouldStopCleaning(total_steps_performed))
     {
-        Step next_step = navigation_system.suggestNextStep();
+        Step next_step = navigation_system.nextStep();
 
         if (Step::FINISH == next_step)
         {

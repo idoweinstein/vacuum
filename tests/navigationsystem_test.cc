@@ -28,6 +28,7 @@ namespace
     {
     protected:
         float battery_level = 100.0;
+        const std::size_t max_steps = 10000;
 
         MockBatteryMeter battery_meter;
         MockDirtSensor dirt_sensor;
@@ -35,8 +36,15 @@ namespace
 
         NavigationSystem navigation_system;
 
-        NavigationSystemTest() : navigation_system(battery_meter, dirt_sensor, wall_sensor)
+        NavigationSystemTest() : navigation_system()
         {
+            navigation_system.setBatteryMeter(battery_meter);
+            navigation_system.setDirtSensor(dirt_sensor);
+            navigation_system.setWallsSensor(wall_sensor);
+            navigation_system.setMaxSteps(max_steps);
+
+            // TODO: test max steps
+
             ON_CALL(battery_meter, getBatteryState())
                 .WillByDefault(testing::Invoke([&]()
                 {
@@ -58,7 +66,7 @@ namespace
 
     TEST_F(NavigationSystemTest, BlockedByWalls)
     {
-        Step suggested_step = navigation_system.suggestNextStep();
+        Step suggested_step = navigation_system.nextStep();
         EXPECT_EQ(Step::FINISH, suggested_step);
     }
 
@@ -66,11 +74,9 @@ namespace
     {
         EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillOnce(testing::Return(1));
-        
         EXPECT_CALL(wall_sensor, isWall(testing::_))
             .WillRepeatedly(testing::Return(false));
-
-        Step suggested_step = navigation_system.suggestNextStep();
+        Step suggested_step = navigation_system.nextStep();
         EXPECT_EQ(Step::STAY, suggested_step);
     }
 
@@ -80,7 +86,6 @@ namespace
 
         bool isAtLimit = false;
         Step suggested_step;
-
         EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillRepeatedly(testing::Invoke([&isAtLimit]()
             {
@@ -99,28 +104,24 @@ namespace
 
         EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::NORTH)))
             .WillRepeatedly(testing::Return(false));
-        
+
         EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::SOUTH)))
             .WillOnce(testing::Return(true))
             .WillRepeatedly(testing::Return(false));
 
         for (int i = 0; i < 2; i++)
         {
-            suggested_step = navigation_system.suggestNextStep();
+            suggested_step = navigation_system.nextStep();
             EXPECT_EQ(Step::NORTH, suggested_step);
-            navigation_system.move(suggested_step);
         }
 
         isAtLimit = true;
-        suggested_step = navigation_system.suggestNextStep();
+        suggested_step = navigation_system.nextStep();
         EXPECT_EQ(Step::STAY, suggested_step);
-        navigation_system.move(suggested_step);
-        
         for (int i = 0; i < 2; i++)
         {
-            suggested_step = navigation_system.suggestNextStep();
+            suggested_step = navigation_system.nextStep();
             EXPECT_EQ(Step::SOUTH, suggested_step);
-            navigation_system.move(suggested_step);
         }
     }
 
@@ -131,7 +132,7 @@ namespace
         EXPECT_CALL(wall_sensor, isWall(testing::_))
             .WillRepeatedly(testing::Return(false));
 
-        Step suggested_step = navigation_system.suggestNextStep();
+        Step suggested_step = navigation_system.nextStep();
         EXPECT_EQ(Step::STAY, suggested_step);
     }
 
@@ -143,15 +144,14 @@ namespace
             .WillRepeatedly(testing::Return(false));
 
         // At first, we will get further because we can
-        Step suggested_step = navigation_system.suggestNextStep();
+        Step suggested_step = navigation_system.nextStep();
         EXPECT_NE(Step::STAY, suggested_step);
-        navigation_system.move(suggested_step);
 
         // Then, even though there will be dirt, we will have to return
         EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillOnce(testing::Return(9));
 
-        suggested_step = navigation_system.suggestNextStep();
+        suggested_step = navigation_system.nextStep();
         EXPECT_NE(Step::STAY, suggested_step);
     }
 }
