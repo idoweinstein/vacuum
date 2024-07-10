@@ -142,7 +142,7 @@ void NavigationSystem::mapWallsAround()
     }
 }
 
-void NavigationSystem::getSensorsInfo(int& dirt_level, std::size_t& max_allowed_steps, bool& is_battery_full)
+void NavigationSystem::getSensorsInfo(int& dirt_level, std::size_t& reamining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full)
 {
     mapWallsAround();
 
@@ -159,12 +159,13 @@ void NavigationSystem::getSensorsInfo(int& dirt_level, std::size_t& max_allowed_
 
     std::size_t remaining_battery_capacity = battery_meter->getBatteryState();
 
-    max_allowed_steps = std::min(remaining_battery_capacity, max_steps - steps_taken);
+    remaining_steps_total = max_steps - steps_taken;
+    reamining_steps_until_charge = std::min(remaining_battery_capacity, remaining_steps_total);
 
     is_battery_full = (remaining_battery_capacity >= full_battery);
 }
 
-Step NavigationSystem::decideNextStep(int dirt_level, std::size_t max_allowed_steps, bool is_battery_full)
+Step NavigationSystem::decideNextStep(int dirt_level, std::size_t remaining_steps_until_charge, std::size_t remaining_steps_total, bool is_battery_full)
 {
     std::deque<Direction> path_to_station;
     bool is_found = getPathToStation(path_to_station);
@@ -173,8 +174,9 @@ Step NavigationSystem::decideNextStep(int dirt_level, std::size_t max_allowed_st
         throw std::runtime_error("Robot cannot find path back to the docking station!");
     }
 
-    // If left no dirty accessible places AND we're in docking station - finish cleaning
-    if (path_to_station.empty() && todo_positions.empty())
+    // If no allowed steps OR
+    // left no dirty accessible places AND we're in docking station - finish cleaning
+    if (remaining_steps_total <= 0 || (path_to_station.empty() && todo_positions.empty()))
     {
         return Step::FINISH;
     }
@@ -186,7 +188,7 @@ Step NavigationSystem::decideNextStep(int dirt_level, std::size_t max_allowed_st
     }
 
     // If there's not enough battery - go to station
-    if (max_allowed_steps < 1 + getPathDistance(path_to_station))
+    if (remaining_steps_until_charge < 1 + getPathDistance(path_to_station))
     {
         return getPathNextStep(path_to_station);
     }
@@ -205,7 +207,7 @@ Step NavigationSystem::decideNextStep(int dirt_level, std::size_t max_allowed_st
 
     /* If going one step further will cause the battery
        to drain before reaching the station - go to station */
-    if (max_allowed_steps < 2 + getPathDistance(path_to_station))
+    if (remaining_steps_until_charge < 2 + getPathDistance(path_to_station))
     {
         return getPathNextStep(path_to_station);
     }
@@ -224,14 +226,15 @@ Step NavigationSystem::decideNextStep(int dirt_level, std::size_t max_allowed_st
 Step NavigationSystem::nextStep()
 {
     int dirt_level = 0;
-    std::size_t max_allowed_steps = 0;
+    std::size_t remaining_steps_until_charge = 0;
+    std::size_t remaining_steps_total = 0;
     bool is_battery_full = false;
 
     checkInited();
 
-    getSensorsInfo(dirt_level, max_allowed_steps, is_battery_full);
+    getSensorsInfo(dirt_level, remaining_steps_until_charge, remaining_steps_total, is_battery_full);
 
-    Step step = decideNextStep(dirt_level, max_allowed_steps, is_battery_full);
+    Step step = decideNextStep(dirt_level, remaining_steps_until_charge, remaining_steps_total, is_battery_full);
 
     move(step);
 
@@ -240,6 +243,12 @@ Step NavigationSystem::nextStep()
 
 void NavigationSystem::move(Step step)
 {
+    if (Step::FINISH != step)
+    {
+        steps_taken++;
+    
+    }
+
     if (Step::STAY != step && Step::FINISH != step)
     {
         Direction direction = stepToDirection(step);

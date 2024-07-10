@@ -58,9 +58,25 @@ namespace
                 .WillByDefault(testing::Return(true));
         }
 
-        void setBatteryLevel(float new_battery_level)
+        void setBatteryLevel(float new_current_battery_level, float new_full_battery_level)
         {
-            battery_level = new_battery_level;
+            ON_CALL(battery_meter, getBatteryState())
+                .WillByDefault(testing::Invoke([&]()
+                {
+                    return new_full_battery_level;
+                }));
+            navigation_system.setBatteryMeter(battery_meter);
+            ON_CALL(battery_meter, getBatteryState())
+                .WillByDefault(testing::Invoke([&]()
+                {
+                    return battery_level--;
+                }));
+            battery_level = new_current_battery_level;
+        }
+
+        void setMaxSteps(std::size_t new_max_steps)
+        {
+            navigation_system.setMaxSteps(new_max_steps);
         }
     };
 
@@ -80,9 +96,9 @@ namespace
         EXPECT_EQ(Step::STAY, suggested_step);
     }
 
-    TEST_F(NavigationSystemTest, ReturnToDockingStation)
+    TEST_F(NavigationSystemTest, ReturnToDockingStationBattery)
     {
-        setBatteryLevel(5.0);
+        setBatteryLevel(5.0, 5.0);
 
         bool isAtLimit = false;
         Step suggested_step;
@@ -125,9 +141,38 @@ namespace
         }
     }
 
+    TEST_F(NavigationSystemTest, ReturnToDockingStationMaxAllowedSteps)
+    {
+        setBatteryLevel(5.0, 5.0);
+        setMaxSteps(2);
+
+        EXPECT_CALL(dirt_sensor, dirtLevel())
+            .WillOnce(testing::Invoke([&]() { return 0; }))
+            .WillRepeatedly(testing::Invoke([&]() { return 1; }));
+
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::EAST)))
+            .WillOnce(testing::Return(true))
+            .WillRepeatedly(testing::Return(false));
+
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::WEST)))
+            .WillRepeatedly(testing::Return(false));
+
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::NORTH)))
+            .WillRepeatedly(testing::Return(true));
+
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::SOUTH)))
+            .WillRepeatedly(testing::Return(true));
+
+        EXPECT_EQ(Step::WEST, navigation_system.nextStep());
+
+        EXPECT_EQ(Step::EAST, navigation_system.nextStep());
+
+        EXPECT_EQ(Step::FINISH, navigation_system.nextStep());
+    }
+
     TEST_F(NavigationSystemTest, TooLowBatteryToGetFurther)
     {
-        setBatteryLevel(1.99); // If we will get further, we won't be able to return
+        setBatteryLevel(1.99, 100); // If we will get further, we won't be able to return
 
         EXPECT_CALL(wall_sensor, isWall(testing::_))
             .WillRepeatedly(testing::Return(false));
@@ -138,7 +183,7 @@ namespace
 
     TEST_F(NavigationSystemTest, TooLowBatteryToStay)
     {
-        setBatteryLevel(2.99); // Whenever we will get further, we won't be able to stay
+        setBatteryLevel(2.99, 2); // Whenever we will get further, we won't be able to stay
 
         EXPECT_CALL(wall_sensor, isWall(testing::_))
             .WillRepeatedly(testing::Return(false));

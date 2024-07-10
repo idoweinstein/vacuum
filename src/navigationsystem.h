@@ -156,10 +156,11 @@ class NavigationSystem : public AbstractAlgorithm
          * This method gets the information from the sensors and updates the provided variables.
          *
          * @param dirt_level The variable to store the dirt level.
-         * @param battery_steps The variable to store the battery level in steps.
+         * @param remaining_steps_until_charge The variable to store the remaining steps until charge.
+         * @param remaining_steps_total The variable to store the remaining total steps.
          * @param battery_is_full The variable to store the battery full status.
          */
-        virtual void getSensorsInfo(int& dirt_level, std::size_t& battery_steps, bool& battery_is_full);
+        virtual void getSensorsInfo(int& dirt_level, std::size_t& remaining_steps_until_charge, std::size_t& remaining_steps_total, bool& battery_is_full);
 
         /**
          * @brief Decides the next step based on the sensor information.
@@ -167,11 +168,12 @@ class NavigationSystem : public AbstractAlgorithm
          * This method decides the next step based on the dirt level, battery level, and battery full status.
          *
          * @param dirt_level The dirt level.
-         * @param battery_steps The battery level in steps.
+         * @param remaining_steps_until_charge The remaining steps until charge.
+         * @param remaining_steps_total The remaining total steps.
          * @param battery_is_full The battery full status.
          * @return The next step to take.
          */
-        virtual Step decideNextStep(int dirt_level, std::size_t battery_steps, bool battery_is_full);
+        virtual Step decideNextStep(int dirt_level, std::size_t remaining_steps_until_charge, std::size_t remaining_steps_total, bool battery_is_full);
 
         /**
          * @brief Moves the algorithm's vacuum cleaner representation one step in the specified direction.
