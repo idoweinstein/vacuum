@@ -25,10 +25,10 @@ class Deserializer
     static constexpr const bool kDefaultIsWall = false;
     static constexpr const unsigned int kDefaultDirtLevel = 0;
 
-    static const std::string kMaxStepsParameter = "MaxSteps";
-    static const std::string kMaxBatteryParameter = "MaxBattery";
-    static const std::string kHouseRowsNumParameter = "Rows";
-    static const std::string kHouseColsNumParameter = "Cols";
+    inline static const std::string kMaxStepsParameter = "MaxSteps";
+    inline static const std::string kMaxBatteryParameter = "MaxBattery";
+    inline static const std::string kHouseRowsNumParameter = "Rows";
+    inline static const std::string kHouseColsNumParameter = "Cols";
 
     struct Parameter
     {
@@ -40,7 +40,7 @@ class Deserializer
     {
         bool is_initialized = false;
         Position position;
-    }
+    };
 
     enum BlockType : char
     {
@@ -67,7 +67,7 @@ class Deserializer
         NUMBER_OF_PARAMETERS
     };
 
-    static void assertParameterSet(Parameter& parameter, const char* parameter_name)
+    static void assertParameterSet(Parameter& parameter, const std::string& parameter_name)
     {
         if (!parameter.is_initialized)
         {
@@ -100,7 +100,7 @@ class Deserializer
 public:
     static unsigned int deserializeMaxSteps(std::istream& input_stream);
 
-    static std::unique_ptr<Battery> SimulatorDeserializer::deserializeBattery(std::istream& input_stream);
+    static std::unique_ptr<Battery> deserializeBattery(std::istream& input_stream);
 
     /**
      * @brief Deserializes the house layout from an input stream.
@@ -111,5 +111,6 @@ public:
      * @param input_stream The input stream to read the house layout from.
      */
     static void deserializeHouse(std::istream& input_stream);
+};
 
 #endif /* VACUUM_DESERIALIZER_H_ */

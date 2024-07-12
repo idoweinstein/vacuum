@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 
+#include "deserializer.h"
 #include "robotlogger.h"
 #include "status.h"
 
@@ -26,7 +27,8 @@ Status Simulator::getMissionStatus(bool is_algorithm_finished, bool is_mission_c
 
 void Simulator::readHouseFile(const std::string& house_file_path)
 {
-    initializeLogFile(house_file_path);
+    RobotLogger& logger = RobotLogger::getInstance();
+    logger.initializeLogFile(house_file_path);
 
     std::ifstream house_file;
     house_file.open(house_file_path);
@@ -36,9 +38,9 @@ void Simulator::readHouseFile(const std::string& house_file_path)
         throw std::runtime_error("Couldn't open input house file!");
     }
 
-    max_simulator_steps = SimulatorDeserializer::deserializeMaxSteps(house_file);
-    battery = SimulatorDeserializer::deserializeBattery(house_file);
-    house = SimulatorDeserializer::deserializeHouse(house_file);
+    max_simulator_steps = Deserializer::deserializeMaxSteps(house_file);
+    battery = Deserializer::deserializeBattery(house_file);
+    house = Deserializer::deserializeHouse(house_file);
 }
 
 void Simulator::move(Step next_step)
@@ -54,37 +56,37 @@ void Simulator::move(Step next_step)
     /* If no battery left - discharge() throws an Empty Battery exception */
     if (Step::STAY == next_step)
     {
-        if (house.isInDockingStation())
+        if (house->isInDockingStation())
         {
-            battery.charge();
+            battery->charge();
         }
 
         else
         {
-            battery.discharge();
-            house.cleanCurrentPosition();
+            battery->discharge();
+            house->cleanCurrentPosition();
         }
     }
 
     else
     {
-        battery.discharge();
+        battery->discharge();
     }
  
-    house.move(next_step);
+    house->move(next_step);
 
-    Position next_position = house.getCurrentPosition();
-    logger.logRobotStep(next_step, next_position);
+    Position next_position = house->getCurrentPosition();
+    logger.logRobotStep(next_step);
 }
 
 void Simulator::setAlgorithm(const AbstractAlgorithm& algorithm)
 {
     algorithm = std::make_unique<AbstractAlgorithm>(algorithm);
 
-    algorithm.setMaxSteps(max_simulator_steps);
-    algorithm.setWallsSensor(house);
-    algorithm.setDirtSensor(house);
-    alogrithm.setBatteryMeter(battery);
+    algorithm->setMaxSteps(max_simulator_steps);
+    algorithm->setWallsSensor(house);
+    algorithm->setDirtSensor(house);
+    algorithm->setBatteryMeter(battery);
 }
 
 void Simulator::run()
@@ -95,7 +97,7 @@ void Simulator::run()
 
     while (!shouldStopCleaning(total_steps_performed))
     {
-        Step next_step = algorithm.nextStep();
+        Step next_step = algorithm->nextStep();
 
         if (Step::FINISH == next_step)
         {
@@ -109,10 +111,10 @@ void Simulator::run()
         total_steps_performed++;
     }
 
-    unsigned int total_dirt_count = house.getTotalDirtCount();
+    unsigned int total_dirt_count = house->getTotalDirtCount();
 
-    bool is_battery_exhausted = battery.getBatteryState() < 1;
-    bool is_mission_complete = (0 == total_dirt_count) && house.isInDockingStation();
+    bool is_battery_exhausted = battery->getBatteryState() < 1;
+    bool is_mission_complete = (0 == total_dirt_count) && house->isInDockingStation();
     Status status = getMissionStatus(is_algorithm_finished, is_mission_complete, is_battery_exhausted);
 
     logger.logCleaningStatistics(total_steps_performed, total_dirt_count, status);

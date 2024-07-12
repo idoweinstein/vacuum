@@ -6,7 +6,7 @@ enum class Status
     FINISHED,
     WORKING,
     DEAD
-}
+};
 
 // Adapting Status enum class to be streamable, for logging purposes:
 namespace std

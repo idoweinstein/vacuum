@@ -8,6 +8,7 @@
 #include "abstractalgorithm.h"
 #include "position.h"
 #include "battery.h"
+#include "status.h"
 #include "house.h"
 #include "step.h"
 
@@ -23,18 +24,12 @@ class Simulator
     std::unique_ptr<House> house;     // The location manager for tracking the robot's position.
     std::unique_ptr<AbstractAlgorithm> algorithm;   // The navigation system for guiding the robot's movement.
 
-    void initializeLogger() const
-    {
-        std::string input_file_name = fs::path(input_file_path).filename().string();
-        logger.addLogFileFromInput(input_file_name);
-    }
-
     /**
      * @brief Checks if the cleaning mission is complete.
      *
      * @return true if the cleaning mission is complete, false otherwise.
      */
-    bool isMissionComplete() const { return (house.isFinished() && house.isInDockingStation()); }
+    bool isMissionComplete() const { return (house->isFinished() && house->isInDockingStation()); }
 
     /**
      * @brief Checks if the simulator should stop cleaning.
@@ -47,7 +42,7 @@ class Simulator
      */
     bool shouldStopCleaning(unsigned int steps_performed) const
     {
-        bool is_max_steps_performed = (steps_performed >= max_robot_steps);
+        bool is_max_steps_performed = (steps_performed >= max_simulator_steps);
         return (isMissionComplete() || is_max_steps_performed);
     }
 
@@ -59,7 +54,7 @@ class Simulator
     void move(Step next_step);
 
 public:
-    void setAlgorithm(const AbstractAlogorithm& algorithm)
+    void setAlgorithm(const AbstractAlgorithm& algorithm);
     
 
     void readHouseFile(const std::string& house_file_path);

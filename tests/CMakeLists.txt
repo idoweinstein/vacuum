@@ -69,10 +69,10 @@ target_link_libraries(battery_test
 )
 
 add_executable(
-    simulatordeserializer_test
-    simulatordeserializer_test.cc
+    deserializer_test
+    deserializer_test.cc
 )
-target_link_libraries(simulatordeserializer_test
+target_link_libraries(deserializer_test
     vacuum_cleaner
     GTest::gtest_main
 )

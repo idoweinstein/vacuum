@@ -3,13 +3,12 @@
 
 #include <vector>
 #include <sstream>
+#include <filesystem>
 
 #include "direction.h"
 #include "position.h"
 #include "logger.h"
 #include "status.h"
-
-
 
 /**
  * @class RobotLogger
@@ -32,7 +31,7 @@ class RobotLogger: public Logger
     inline static constexpr const char kStatusField[] = "\nStatus = ";
     inline static constexpr const char kStepsField[] = "\nSteps:\n";
 
-    static std::ostringstream steps_taken;
+    inline static std::ostringstream steps_taken;
 
     /* Private ctor & dtor - So it WON'T be used externally and WON'T be inherited */
     RobotLogger() {}
@@ -51,7 +50,7 @@ public:
 
     virtual std::string getFileName(const std::string& file_path) const
     {
-        std::string file_name = fs::path(input_file_path).filename().string();
+        std::string file_name = std::filesystem::path(file_path).filename().string();
         return file_name;
     }
 
@@ -71,7 +70,7 @@ public:
      * @param step_moved The step the robot moved.
      * @param current_position The current position of the robot.
      */
-    virtual void logRobotStep(Step step_moved, Position current_position)
+    virtual void logRobotStep(Step step_moved)
     {
         steps_taken << step_moved;
     }
@@ -89,7 +88,7 @@ public:
         stringStream << kStepsNumField << total_steps \
                      << kDirtLeftField << total_dirt \
                      << kStatusField << status \
-                     << kStepsField << steps_taken;
+                     << kStepsField << steps_taken.str();
 
         logMessage(LogLevel::INFO, LogOutput::FILE, stringStream.str());
     }

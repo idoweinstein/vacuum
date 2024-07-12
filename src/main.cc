@@ -5,8 +5,6 @@
 #include "algorithm.h"
 #include "simulator.h"
 
-namespace fs = std::filesystem;
-
 namespace Constants
 {
     constexpr int kNumberOfArguments = 2;
