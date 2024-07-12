@@ -37,7 +37,7 @@ public:
      *
      * @return The current remaining capacity (in steps).
      */
-    virtual std::size_t getBatteryState() const
+    virtual std::size_t getBatteryState() const override
     {
         return floor(current_amount);
     }

@@ -4,6 +4,7 @@
 #include <deque>
 #include <utility>
 #include <functional>
+#include <memory>
 #include <unordered_set>
 #include <unordered_map>
 
@@ -44,15 +45,15 @@ class NavigationSystem : public AbstractAlgorithm
 
         Position current_position;                      // The current position of the vacuum cleaner.
 
-        bool is_battery_meter_inited;                    // Flag indicating if battery_meter is initialized.
-        const BatteryMeter* battery_meter;                    // Reference to the battery meter.
+        bool is_battery_meter_inited;                   // Flag indicating if battery_meter is initialized.
+        const BatteryMeter* battery_meter;              // Reference to the battery meter.
         unsigned int full_battery;                      // Full battery power (in steps).
 
         bool is_dirt_sensor_inited;                     // Flag indicating if dirt_sensor is initialized.
-        const DirtSensor* dirt_sensor;                        // Reference to the dirt sensor.
+        const DirtSensor* dirt_sensor;                  // Reference to the dirt sensor.
 
         bool is_walls_sensor_inited;                    // Flag indicating if walls_sensor is initialized.
-        const WallsSensor* walls_sensor;                      // Reference to the walls sensor.
+        const WallsSensor* walls_sensor;                // Reference to the walls sensor.
 
         /**
          * @brief Checks if the algorithm is fully initialized.
@@ -195,35 +196,35 @@ class NavigationSystem : public AbstractAlgorithm
          *
          * @param maxSteps The maximum number of steps.
          */
-        virtual void setMaxSteps(std::size_t);
+        virtual void setMaxSteps(std::size_t) override;
 
         /**
          * @brief Set the walls sensor for the algorithm.
          *
          * @param wallsSensor The walls sensor to use.
          */
-        virtual void setWallsSensor(const WallsSensor&);
+        virtual void setWallsSensor(const WallsSensor&) override;
 
         /**
          * @brief Set the dirt sensor for the algorithm.
          *
          * @param dirtSensor The dirt sensor to use.
          */
-        virtual void setDirtSensor(const DirtSensor&);
+        virtual void setDirtSensor(const DirtSensor&) override;
 
         /**
          * @brief Set the battery meter for the algorithm.
          *
          * @param batteryMeter The battery meter to use.
          */
-        virtual void setBatteryMeter(const BatteryMeter&);
+        virtual void setBatteryMeter(const BatteryMeter&) override;
 
         /**
          * @brief Get the next step to take.
          *
          * @return The next step to take.
          */
-        virtual Step nextStep();
+        virtual Step nextStep() override;
 };
 
 #endif /* VACUUM_NAVIGATIONSYSTEM_H_ */

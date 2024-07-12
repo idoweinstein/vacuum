@@ -2,6 +2,7 @@
 #define VACUUM_ROBOTDESERIALIZER_H_
 
 #include <map>
+#include <memory>
 #include <vector>
 #include <string>
 #include <istream>

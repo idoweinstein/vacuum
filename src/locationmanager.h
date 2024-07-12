@@ -87,7 +87,7 @@ public:
      *
      * @return The dirt level at the current position.
      */
-    virtual int dirtLevel() const;
+    virtual int dirtLevel() const override;
 
     /**
      * @brief Gets the current position of the vacuum cleaner.
@@ -102,7 +102,7 @@ public:
      * @param direction The direction to check.
      * @return true if there is a wall, false otherwise.
      */
-    virtual bool isWall(Direction) const;
+    virtual bool isWall(Direction) const override;
 };
 
 #endif /* VACUUM_LOCATIONMANAGER_H_ */
