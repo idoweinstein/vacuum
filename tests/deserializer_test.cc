@@ -4,8 +4,8 @@
 #include <sstream>
 #include <streambuf>
 
-#include "robotdeserializer.h"
-#include "robot.h"
+#include "deserializer.h"
+#include "simulator.h"
 
 namespace
 {
@@ -45,86 +45,86 @@ namespace
         EXPECT_STREQ(warning_message, output.c_str());
     }
 
-    TEST(RobotDeserializerTest, InvalidInputFile)
+    TEST(DeserializerTest, InvalidInputFile)
     {
         CoutCapture cout_capture;
 
         EXPECT_THROW({
-            RobotDeserializer::deserializeFromFile("no_way_this_file_exists.txt");
+            Deserializer::deserializeFromFile("no_way_this_file_exists.txt");
         }, std::runtime_error);
 
         assertNoWarnings(cout_capture);
     }
 
-    TEST(RobotDeserializerTest, DeserializerSanity)
+    TEST(DeserializerTest, DeserializerSanity)
     {
         CoutCapture cout_capture;
 
-        (void)RobotDeserializer::deserializeFromFile("inputs/input_sanity.txt");
+        (void)Deserializer::deserializeFromFile("inputs/input_sanity.txt");
 
         assertNoWarnings(cout_capture);
     }
 
-    TEST(RobotDeserializerTest, InvalidParameters)
+    TEST(DeserializerTest, InvalidParameters)
     {
         CoutCapture cout_capture;
 
-        (void)RobotDeserializer::deserializeFromFile("inputs/input_invparam.txt");
+        (void)Deserializer::deserializeFromFile("inputs/input_invparam.txt");
 
         assertWarning(cout_capture, "[WARNING] Invalid configuration parameter was given - Ignoring this line...\n");
     }
 
-    TEST(RobotDeserializerTest, MissingParameters)
+    TEST(DeserializerTest, MissingParameters)
     {
         CoutCapture cout_capture;
 
-        (void)RobotDeserializer::deserializeFromFile("inputs/input_missparam.txt");
+        (void)Deserializer::deserializeFromFile("inputs/input_missparam.txt");
 
         assertWarning(cout_capture, "[WARNING] Missing parameters - Initializing missing ones with default value of '0'...\n");
     }
 
-    TEST(RobotDeserializerTest, MissingParameterValue)
+    TEST(DeserializerTest, MissingParameterValue)
     {
         CoutCapture cout_capture;
 
-        (void)RobotDeserializer::deserializeFromFile("inputs/input_missvalue.txt");
+        (void)Deserializer::deserializeFromFile("inputs/input_missvalue.txt");
 
         assertWarning(cout_capture, "[WARNING] Parameter with non-integer value given - Setting default value of '0'...\n");
     }
 
-    TEST(RobotDeserializerTest, MissingHouse)
+    TEST(DeserializerTest, MissingHouse)
     {
         CoutCapture cout_capture;
 
-        (void)RobotDeserializer::deserializeFromFile("inputs/input_nohouse.txt");
+        (void)Deserializer::deserializeFromFile("inputs/input_nohouse.txt");
 
         assertWarning(cout_capture, "[WARNING] House grid is not given - Using an empty house...\n"
                                     "[WARNING] Docking Station was not given - Adding a Docking Station at the end of first row...\n");
     }
 
-    TEST(RobotDeserializerTest, MissingDockingStation)
+    TEST(DeserializerTest, MissingDockingStation)
     {
         CoutCapture cout_capture;
 
-        (void)RobotDeserializer::deserializeFromFile("inputs/input_nodock.txt");
+        (void)Deserializer::deserializeFromFile("inputs/input_nodock.txt");
 
         assertWarning(cout_capture, "[WARNING] Docking Station was not given - Adding a Docking Station at the end of first row...\n");
     }
 
-    TEST(RobotDeserializerTest, DuplicateDockingStation)
+    TEST(DeserializerTest, DuplicateDockingStation)
     {
         CoutCapture cout_capture;
 
-        (void)RobotDeserializer::deserializeFromFile("inputs/input_dupdock.txt");
+        (void)Deserializer::deserializeFromFile("inputs/input_dupdock.txt");
 
         assertWarning(cout_capture, "[WARNING] Docking Station defined more than once - Using first definition...\n");
     }
 
-    TEST(RobotDeserializerTest, InvalidHouseCharacter)
+    TEST(DeserializerTest, InvalidHouseCharacter)
     {
         CoutCapture cout_capture;
 
-        (void)RobotDeserializer::deserializeFromFile("inputs/input_invchar.txt");
+        (void)Deserializer::deserializeFromFile("inputs/input_invchar.txt");
 
         assertWarning(cout_capture, "[WARNING] Invalid character given in House - Parsing it as a wall...\n");
     }

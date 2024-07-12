@@ -1,8 +1,8 @@
 #include <string>
 #include <exception>
 
-#include "navigationsystem.h"
 #include "robotlogger.h"
+#include "algorithm.h"
 #include "simulator.h"
 
 namespace fs = std::filesystem;
@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
         try
         {
             Simulator simulator;
-            NavigationSystem algorithm;
+            Algorithm algorithm;
 
             simulator.readHouseFile(input_file_path);
             simulator.setAlgorithm(algorithm);

@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "navigationsystem.h"
+#include "algorithm.h"
 #include "direction.h"
 
 namespace
@@ -42,7 +42,7 @@ namespace
         MOCK_METHOD(std::size_t, getBatteryState, (), (const, override));
     };
 
-    class NavigationSystemTest : public testing::Test
+    class AlgorithmTest: public testing::Test
     {
     protected:
         float battery_level = 100.0;
@@ -52,14 +52,14 @@ namespace
         MockDirtSensor dirt_sensor;
         MockWallsSensor wall_sensor;
 
-        NavigationSystem navigation_system;
+        Algorithm algorithm;
 
-        NavigationSystemTest() : battery_meter(), dirt_sensor(), wall_sensor(), navigation_system()
+        AlgorithmTest() : battery_meter(), dirt_sensor(), wall_sensor(), algorithm()
         {
-            navigation_system.setBatteryMeter(battery_meter);
-            navigation_system.setDirtSensor(dirt_sensor);
-            navigation_system.setWallsSensor(wall_sensor);
-            navigation_system.setMaxSteps(max_steps);
+            algorithm.setBatteryMeter(battery_meter);
+            algorithm.setDirtSensor(dirt_sensor);
+            algorithm.setWallsSensor(wall_sensor);
+            algorithm.setMaxSteps(max_steps);
 
             ON_CALL(battery_meter, getBatteryState())
                 .WillByDefault(testing::Invoke([&]()
@@ -81,7 +81,7 @@ namespace
                 {
                     return new_full_battery_level;
                 }));
-            navigation_system.setBatteryMeter(battery_meter);
+            algorithm.setBatteryMeter(battery_meter);
             ON_CALL(battery_meter, getBatteryState())
                 .WillByDefault(testing::Invoke([&]()
                 {
@@ -92,27 +92,27 @@ namespace
 
         void setMaxSteps(std::size_t new_max_steps)
         {
-            navigation_system.setMaxSteps(new_max_steps);
+            algorithm.setMaxSteps(new_max_steps);
         }
     };
 
-    TEST_F(NavigationSystemTest, BlockedByWalls)
+    TEST_F(AlgorithmTest, BlockedByWalls)
     {
-        Step suggested_step = navigation_system.nextStep();
+        Step suggested_step = algorithm.nextStep();
         EXPECT_EQ(Step::FINISH, suggested_step);
     }
 
-    TEST_F(NavigationSystemTest, dirtyDockingStation)
+    TEST_F(AlgorithmTest, dirtyDockingStation)
     {
         EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillOnce(testing::Return(1));
         EXPECT_CALL(wall_sensor, isWall(testing::_))
             .WillRepeatedly(testing::Return(false));
-        Step suggested_step = navigation_system.nextStep();
+        Step suggested_step = algorithm.nextStep();
         EXPECT_EQ(Step::STAY, suggested_step);
     }
 
-    TEST_F(NavigationSystemTest, ReturnToDockingStationBattery)
+    TEST_F(AlgorithmTest, ReturnToDockingStationBattery)
     {
         setBatteryLevel(5.0, 5.0);
 
@@ -143,21 +143,21 @@ namespace
 
         for (int i = 0; i < 2; i++)
         {
-            suggested_step = navigation_system.nextStep();
+            suggested_step = algorithm.nextStep();
             EXPECT_EQ(Step::NORTH, suggested_step);
         }
 
         isAtLimit = true;
-        suggested_step = navigation_system.nextStep();
+        suggested_step = algorithm.nextStep();
         EXPECT_EQ(Step::STAY, suggested_step);
         for (int i = 0; i < 2; i++)
         {
-            suggested_step = navigation_system.nextStep();
+            suggested_step = algorithm.nextStep();
             EXPECT_EQ(Step::SOUTH, suggested_step);
         }
     }
 
-    TEST_F(NavigationSystemTest, ReturnToDockingStationMaxAllowedSteps)
+    TEST_F(AlgorithmTest, ReturnToDockingStationMaxAllowedSteps)
     {
         setBatteryLevel(5.0, 5.0);
         setMaxSteps(2);
@@ -179,25 +179,25 @@ namespace
         EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::SOUTH)))
             .WillRepeatedly(testing::Return(true));
 
-        EXPECT_EQ(Step::WEST, navigation_system.nextStep());
+        EXPECT_EQ(Step::WEST, algorithm.nextStep());
 
-        EXPECT_EQ(Step::EAST, navigation_system.nextStep());
+        EXPECT_EQ(Step::EAST, algorithm.nextStep());
 
-        EXPECT_EQ(Step::FINISH, navigation_system.nextStep());
+        EXPECT_EQ(Step::FINISH, algorithm.nextStep());
     }
 
-    TEST_F(NavigationSystemTest, TooLowBatteryToGetFurther)
+    TEST_F(AlgorithmTest, TooLowBatteryToGetFurther)
     {
         setBatteryLevel(1.99, 100); // If we will get further, we won't be able to return
 
         EXPECT_CALL(wall_sensor, isWall(testing::_))
             .WillRepeatedly(testing::Return(false));
 
-        Step suggested_step = navigation_system.nextStep();
+        Step suggested_step = algorithm.nextStep();
         EXPECT_EQ(Step::STAY, suggested_step);
     }
 
-    TEST_F(NavigationSystemTest, TooLowBatteryToStay)
+    TEST_F(AlgorithmTest, TooLowBatteryToStay)
     {
         setBatteryLevel(2.99, 2); // Whenever we will get further, we won't be able to stay
 
@@ -205,14 +205,14 @@ namespace
             .WillRepeatedly(testing::Return(false));
 
         // At first, we will get further because we can
-        Step suggested_step = navigation_system.nextStep();
+        Step suggested_step = algorithm.nextStep();
         EXPECT_NE(Step::STAY, suggested_step);
 
         // Then, even though there will be dirt, we will have to return
         EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillOnce(testing::Return(9));
 
-        suggested_step = navigation_system.nextStep();
+        suggested_step = algorithm.nextStep();
         EXPECT_NE(Step::STAY, suggested_step);
     }
 }

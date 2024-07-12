@@ -1,5 +1,5 @@
-#ifndef VACUUM_NAVIGATIONSYSTEM_H_
-#define VACUUM_NAVIGATIONSYSTEM_H_
+#ifndef VACUUM_ALGORITHM_H_
+#define VACUUM_ALGORITHM_H_
 
 #include <deque>
 #include <utility>
@@ -19,17 +19,17 @@
 #include "step.h"
 
 /**
- * @class NavigationSystem
- * @brief The NavigationSystem class represents the navigation algorithm of a vacuum cleaner.
+ * @class Algorithm 
+ * @brief The Algorithm class represents an implementation of the navigation algorithm of a vacuum cleaner.
  *
- * The NavigationSystem class is responsible for managing the movement and navigation of the vacuum cleaner.
+ * The Algorithm class is responsible for managing the movement and navigation of the vacuum cleaner.
  * It uses various sensors such as BatteryMeter, DirtSensor, and WallsSensor to make decisions about the next step.
  * The navigation system keeps track of the current position, wall map, and a set of positions to visit.
  * It uses a path tree to store the paths explored during navigation.
  *
  * The class provides methods for suggesting the next step and moving the vacuum cleaner in a specific direction.
  */
-class NavigationSystem : public AbstractAlgorithm
+class Algorithm : public AbstractAlgorithm
 {
         static constexpr const int kNotFound = -1;     // Constant value representing path not found status.
         inline static const Direction directions[] = { // Directions of movement.
@@ -58,13 +58,13 @@ class NavigationSystem : public AbstractAlgorithm
          *
          * This method checks if the algorithm is fully initialized by checking if all the required components are initialized.
          */
-        void checkInited() const 
+        void assertAllInitialied() const 
         { 
             if (!(max_steps.has_value()
                   && battery_meter.has_value() 
                   && dirt_sensor.has_value()
                   && walls_sensor.has_value())) {
-                throw std::runtime_error("NavigationSystem is not fully initialized.");
+                throw std::runtime_error("Algorithm is not fully initialized.");
             }
         }
 
@@ -187,9 +187,9 @@ class NavigationSystem : public AbstractAlgorithm
 
     public:
         /**
-         * @brief Constructs a new NavigationSystem object.
+         * @brief Constructs a new Algorithm object.
          */
-        NavigationSystem();
+        Algorithm();
 
         /**
          * @brief Set the maximum number of steps the algorithm can take.
@@ -227,4 +227,4 @@ class NavigationSystem : public AbstractAlgorithm
         virtual Step nextStep() override;
 };
 
-#endif /* VACUUM_NAVIGATIONSYSTEM_H_ */
+#endif /* VACUUM_ALGORITHM_H_ */

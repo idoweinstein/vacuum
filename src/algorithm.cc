@@ -1,4 +1,4 @@
-#include "navigationsystem.h"
+#include "algorithm.h"
 
 #include <map>
 #include <cmath>
@@ -7,31 +7,35 @@
 #include <stdexcept>
 #include <unordered_set>
 
-NavigationSystem::NavigationSystem()
+Algorithm::Algorithm()
     : current_position(0, 0)
 {
     // Update current location (docking station) as non-wall
     wall_map[current_position] = false;
 }
 
-void NavigationSystem::setMaxSteps(std::size_t max_steps) {
+void Algorithm::setMaxSteps(std::size_t max_steps)
+{
     this->max_steps = max_steps;
 }
 
-void NavigationSystem::setBatteryMeter(const BatteryMeter& battery_meter) {
+void Algorithm::setBatteryMeter(const BatteryMeter& battery_meter)
+{
     this->battery_meter = &battery_meter;
     full_battery = battery_meter.getBatteryState();
 }
 
-void NavigationSystem::setDirtSensor(const DirtSensor& dirt_sensor) {
+void Algorithm::setDirtSensor(const DirtSensor& dirt_sensor)
+{
     this->dirt_sensor = &dirt_sensor;
 }
 
-void NavigationSystem::setWallsSensor(const WallsSensor& walls_sensor) {
+void Algorithm::setWallsSensor(const WallsSensor& walls_sensor)
+{
     this->walls_sensor = &walls_sensor;
 }
 
-int NavigationSystem::performBFS(PathTree& path_tree, unsigned int start_index, const std::function<bool(Position)>& found_criteria) const
+int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const std::function<bool(Position)>& found_criteria) const
 {
     std::unordered_set<Position> visited_positions;
     std::queue<unsigned int> index_queue;
@@ -77,7 +81,7 @@ int NavigationSystem::performBFS(PathTree& path_tree, unsigned int start_index, 
     return kNotFound;
 }
 
-bool NavigationSystem::getPathByFoundCriteria(std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria)
+bool Algorithm::getPathByFoundCriteria(std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria)
 {
     PathTree path_tree;
 
@@ -99,7 +103,7 @@ bool NavigationSystem::getPathByFoundCriteria(std::deque<Direction>& path, const
     return true;
 }
 
-bool NavigationSystem::getPathToNearestTodo(std::deque<Direction>& path)
+bool Algorithm::getPathToNearestTodo(std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(path,
                                   [&](Position position)
@@ -107,7 +111,7 @@ bool NavigationSystem::getPathToNearestTodo(std::deque<Direction>& path)
     );
 }
 
-bool NavigationSystem::getPathToStation(std::deque<Direction>& path)
+bool Algorithm::getPathToStation(std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(path,
                                   [&](Position position)
@@ -115,7 +119,7 @@ bool NavigationSystem::getPathToStation(std::deque<Direction>& path)
     );
 }
 
-void NavigationSystem::mapWallsAround()
+void Algorithm::mapWallsAround()
 {
     for (Direction direction : directions)
     {
@@ -138,7 +142,7 @@ void NavigationSystem::mapWallsAround()
     }
 }
 
-void NavigationSystem::getSensorsInfo(int& dirt_level, std::size_t& reamining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full)
+void Algorithm::getSensorsInfo(int& dirt_level, std::size_t& reamining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full)
 {
     mapWallsAround();
 
@@ -161,13 +165,13 @@ void NavigationSystem::getSensorsInfo(int& dirt_level, std::size_t& reamining_st
     is_battery_full = (remaining_battery_capacity >= full_battery);
 }
 
-Step NavigationSystem::decideNextStep(int dirt_level, std::size_t remaining_steps_until_charge, std::size_t remaining_steps_total, bool is_battery_full)
+Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until_charge, std::size_t remaining_steps_total, bool is_battery_full)
 {
     std::deque<Direction> path_to_station;
     bool is_found = getPathToStation(path_to_station);
     if (!is_found)
     {
-        throw std::runtime_error("Robot cannot find path back to the docking station!");
+        throw std::runtime_error("Simulator cannot find path back to the docking station!");
     }
 
     // If no allowed steps OR
@@ -219,14 +223,14 @@ Step NavigationSystem::decideNextStep(int dirt_level, std::size_t remaining_step
     return getPathNextStep(path_to_nearest_todo);
 }
 
-Step NavigationSystem::nextStep()
+Step Algorithm::nextStep()
 {
     int dirt_level = 0;
     std::size_t remaining_steps_until_charge = 0;
     std::size_t remaining_steps_total = 0;
     bool is_battery_full = false;
 
-    checkInited();
+    assertAllInitialied();
 
     getSensorsInfo(dirt_level, remaining_steps_until_charge, remaining_steps_total, is_battery_full);
 
@@ -237,7 +241,7 @@ Step NavigationSystem::nextStep()
     return step;
 }
 
-void NavigationSystem::move(Step step)
+void Algorithm::move(Step step)
 {
     if (Step::FINISH == step)
     {

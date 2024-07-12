@@ -1,18 +1,16 @@
 #include "gtest/gtest.h"
 
-#include <filesystem>
 #include <sstream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <ios>
 
-#include "robot.h"
 #include "direction.h"
+#include "simulator.h"
+#include "algorithm.h"
 #include "robotlogger.h"
-#include "robotdeserializer.h"
-
-namespace fs = std::filesystem;
+#include "deserializer.h"
 
 namespace
 {
@@ -142,7 +140,7 @@ namespace
         return true;
     }
 
-    class RobotTest : public testing::Test
+    class SimulatorTest : public testing::Test
     {
         OutputDeserializer deserializer;
     protected:
@@ -151,11 +149,15 @@ namespace
         {
             RobotLogger& logger = RobotLogger::getInstance();
 
-            std::unique_ptr<Robot> robot = RobotDeserializer::deserializeFromFile(input_file);
-            std::string input_file_name = fs::path(input_file).filename().string();
-            logger.addLogFileFromInput(input_file_name);
+            logger.initializeLogFile(input_file);
 
-            robot->run();
+            Simulator simulator;
+            Algorithm algorithm;
+
+            simulator.readHouseFile(input_file);
+            simulator.setAlgorithm(algorithm);
+            simulator.run();
+
             EXPECT_TRUE(deserializer.deserializeOutputFile(output_file));
         }
 

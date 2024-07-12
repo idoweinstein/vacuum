@@ -1,10 +1,10 @@
-#include "locationmanager.h"
+#include "house.h"
 
 #include <stdexcept>
 
 #include "robotlogger.h"
 
-void LocationManager::setTotalDirtCount()
+void House::setTotalDirtCount()
 {
     for (std::vector<unsigned int>& row : dirt_map)
     {
@@ -15,20 +15,20 @@ void LocationManager::setTotalDirtCount()
     }
 }
 
-LocationManager::LocationManager(const std::vector<std::vector<bool>>& wall_map,
-                                 const std::vector<std::vector<unsigned int>>& dirt_map,
-                                 const Position& docking_station_position)
-                                 : wall_map(wall_map),
-                                   dirt_map(dirt_map),
-                                   current_position(docking_station_position),
-                                   docking_station_position(docking_station_position),
-                                   total_dirt_count(0)
+House::House(const std::vector<std::vector<bool>>& wall_map,
+             const std::vector<std::vector<unsigned int>>& dirt_map,
+             const Position& docking_station_position)
+            : wall_map(wall_map),
+              dirt_map(dirt_map),
+              current_position(docking_station_position),
+              docking_station_position(docking_station_position),
+              total_dirt_count(0)
 {
     setTotalDirtCount();
 }
 
 template <typename T>
-bool LocationManager::isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position)
+bool House::isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position)
 {
     if (position.first < 0 || position.second < 0)
     {
@@ -48,10 +48,10 @@ bool LocationManager::isOutOfBounds(const std::vector<std::vector<T>>& map, cons
     return false;
 }
 
-template bool LocationManager::isOutOfBounds<bool>(const std::vector<std::vector<bool>>& wall_map, const Position& position);
-template bool LocationManager::isOutOfBounds<unsigned int>(const std::vector<std::vector<unsigned int>>& dirt_map, const Position& position);
+template bool House::isOutOfBounds<bool>(const std::vector<std::vector<bool>>& wall_map, const Position& position);
+template bool House::isOutOfBounds<unsigned int>(const std::vector<std::vector<unsigned int>>& dirt_map, const Position& position);
 
-int LocationManager::dirtLevel() const
+int House::dirtLevel() const
 {
     if (isOutOfBounds(dirt_map, current_position))
     {
@@ -61,7 +61,7 @@ int LocationManager::dirtLevel() const
     return dirt_map[current_position.first][current_position.second];
 }
 
-void LocationManager::cleanCurrentPosition()
+void House::cleanCurrentPosition()
 {
     if (dirtLevel() == 0) // dirtLevel() calls isOutOfBounds() already
     {
@@ -72,7 +72,7 @@ void LocationManager::cleanCurrentPosition()
     total_dirt_count -= kDirtCleaningUnit;
 }
 
-bool LocationManager::isWall(Direction direction) const
+bool House::isWall(Direction direction) const
 {
     Position suggested_position = Position::computePosition(current_position, direction);
 
@@ -85,7 +85,7 @@ bool LocationManager::isWall(Direction direction) const
     return wall_map[suggested_position.first][suggested_position.second];
 }
 
-void LocationManager::move(Step step)
+void House::move(Step step)
 {
     if (Step::STAY == step || Step::FINISH == step) {
         return;

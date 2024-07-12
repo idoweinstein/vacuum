@@ -6,11 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED YES)
 # Create a library to from source files
 add_library(vacuum_cleaner
     logger.cc
-    robot.cc
+    simulator.cc
     pathtree.cc
-    locationmanager.cc
-    navigationsystem.cc
-    robotdeserializer.cc
+    house.cc
+    algorithm.cc
+    deserializer.cc
 )
 
 target_include_directories(vacuum_cleaner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

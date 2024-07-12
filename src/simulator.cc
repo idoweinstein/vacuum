@@ -18,8 +18,8 @@ void Simulator::readHouseFile(const std::string& house_file_path)
     }
 
     max_simulator_steps = SimulatorDeserializer::deserializeMaxSteps(house_file);
-    battery_controller = SimulatorDeserializer::deserializeBattery(house_file);
-    location_manager = SimulatorDeserializer::deserializeHouse(house_file);
+    battery = SimulatorDeserializer::deserializeBattery(house_file);
+    house = SimulatorDeserializer::deserializeHouse(house_file);
 }
 
 void Simulator::move(Step next_step)
@@ -35,26 +35,26 @@ void Simulator::move(Step next_step)
     /* If no battery left - discharge() throws an Empty Battery exception */
     if (Step::STAY == next_step)
     {
-        if (location_manager.isInDockingStation())
+        if (house.isInDockingStation())
         {
-            battery_controller.charge();
+            battery.charge();
         }
 
         else
         {
-            battery_controller.discharge();
-            location_manager.cleanCurrentPosition();
+            battery.discharge();
+            house.cleanCurrentPosition();
         }
     }
 
     else
     {
-        battery_controller.discharge();
+        battery.discharge();
     }
  
-    location_manager.move(next_step);
+    house.move(next_step);
 
-    Position next_position = location_manager.getCurrentPosition();
+    Position next_position = house.getCurrentPosition();
     logger.logRobotStep(next_step, next_position);
 }
 
@@ -63,9 +63,9 @@ void Simulator::setAlgorithm(const AbstractAlgorithm& algorithm)
     algorithm = std::make_unique<AbstractAlgorithm>(algorithm);
 
     algorithm.setMaxSteps(max_simulator_steps);
-    algorithm.setWallsSensor(location_manager);
-    algorithm.setDirtSensor(location_manager);
-    alogrithm.setBatteryMeter(battery_controller);
+    algorithm.setWallsSensor(house);
+    algorithm.setDirtSensor(house);
+    alogrithm.setBatteryMeter(battery);
 }
 
 void Simulator::run()
@@ -76,7 +76,7 @@ void Simulator::run()
 
     while (!shouldStopCleaning(total_steps_performed))
     {
-        Step next_step = navigation_system.nextStep();
+        Step next_step = algorithm.nextStep();
 
         if (Step::FINISH == next_step)
         {
@@ -94,9 +94,9 @@ void Simulator::run()
         logger.logRobotFinish();
     }
 
-    unsigned int total_dirt_count = location_manager.getTotalDirtCount();
-    bool is_battery_exhausted = battery_controller.getBatteryState() < 1;
-    bool is_mission_complete = (0 == total_dirt_count) && location_manager.isInDockingStation();
+    unsigned int total_dirt_count = house.getTotalDirtCount();
+    bool is_battery_exhausted = battery.getBatteryState() < 1;
+    bool is_mission_complete = (0 == total_dirt_count) && house.isInDockingStation();
 
     logger.logCleaningStatistics(total_steps_performed,
                                  total_dirt_count,

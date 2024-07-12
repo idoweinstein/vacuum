@@ -6,9 +6,9 @@
 #include <memory>
 
 #include "abstractalgorithm.h"
-#include "batterycontroller.h"
-#include "locationmanager.h"
 #include "position.h"
+#include "battery.h"
+#include "house.h"
 #include "step.h"
 
 /**
@@ -19,8 +19,8 @@
 class Simulator
 {
     unsigned int max_simulator_steps = 0; // The maximum number of steps the simulator can perform.
-    std::unique_ptr<BatteryController> battery_controller; // The battery controller for managing the robot's battery.
-    std::unique_ptr<LocationManager> location_manager;     // The location manager for tracking the robot's position.
+    std::unique_ptr<Battery> battery; // The battery controller for managing the robot's battery.
+    std::unique_ptr<House> house;     // The location manager for tracking the robot's position.
     std::unique_ptr<AbstractAlgorithm> algorithm;   // The navigation system for guiding the robot's movement.
 
     void initializeLogger() const
@@ -34,7 +34,7 @@ class Simulator
      *
      * @return true if the cleaning mission is complete, false otherwise.
      */
-    bool isMissionComplete() const { return (location_manager.isFinished() && location_manager.isInDockingStation()); }
+    bool isMissionComplete() const { return (house.isFinished() && house.isInDockingStation()); }
 
     /**
      * @brief Checks if the simulator should stop cleaning.

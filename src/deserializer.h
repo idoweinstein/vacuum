@@ -1,5 +1,5 @@
-#ifndef VACUUM_SIMULATORDESERIALIZER_H_
-#define VACUUM_SIMULATORDESERIALIZER_H_
+#ifndef VACUUM_DESERIALIZER_H_
+#define VACUUM_DESERIALIZER_H_
 
 #include <map>
 #include <memory>
@@ -8,16 +8,16 @@
 #include <istream>
 #include <stdexcept>
 
+#include "simulator.h"
 #include "position.h"
-#include "robot.h"
 
 /**
- * @brief The RobotDeserializer class is responsible for deserializing robot data from a file.
+ * @brief The Deserializer class is responsible for deserializing simulator data from a file.
  *
  * It provides methods to deserialize parameters and the house layout from an input stream.
- * The deserialized data is used to create a Robot object.
+ * The deserialized data is used to create a Simulator object.
  */
-class SimulatorDeserializer
+class Deserializer
 {
     static constexpr const char kParameterDelimiter = '=';
     static constexpr const int kDefaultParameterValue = 0;
@@ -100,7 +100,7 @@ class SimulatorDeserializer
 public:
     static unsigned int deserializeMaxSteps(std::istream& input_stream);
 
-    static std::unique_ptr<BatteryController> SimulatorDeserializer::deserializeBattery(std::istream& input_stream);
+    static std::unique_ptr<Battery> SimulatorDeserializer::deserializeBattery(std::istream& input_stream);
 
     /**
      * @brief Deserializes the house layout from an input stream.
@@ -112,4 +112,4 @@ public:
      */
     static void deserializeHouse(std::istream& input_stream);
 
-#endif /* VACUUM_SIMULATORDESERIALIZER_H_ */
+#endif /* VACUUM_DESERIALIZER_H_ */

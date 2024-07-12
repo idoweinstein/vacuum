@@ -1,4 +1,4 @@
-#include "simulatordeserializer.h"
+#include "deserializer.h"
 
 #include <string>
 #include <vector>
@@ -7,12 +7,12 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "batterycontroller.h"
-#include "locationmanager.h"
 #include "robotlogger.h"
 #include "position.h"
+#include "battery.h"
+#include "house.h"
 
-unsigned int SimulatorDeserializer::valueToUnsignedInt(const std::string& value)
+unsigned int Deserializer::valueToUnsignedInt(const std::string& value)
 {
     RobotLogger& logger = RobotLogger::getInstance();
     std::istringstream value_stream(value);
@@ -34,7 +34,7 @@ unsigned int SimulatorDeserializer::valueToUnsignedInt(const std::string& value)
     return (unsigned int)numerical_value;
 }
 
-unsigned int SimulatorDeserializer::deserializeParameter(std::istream& input_stream, const std::string& parameter_name)
+unsigned int Deserializer::deserializeParameter(std::istream& input_stream, const std::string& parameter_name)
 {
     Parameter parameter;
 
@@ -60,7 +60,7 @@ unsigned int SimulatorDeserializer::deserializeParameter(std::istream& input_str
     return paramter.value;
 }
 
-unsigned int SimulatorDeserializer::deserializeMaxSteps(std::istream& input_stream)
+unsigned int Deserializer::deserializeMaxSteps(std::istream& input_stream)
 {
     // Unused input line - used for internal naming
     std::string house_internal_name;
@@ -71,14 +71,14 @@ unsigned int SimulatorDeserializer::deserializeMaxSteps(std::istream& input_stre
     return max_simulator_steps;
 }
 
-std::unique_ptr<BatteryController> SimulatorDeserializer::deserializeBattery(std::istream& input_stream)
+std::unique_ptr<Battery> Deserializer::deserializeBattery(std::istream& input_stream)
 {
     unsigned int full_battery_capacity = deserializeParameter(input_stream, kMaxBatteryParameter);
 
-    return make_unique<BatteryController>(full_battery_capacity);
+    return make_unique<Battery>(full_battery_capacity);
 }
 
-std::unique_ptr<LocationManager> SimulatorDeserializer::deserializeHouse(std::istream& input_stream)
+std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream)
 {
     std::vector<std::vector<bool>> wall_map;
     std::vector<std::vector<unsigned int>> dirt_map;
@@ -147,5 +147,5 @@ std::unique_ptr<LocationManager> SimulatorDeserializer::deserializeHouse(std::is
         throw std::runtime_error("Missing docking station position in house file!");
     }
 
-    return std::make_unique<LocationManager>(wall_map, dirt_map, docking_station_position);
+    return std::make_unique<House>(wall_map, dirt_map, docking_station_position);
 }

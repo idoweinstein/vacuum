@@ -50,48 +50,48 @@ target_link_libraries(pathtree_test
 )
 
 add_executable(
-    locationmanager_test
-    locationmanager_test.cc
+    house_test
+    house_test.cc
 )
-target_link_libraries(locationmanager_test
+target_link_libraries(house_test
     vacuum_cleaner
     GTest::gtest_main
 )
 
 add_executable(
-    batterycontroller_test
-    batterycontroller_test.cc
+    battery_test
+    battery_test.cc
 )
 
-target_link_libraries(batterycontroller_test
+target_link_libraries(battery_test
     vacuum_cleaner
     GTest::gtest_main
 )
 
 add_executable(
-    robotdeserializer_test
-    robotdeserializer_test.cc
+    simulatordeserializer_test
+    simulatordeserializer_test.cc
 )
-target_link_libraries(robotdeserializer_test
+target_link_libraries(simulatordeserializer_test
     vacuum_cleaner
     GTest::gtest_main
 )
 
 add_executable(
-    navigationsystem_test
-    navigationsystem_test.cc
+    algorithm_test
+    algorithm_test.cc
 )
-target_link_libraries(navigationsystem_test
+target_link_libraries(algorithm_test
     vacuum_cleaner
     GTest::gtest_main
     GTest::gmock_main
 )
 
 add_executable(
-    robot_test
-    robot_test.cc
+    simulator_test
+    simulator_test.cc
 )
-target_link_libraries(robot_test
+target_link_libraries(simulator_test
     vacuum_cleaner
     GTest::gtest_main
 )
@@ -103,26 +103,26 @@ add_test(
 )
 
 add_test(
-    NAME locationmanager_test
-    COMMAND locationmanager_test
+    NAME house_test
+    COMMAND house_test
 )
 
 add_test(
-    NAME batterycontroller_test
-    COMMAND batterycontroller_test
+    NAME battery_test
+    COMMAND battery_test
 )
 
 add_test(
-    NAME robotdeserializer_test
-    COMMAND robotdeserializer_test
+    NAME deserializer_test
+    COMMAND deserializer_test
 )
 
 add_test(
-    NAME navigationsystem_test
-    COMMAND navigationsystem_test
+    NAME algorithm_test
+    COMMAND algorithm_test
 )
 
 add_test(
-    NAME robot_test
-    COMMAND robot_test
+    NAME simulator_test
+    COMMAND simulator_test
 )
