@@ -4,6 +4,7 @@
 #include <deque>
 #include <utility>
 #include <functional>
+#include <optional>
 #include <memory>
 #include <unordered_set>
 #include <unordered_map>
@@ -37,23 +38,20 @@ class NavigationSystem : public AbstractAlgorithm
 
         std::size_t steps_taken = 0;                    // Number of steps taken so far.
 
-        bool is_max_steps_inited;                       // Flag indicating if max_steps is initialized.
-        std::size_t max_steps;                          // Maximum number of steps to take.
+        std::optional<std::size_t> max_steps;           // Maximum number of steps to take.
 
         std::unordered_map<Position, bool> wall_map;    // Internal algorithm's mapping of the house walls.
         std::unordered_set<Position> todo_positions;    // A set of positions to visit (unvisited / dirty positions).
 
         Position current_position;                      // The current position of the vacuum cleaner.
 
-        bool is_battery_meter_inited;                   // Flag indicating if battery_meter is initialized.
-        const BatteryMeter* battery_meter;              // Reference to the battery meter.
+        std::optional<const BatteryMeter*>
+            battery_meter;                              // Reference to the battery meter.
         unsigned int full_battery;                      // Full battery power (in steps).
 
-        bool is_dirt_sensor_inited;                     // Flag indicating if dirt_sensor is initialized.
-        const DirtSensor* dirt_sensor;                  // Reference to the dirt sensor.
+        std::optional<const DirtSensor*> dirt_sensor;   // Reference to the dirt sensor.
 
-        bool is_walls_sensor_inited;                    // Flag indicating if walls_sensor is initialized.
-        const WallsSensor* walls_sensor;                // Reference to the walls sensor.
+        std::optional<const WallsSensor*> walls_sensor; // Reference to the walls sensor.
 
         /**
          * @brief Checks if the algorithm is fully initialized.
@@ -62,9 +60,11 @@ class NavigationSystem : public AbstractAlgorithm
          */
         void checkInited() const 
         { 
-            if (!(is_max_steps_inited && is_battery_meter_inited 
-                && is_dirt_sensor_inited && is_walls_sensor_inited)) {
-                    throw std::runtime_error("NavigationSystem is not fully initialized.");
+            if (!(max_steps.has_value()
+                  && battery_meter.has_value() 
+                  && dirt_sensor.has_value()
+                  && walls_sensor.has_value())) {
+                throw std::runtime_error("NavigationSystem is not fully initialized.");
             }
         }
 
@@ -110,7 +110,7 @@ class NavigationSystem : public AbstractAlgorithm
             {
                 return Step::STAY;
             }
-            return directionToStep(path.front());
+            return static_cast<Step>(path.front());
         }
 
         /**

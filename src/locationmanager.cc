@@ -91,7 +91,7 @@ void LocationManager::move(Step step)
         return;
     }
 
-    Direction direction = stepToDirection(step);
+    Direction direction = static_cast<Direction>(step);
 
     if (isWall(direction))
     {

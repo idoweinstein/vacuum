@@ -64,7 +64,7 @@ public:
     /**
      * @brief Moves the vacuum cleaner one step in the specified direction.
      *
-     * @param direction The direction to move (or stay/finish).
+     * @param step The step to move (a Direction or Stay / Finish).
      */
     virtual void move(Step);
 
