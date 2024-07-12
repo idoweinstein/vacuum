@@ -9,18 +9,36 @@ namespace
     class MockWallsSensor : public WallsSensor
     {
     public:
+        MockWallsSensor() = default;
+        // delete copy constructor
+        MockWallsSensor(const MockWallsSensor&) = delete;
+        // delete assignment operator
+        MockWallsSensor& operator=(const MockWallsSensor&) = delete;
+
         MOCK_METHOD(bool, isWall, (Direction direction), (const, override));
     };
 
     class MockDirtSensor : public DirtSensor
     {
     public:
+        MockDirtSensor() = default;
+        // delete copy constructor
+        MockDirtSensor(const MockDirtSensor&) = delete;
+        // delete assignment operator
+        MockDirtSensor& operator=(const MockDirtSensor&) = delete;
+
         MOCK_METHOD(int, dirtLevel, (), (const, override));
     };
 
     class MockBatteryMeter : public BatteryMeter
     {
     public:
+        MockBatteryMeter() = default;
+        // delete copy constructor
+        MockBatteryMeter(const MockBatteryMeter&) = delete;
+        // delete assignment operator
+        MockBatteryMeter& operator=(const MockBatteryMeter&) = delete;
+
         MOCK_METHOD(std::size_t, getBatteryState, (), (const, override));
     };
 
@@ -36,14 +54,12 @@ namespace
 
         NavigationSystem navigation_system;
 
-        NavigationSystemTest() : navigation_system()
+        NavigationSystemTest() : battery_meter(), dirt_sensor(), wall_sensor(), navigation_system()
         {
             navigation_system.setBatteryMeter(battery_meter);
             navigation_system.setDirtSensor(dirt_sensor);
             navigation_system.setWallsSensor(wall_sensor);
             navigation_system.setMaxSteps(max_steps);
-
-            // TODO: test max steps
 
             ON_CALL(battery_meter, getBatteryState())
                 .WillByDefault(testing::Invoke([&]()

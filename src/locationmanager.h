@@ -35,6 +35,10 @@ class LocationManager : public WallsSensor, public DirtSensor
     template <typename T> static bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position);
 
 public:
+    // Delete copy constructor and assignment operator
+    LocationManager(const LocationManager&) = delete;
+    LocationManager& operator=(const LocationManager&) = delete;
+
     /**
      * @brief Constructs a new LocationManager object.
      *

@@ -104,7 +104,7 @@ public:
      * @param input_file_name The name of the input file.
      * @return The deserialized Robot object.
      */
-    static Robot deserializeFromFile(const std::string& input_file_name);
+    static std::unique_ptr<Robot> deserializeFromFile(const std::string& input_file_name);
 };
 
 #endif /* VACUUM_DESERIALIZER_H_ */

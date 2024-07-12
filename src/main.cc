@@ -27,9 +27,9 @@ int main(int argc, char* argv[])
             std::string input_file_name = fs::path(input_file_path).filename().string();
             logger.addLogFileFromInput(input_file_name);
 
-            Robot robot = RobotDeserializer::deserializeFromFile(input_file_path);
+            std::unique_ptr<Robot> robot = RobotDeserializer::deserializeFromFile(input_file_path);
 
-            robot.run();
+            robot->run();
         }
         catch(const std::exception& exception)
         {

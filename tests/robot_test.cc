@@ -151,11 +151,11 @@ namespace
         {
             RobotLogger& logger = RobotLogger::getInstance();
 
-            Robot robot = RobotDeserializer::deserializeFromFile(input_file);
+            std::unique_ptr<Robot> robot = RobotDeserializer::deserializeFromFile(input_file);
             std::string input_file_name = fs::path(input_file).filename().string();
             logger.addLogFileFromInput(input_file_name);
 
-            robot.run();
+            robot->run();
             EXPECT_TRUE(deserializer.deserializeOutputFile(output_file));
         }
 
