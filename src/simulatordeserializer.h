@@ -1,11 +1,12 @@
-#ifndef VACUUM_ROBOTDESERIALIZER_H_
-#define VACUUM_ROBOTDESERIALIZER_H_
+#ifndef VACUUM_SIMULATORDESERIALIZER_H_
+#define VACUUM_SIMULATORDESERIALIZER_H_
 
 #include <map>
 #include <memory>
 #include <vector>
 #include <string>
 #include <istream>
+#include <stdexcept>
 
 #include "position.h"
 #include "robot.h"
@@ -16,10 +17,18 @@
  * It provides methods to deserialize parameters and the house layout from an input stream.
  * The deserialized data is used to create a Robot object.
  */
-class RobotDeserializer
+class SimulatorDeserializer
 {
-    static constexpr const char kParameterDelimiter = ' ';
+    static constexpr const char kParameterDelimiter = '=';
     static constexpr const int kDefaultParameterValue = 0;
+
+    static constexpr const bool kDefaultIsWall = false;
+    static constexpr const unsigned int kDefaultDirtLevel = 0;
+
+    static const std::string kMaxStepsParameter = "MaxSteps";
+    static const std::string kMaxBatteryParameter = "MaxBattery";
+    static const std::string kHouseRowsNumParameter = "Rows";
+    static const std::string kHouseColsNumParameter = "Cols";
 
     struct Parameter
     {
@@ -27,11 +36,16 @@ class RobotDeserializer
         unsigned int value = kDefaultParameterValue;
     };
 
+    struct DockingStation
+    {
+        bool is_initialized = false;
+        Position position;
+    }
+
     enum BlockType : char
     {
-        DOCKING_STATION = '@',
-        WALL = 'X',
-        CLEAN = ' ',
+        DOCKING_STATION = 'D',
+        WALL = 'W',
         DIRT_LEVEL_0 = '0',
         DIRT_LEVEL_1 = '1',
         DIRT_LEVEL_2 = '2',
@@ -46,13 +60,21 @@ class RobotDeserializer
 
     enum ParameterType
     {
-        END_OF_PARAMETER = -1,
         MAX_BATTERY_STEPS = 0,
-        MAX_ROBOT_STEPS,
+        MAX_SIMULATOR_STEPS,
+        HOUSE_ROWS_NUM,
+        HOUSE_COLS_NUM,
         NUMBER_OF_PARAMETERS
     };
 
-    static const std::map<std::string, ParameterType> parameter_map;
+    static void assertParameterSet(Parameter& parameter, const char* parameter_name)
+    {
+        if (!parameter.is_initialized)
+        {
+            const std::string error_message = "Missing " + parameter_name + " parameter in house file!";
+            throw std::runtime_error(error_message);
+        }
+    }
 
     /**
      * @brief Converts a string value to an unsigned integer.
@@ -65,16 +87,6 @@ class RobotDeserializer
     static unsigned int valueToUnsignedInt(const std::string& value);
 
     /**
-     * @brief Stores a parameter value in the parameters array.
-     *
-     * @param parameters The array to store the parameter value.
-     * @param key The parameter key.
-     * @param value The parameter value.
-     * @return true if ParameterType::END_OF_PARAMETER ('house') was reached in input stream, false otherwise.
-     */
-    static bool storeParameter(Parameter* parameters, const std::string& key, const std::string& value);
-
-    /**
      * @brief Deserializes the parameters from an input stream.
      *
      * In case a required parameter is missing, a default value of '0' will be used instead.
@@ -83,7 +95,12 @@ class RobotDeserializer
      * @param input_stream The input stream to read the parameters from.
      * @return true if house grid was given in input stream, false otherwise.
      */
-    static bool deserializeParameters(Parameter* parameters, std::istream& input_stream);
+    static bool deserializeParameter(std::istream& input_stream, const std::string& parameter_name);
+
+public:
+    static unsigned int deserializeMaxSteps(std::istream& input_stream);
+
+    static std::unique_ptr<BatteryController> SimulatorDeserializer::deserializeBattery(std::istream& input_stream);
 
     /**
      * @brief Deserializes the house layout from an input stream.
@@ -93,19 +110,6 @@ class RobotDeserializer
      * @param docking_station_position The position of the docking station.
      * @param input_stream The input stream to read the house layout from.
      */
-    static void deserializeHouse(std::vector<std::vector<bool>>& wall_map,
-                                 std::vector<std::vector<unsigned int>>& dirt_map,
-                                 Position& docking_station_position,
-                                 std::istream& input_stream);
+    static void deserializeHouse(std::istream& input_stream);
 
-public:
-    /**
-     * @brief Deserializes robot data from a file.
-     *
-     * @param input_file_name The name of the input file.
-     * @return The deserialized Robot object.
-     */
-    static std::unique_ptr<Robot> deserializeFromFile(const std::string& input_file_name);
-};
-
-#endif /* VACUUM_DESERIALIZER_H_ */
+#endif /* VACUUM_SIMULATORDESERIALIZER_H_ */

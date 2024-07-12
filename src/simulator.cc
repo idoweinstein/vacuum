@@ -1,24 +1,28 @@
-#include "robot.h"
+#include "simulator.h"
+
+#include <string>
+#include <fstream>
 
 #include "robotlogger.h"
 
-Robot::Robot(unsigned int max_robot_steps,
-             unsigned int max_battery_steps,
-             std::vector<std::vector<bool>>& wall_map,
-             std::vector<std::vector<unsigned int>>& dirt_map,
-             Position& docking_station_position)
-    : max_robot_steps(max_robot_steps),
-      battery_controller(max_battery_steps),
-      location_manager(wall_map, dirt_map, docking_station_position),
-      navigation_system()
+void Simulator::readHouseFile(const std::string& house_file_path)
 {
-    navigation_system.setMaxSteps(max_robot_steps);
-    navigation_system.setWallsSensor(static_cast<WallsSensor&>(location_manager));
-    navigation_system.setDirtSensor(static_cast<DirtSensor&>(location_manager));
-    navigation_system.setBatteryMeter(static_cast<BatteryMeter&>(battery_controller));
+    initializeLogFile(house_file_path);
+
+    std::ifstream house_file;
+    house_file.open(house_file_path);
+
+    if (!house_file.is_open())
+    {
+        throw std::runtime_error("Couldn't open input house file!");
+    }
+
+    max_simulator_steps = SimulatorDeserializer::deserializeMaxSteps(house_file);
+    battery_controller = SimulatorDeserializer::deserializeBattery(house_file);
+    location_manager = SimulatorDeserializer::deserializeHouse(house_file);
 }
 
-void Robot::move(Step next_step)
+void Simulator::move(Step next_step)
 {
     RobotLogger& logger = RobotLogger::getInstance();
 
@@ -54,7 +58,17 @@ void Robot::move(Step next_step)
     logger.logRobotStep(next_step, next_position);
 }
 
-void Robot::run()
+void Simulator::setAlgorithm(const AbstractAlgorithm& algorithm)
+{
+    algorithm = std::make_unique<AbstractAlgorithm>(algorithm);
+
+    algorithm.setMaxSteps(max_simulator_steps);
+    algorithm.setWallsSensor(location_manager);
+    algorithm.setDirtSensor(location_manager);
+    alogrithm.setBatteryMeter(battery_controller);
+}
+
+void Simulator::run()
 {
     RobotLogger& logger = RobotLogger::getInstance();
     unsigned int total_steps_performed = 0;

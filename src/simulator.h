@@ -1,0 +1,76 @@
+#ifndef VACUUM_SIMULATOR_H_
+#define VACUUM_SIMULATOR_H_
+
+#include <vector>
+#include <string>
+#include <memory>
+
+#include "abstractalgorithm.h"
+#include "batterycontroller.h"
+#include "locationmanager.h"
+#include "position.h"
+#include "step.h"
+
+/**
+ * @brief The Simulator class represents a vacuum cleaning robot.
+ *
+ * This class encapsulates the main functionality of a vacuum cleaning robot.
+ */
+class Simulator
+{
+    unsigned int max_simulator_steps = 0; // The maximum number of steps the simulator can perform.
+    std::unique_ptr<BatteryController> battery_controller; // The battery controller for managing the robot's battery.
+    std::unique_ptr<LocationManager> location_manager;     // The location manager for tracking the robot's position.
+    std::unique_ptr<AbstractAlgorithm> algorithm;   // The navigation system for guiding the robot's movement.
+
+    void initializeLogger() const
+    {
+        std::string input_file_name = fs::path(input_file_path).filename().string();
+        logger.addLogFileFromInput(input_file_name);
+    }
+
+    /**
+     * @brief Checks if the cleaning mission is complete.
+     *
+     * @return true if the cleaning mission is complete, false otherwise.
+     */
+    bool isMissionComplete() const { return (location_manager.isFinished() && location_manager.isInDockingStation()); }
+
+    /**
+     * @brief Checks if the simulator should stop cleaning.
+     *
+     * The simulator should stop cleaning if the cleaning mission is complete or
+     * if the maximum number of steps has been performed.
+     *
+     * @param steps_performed The number of steps performed by the simulator.
+     * @return true if the simulator should stop cleaning, false otherwise.
+     */
+    bool shouldStopCleaning(unsigned int steps_performed) const
+    {
+        bool is_max_steps_performed = (steps_performed >= max_robot_steps);
+        return (isMissionComplete() || is_max_steps_performed);
+    }
+
+     /**
+     * @brief Moves the simulator to the next position.
+     */
+    void move(Step next_step);
+
+public:
+    void setAlgorithm(const AbstractAlogorithm& algorithm)
+    
+
+    void readHouseFile(const std::string& house_file_path);
+
+    /**
+     * @brief Runs the cleaning operation.
+     *
+     * This method starts the cleaning operation and continues until one of the following conditions satisfied:
+     * 1. cleaning mission is complete.
+     * 2. the maximum number of steps is reached.
+     * 3. vacuum cleaner mapped and cleaned all accessible positions.
+     */
+    void run();
+};
+
+#endif /* VACUUM_SIMULATOR_H_ */

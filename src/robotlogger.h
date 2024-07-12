@@ -49,13 +49,20 @@ public:
         return robot_logger_instance;
     }
 
-    /**
-     * @brief Add a log file based on the input file name.
-     * @param input_file_name The name of the input file.
-     */
-    virtual void addLogFileFromInput(const std::string& input_file_name)
+    virtual std::string getFileName(const std::string& file_path) const
     {
-        const std::string log_file_name = kOutputFilePrefix + input_file_name;
+        std::string file_name = fs::path(input_file_path).filename().string();
+        return file_name;
+    }
+
+    /**
+     * @brief Add a log file based on the input house file path.
+     * @param house_file_path The path of the input house file.
+     */
+    virtual void initializeLogFile(const std::string& house_file_path)
+    {
+        std::string house_file_name = getFileName(house_file_path);
+        const std::string log_file_name = kOutputFilePrefix + house_file_name;
         addLogFile(log_file_name);
     }
 
