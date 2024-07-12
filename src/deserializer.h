@@ -93,9 +93,9 @@ class Deserializer
      *
      * @param parameters The array to store the deserialized parameters.
      * @param input_stream The input stream to read the parameters from.
-     * @return true if house grid was given in input stream, false otherwise.
+     * @return The value of the deserialized parameter.
      */
-    static bool deserializeParameter(std::istream& input_stream, const std::string& parameter_name);
+    static unsigned int deserializeParameter(std::istream& input_stream, const std::string& parameter_name);
 
 public:
     static unsigned int deserializeMaxSteps(std::istream& input_stream);
@@ -110,7 +110,7 @@ public:
      * @param docking_station_position The position of the docking station.
      * @param input_stream The input stream to read the house layout from.
      */
-    static void deserializeHouse(std::istream& input_stream);
+    static std::unique_ptr<House> deserializeHouse(std::istream& input_stream);
 };
 
 #endif /* VACUUM_DESERIALIZER_H_ */

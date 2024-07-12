@@ -19,11 +19,29 @@
  */
 class Simulator
 {
+    class NullAlgorithm : public AbstractAlgorithm
+    {
+    private:
+        // Make the constructor private to prevent instantiation.
+        NullAlgorithm() = default;
+    public:
+        void setMaxSteps(std::size_t) override {}
+        void setWallsSensor(const WallsSensor&) override {}
+        void setDirtSensor(const DirtSensor&) override {}
+        void setBatteryMeter(const BatteryMeter&) override {}
+        Step nextStep() override { return Step::FINISH; }
+        // Implement singleton pattern for NullAlgorithm
+        static NullAlgorithm& getInstance() {
+            static NullAlgorithm instance;
+            return instance;
+        }
+    };
+
     unsigned int max_simulator_steps = 0; // The maximum number of steps the simulator can perform.
     std::unique_ptr<Battery> battery; // The battery controller for managing the robot's battery.
     std::unique_ptr<House> house;     // The location manager for tracking the robot's position.
-    std::unique_ptr<AbstractAlgorithm> algorithm;   // The navigation system for guiding the robot's movement.
-
+    // The navigation system for guiding the robot's movement.
+    std::shared_ptr<AbstractAlgorithm> algorithm = std::shared_ptr<NullAlgorithm>(&NullAlgorithm::getInstance());
     /**
      * @brief Checks if the cleaning mission is complete.
      *
@@ -54,8 +72,7 @@ class Simulator
     void move(Step next_step);
 
 public:
-    void setAlgorithm(const AbstractAlgorithm& algorithm);
-    
+    void setAlgorithm(AbstractAlgorithm& algorithm);
 
     void readHouseFile(const std::string& house_file_path);
 

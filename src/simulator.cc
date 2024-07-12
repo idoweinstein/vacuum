@@ -75,18 +75,22 @@ void Simulator::move(Step next_step)
  
     house->move(next_step);
 
-    Position next_position = house->getCurrentPosition();
     logger.logRobotStep(next_step);
 }
 
-void Simulator::setAlgorithm(const AbstractAlgorithm& algorithm)
+void Simulator::setAlgorithm(AbstractAlgorithm& alg)
 {
-    algorithm = std::make_unique<AbstractAlgorithm>(algorithm);
+    /*
+     * Use a shared pointer.
+     * Pass a custom no-op deleter to prevent calling the actual destructor since
+     * we don't own this object.
+     */
+    algorithm = std::shared_ptr<AbstractAlgorithm>(&alg, [](const AbstractAlgorithm*){});
 
     algorithm->setMaxSteps(max_simulator_steps);
-    algorithm->setWallsSensor(house);
-    algorithm->setDirtSensor(house);
-    algorithm->setBatteryMeter(battery);
+    algorithm->setWallsSensor(*house);
+    algorithm->setDirtSensor(*house);
+    algorithm->setBatteryMeter(*battery);
 }
 
 void Simulator::run()
