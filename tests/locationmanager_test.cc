@@ -108,7 +108,7 @@ namespace
 
             if (Step::FINISH != next_step && Step::STAY != next_step)
             {
-                is_wall = location_manager->isWall(stepToDirection(next_step));
+                is_wall = location_manager->isWall(static_cast<Direction>(next_step));
             }
 
             if(is_wall)

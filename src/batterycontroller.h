@@ -39,7 +39,7 @@ public:
      */
     virtual std::size_t getBatteryState() const override
     {
-        return floor(current_amount);
+        return std::floor(current_amount);
     }
 
     /**

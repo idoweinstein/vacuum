@@ -16,23 +16,19 @@ NavigationSystem::NavigationSystem()
 
 void NavigationSystem::setMaxSteps(std::size_t max_steps) {
     this->max_steps = max_steps;
-    is_max_steps_inited = true;
 }
 
 void NavigationSystem::setBatteryMeter(const BatteryMeter& battery_meter) {
     this->battery_meter = &battery_meter;
     full_battery = battery_meter.getBatteryState();
-    is_battery_meter_inited = true;
 }
 
 void NavigationSystem::setDirtSensor(const DirtSensor& dirt_sensor) {
     this->dirt_sensor = &dirt_sensor;
-    is_dirt_sensor_inited = true;
 }
 
 void NavigationSystem::setWallsSensor(const WallsSensor& walls_sensor) {
     this->walls_sensor = &walls_sensor;
-    is_walls_sensor_inited = true;
 }
 
 int NavigationSystem::performBFS(PathTree& path_tree, unsigned int start_index, const std::function<bool(Position)>& found_criteria) const
@@ -130,7 +126,7 @@ void NavigationSystem::mapWallsAround()
             continue;
         }
 
-        bool is_wall = walls_sensor->isWall(direction);
+        bool is_wall = walls_sensor.value()->isWall(direction);
         wall_map[position] = is_wall;
 
         if (is_wall)
@@ -146,7 +142,7 @@ void NavigationSystem::getSensorsInfo(int& dirt_level, std::size_t& reamining_st
 {
     mapWallsAround();
 
-    dirt_level = dirt_sensor->dirtLevel();
+    dirt_level = dirt_sensor.value()->dirtLevel();
     if (dirt_level > 0)
     {
         todo_positions.insert(current_position);
@@ -157,9 +153,9 @@ void NavigationSystem::getSensorsInfo(int& dirt_level, std::size_t& reamining_st
     /* Update current location (docking station) as non-wall */
     wall_map[current_position] = false;
 
-    std::size_t remaining_battery_capacity = battery_meter->getBatteryState();
+    std::size_t remaining_battery_capacity = battery_meter.value()->getBatteryState();
 
-    remaining_steps_total = max_steps - steps_taken;
+    remaining_steps_total = max_steps.value() - steps_taken;
     reamining_steps_until_charge = std::min(remaining_battery_capacity, remaining_steps_total);
 
     is_battery_full = (remaining_battery_capacity >= full_battery);
@@ -251,7 +247,7 @@ void NavigationSystem::move(Step step)
 
     if (Step::STAY != step && Step::FINISH != step)
     {
-        Direction direction = stepToDirection(step);
+        Direction direction = static_cast<Direction>(step);
         current_position = Position::computePosition(current_position, direction);
     }
 }
