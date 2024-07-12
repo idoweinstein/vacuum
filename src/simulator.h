@@ -51,6 +51,8 @@ class Simulator
         return (isMissionComplete() || is_max_steps_performed);
     }
 
+    Status getMissionStatus(bool is_algorithm_finished, bool is_mission_complete, bool is_battery_exhausted);
+
      /**
      * @brief Moves the simulator to the next position.
      */

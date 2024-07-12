@@ -4,6 +4,25 @@
 #include <fstream>
 
 #include "robotlogger.h"
+#include "status.h"
+
+Status Simulator::getMissionStatus(bool is_algorithm_finished, bool is_mission_complete, bool is_battery_exhausted)
+{
+    if (is_mission_complete || is_algorithm_finished)
+    {
+        return Status::FINISHED;
+    }
+
+    else if (is_battery_exhausted)
+    {
+        return Status::DEAD;
+    }
+
+    else
+    {
+        return Status::WORKING;
+    }
+}
 
 void Simulator::readHouseFile(const std::string& house_file_path)
 {
@@ -82,6 +101,7 @@ void Simulator::run()
         {
             // In case Robot mapped all accessible positions and have nothing left to clean
             is_algorithm_finished = true;
+            logger.logRobotStep(next_step);
             break;
         }
 
@@ -89,17 +109,11 @@ void Simulator::run()
         total_steps_performed++;
     }
 
-    if (isMissionComplete() || is_algorithm_finished)
-    {
-        logger.logRobotFinish();
-    }
-
     unsigned int total_dirt_count = house.getTotalDirtCount();
+
     bool is_battery_exhausted = battery.getBatteryState() < 1;
     bool is_mission_complete = (0 == total_dirt_count) && house.isInDockingStation();
+    Status status = getMissionStatus(is_algorithm_finished, is_mission_complete, is_battery_exhausted);
 
-    logger.logCleaningStatistics(total_steps_performed,
-                                 total_dirt_count,
-                                 is_battery_exhausted,
-                                 is_mission_complete);
+    logger.logCleaningStatistics(total_steps_performed, total_dirt_count, status);
 }

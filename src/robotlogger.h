@@ -1,11 +1,15 @@
 #ifndef VACUUM_ROBOTLOGGER_H_
 #define VACUUM_ROBOTLOGGER_H_
 
+#include <vector>
 #include <sstream>
 
 #include "direction.h"
 #include "position.h"
 #include "logger.h"
+#include "status.h"
+
+
 
 /**
  * @class RobotLogger
@@ -22,17 +26,13 @@
 class RobotLogger: public Logger
 {
     // Constant RobotLogger strings
-    inline static constexpr const char kRobotFinishPrompt[] = "[FINISH] Robot finished cleaning all accessible places!";
     inline static constexpr const char kOutputFilePrefix[] = "output_";
-    inline static constexpr const char kStepFormat1[] = "[STEP] Robot took step to ";
-    inline static constexpr const char kStepFormat2[] = " - New Position (";
-    inline static constexpr const char kStepFormat3[] = ",";
-    inline static constexpr const char kStepFormat4[] = ")";
-    inline static constexpr const char kStatisticsFormat1[] = "### Program Terminated ###";
-    inline static constexpr const char kStatisticsFormat2[] = "\nTotal Steps Taken: ";
-    inline static constexpr const char kStatisticsFormat3[] = "\nTotal Dirt Left: ";
-    inline static constexpr const char kStatisticsFormat4[] = "\nIs Battery Exhausted: ";
-    inline static constexpr const char kStatisticsFormat5[] = "\nMission Succeeded: ";
+    inline static constexpr const char kStepsNumField[] = "NumSteps = ";
+    inline static constexpr const char kDirtLeftField[] = "\nDirtLeft = ";
+    inline static constexpr const char kStatusField[] = "\nStatus = ";
+    inline static constexpr const char kStepsField[] = "\nSteps:\n";
+
+    static std::ostringstream steps_taken;
 
     /* Private ctor & dtor - So it WON'T be used externally and WON'T be inherited */
     RobotLogger() {}
@@ -67,25 +67,13 @@ public:
     }
 
     /**
-     * @brief Log a robot reaching its finish condition.
-     */
-    virtual void logRobotFinish()
-    {
-        logMessage(LogLevel::INFO, LogOutput::FILE, kRobotFinishPrompt);
-    }
-
-    /**
      * @brief Log a robot step.
      * @param step_moved The step the robot moved.
      * @param current_position The current position of the robot.
      */
     virtual void logRobotStep(Step step_moved, Position current_position)
     {
-        std::ostringstream stringStream;
-        stringStream << kStepFormat1 << step_moved << kStepFormat2 \
-            << current_position.first << kStepFormat3 << current_position.second << kStepFormat4;
-
-        logMessage(LogLevel::INFO, LogOutput::FILE, stringStream.str());
+        steps_taken << step_moved;
     }
 
     /**
@@ -95,12 +83,13 @@ public:
      * @param is_battery_exhausted Whether the vacuum cleaner's battery is exhausted.
      * @param is_mission_complete Whether the cleaning mission is complete.
      */
-    virtual void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, bool is_battery_exhausted, bool is_mission_complete)
+    virtual void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, Status status)
     {
         std::ostringstream stringStream;
-        stringStream << kStatisticsFormat1 << kStatisticsFormat2 << total_steps << kStatisticsFormat3 \
-            << total_dirt << kStatisticsFormat4 << std::boolalpha << is_battery_exhausted << kStatisticsFormat5 \
-            << is_mission_complete;
+        stringStream << kStepsNumField << total_steps \
+                     << kDirtLeftField << total_dirt \
+                     << kStatusField << status \
+                     << kStepsField << steps_taken;
 
         logMessage(LogLevel::INFO, LogOutput::FILE, stringStream.str());
     }

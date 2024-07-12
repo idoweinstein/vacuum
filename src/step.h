@@ -22,27 +22,27 @@ namespace std
         switch (step)
         {
             case Step::NORTH:
-                string_step = "North";
+                string_step = "N";
                 break;
 
             case Step::EAST:
-                string_step = "East";
+                string_step = "E";
                 break;
 
             case Step::SOUTH:
-                string_step = "South";
+                string_step = "S";
                 break;
 
             case Step::WEST:
-                string_step = "West";
+                string_step = "W";
                 break;
 
             case Step::STAY:
-                string_step = "Stay";
+                string_step = "s";
                 break;
 
             case Step::FINISH:
-                string_step = "Finish";
+                string_step = "F";
                 break;
         }
 
