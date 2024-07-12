@@ -51,7 +51,7 @@ bool LocationManager::isOutOfBounds(const std::vector<std::vector<T>>& map, cons
 template bool LocationManager::isOutOfBounds<bool>(const std::vector<std::vector<bool>>& wall_map, const Position& position);
 template bool LocationManager::isOutOfBounds<unsigned int>(const std::vector<std::vector<unsigned int>>& dirt_map, const Position& position);
 
-unsigned int LocationManager::getDirtLevel() const
+int LocationManager::dirtLevel() const
 {
     if (isOutOfBounds(dirt_map, current_position))
     {
@@ -63,7 +63,7 @@ unsigned int LocationManager::getDirtLevel() const
 
 void LocationManager::cleanCurrentPosition()
 {
-    if (getDirtLevel() == 0) // getDirtLevel() calls isOutOfBounds() already
+    if (dirtLevel() == 0) // dirtLevel() calls isOutOfBounds() already
     {
         return;
     }
@@ -85,8 +85,14 @@ bool LocationManager::isWall(Direction direction) const
     return wall_map[suggested_position.first][suggested_position.second];
 }
 
-void LocationManager::move(Direction direction)
+void LocationManager::move(Step step)
 {
+    if (Step::STAY == step || Step::FINISH == step) {
+        return;
+    }
+
+    Direction direction = static_cast<Direction>(step);
+
     if (isWall(direction))
     {
         throw std::runtime_error("Cannot move to wall");

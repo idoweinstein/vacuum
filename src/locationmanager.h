@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "dirtsensor.h"
-#include "wallsensor.h"
+#include "wallssensor.h"
 #include "direction.h"
 #include "position.h"
 
@@ -13,7 +13,7 @@
  *
  * It keeps track of the wall map, dirt map, current position, docking station position, and total dirt count.
  */
-class LocationManager : public WallSensor, public DirtSensor
+class LocationManager : public WallsSensor, public DirtSensor
 {
     static constexpr const unsigned int kDirtCleaningUnit = 1; // Units of dirt to clean when cleaning a position
 
@@ -35,6 +35,10 @@ class LocationManager : public WallSensor, public DirtSensor
     template <typename T> static bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position);
 
 public:
+    // Delete copy constructor and assignment operator
+    LocationManager(const LocationManager&) = delete;
+    LocationManager& operator=(const LocationManager&) = delete;
+
     /**
      * @brief Constructs a new LocationManager object.
      *
@@ -58,11 +62,11 @@ public:
     virtual void cleanCurrentPosition();
 
     /**
-     * @brief Moves the vacuum cleaner in the specified direction.
+     * @brief Moves the vacuum cleaner one step in the specified direction.
      *
-     * @param direction The direction to move.
+     * @param step The step to move (a Direction or Stay / Finish).
      */
-    virtual void move(Direction);
+    virtual void move(Step);
 
     /**
      * @brief Checks if the vacuum cleaner is in the docking station.
@@ -83,7 +87,7 @@ public:
      *
      * @return The dirt level at the current position.
      */
-    virtual unsigned int getDirtLevel() const;
+    virtual int dirtLevel() const override;
 
     /**
      * @brief Gets the current position of the vacuum cleaner.
@@ -98,7 +102,7 @@ public:
      * @param direction The direction to check.
      * @return true if there is a wall, false otherwise.
      */
-    virtual bool isWall(Direction) const;
+    virtual bool isWall(Direction) const override;
 };
 
 #endif /* VACUUM_LOCATIONMANAGER_H_ */

@@ -10,17 +10,26 @@ Robot::Robot(unsigned int max_robot_steps,
     : max_robot_steps(max_robot_steps),
       battery_controller(max_battery_steps),
       location_manager(wall_map, dirt_map, docking_station_position),
-      navigation_system(static_cast<BatterySensor&>(battery_controller),
-                        static_cast<DirtSensor&>(location_manager),
-                        static_cast<WallSensor&>(location_manager))
-{ }
+      navigation_system()
+{
+    navigation_system.setMaxSteps(max_robot_steps);
+    navigation_system.setWallsSensor(static_cast<WallsSensor&>(location_manager));
+    navigation_system.setDirtSensor(static_cast<DirtSensor&>(location_manager));
+    navigation_system.setBatteryMeter(static_cast<BatteryMeter&>(battery_controller));
+}
 
-void Robot::move(Direction next_direction)
+void Robot::move(Step next_step)
 {
     RobotLogger& logger = RobotLogger::getInstance();
 
+    if (Step::FINISH == next_step)
+    {
+        /* Shouldn't happen */
+        return;
+    }
+
     /* If no battery left - discharge() throws an Empty Battery exception */
-    if (Direction::STAY == next_direction)
+    if (Step::STAY == next_step)
     {
         if (location_manager.isInDockingStation())
         {
@@ -39,11 +48,10 @@ void Robot::move(Direction next_direction)
         battery_controller.discharge();
     }
  
-    navigation_system.move(next_direction);
-    location_manager.move(next_direction);
+    location_manager.move(next_step);
 
     Position next_position = location_manager.getCurrentPosition();
-    logger.logRobotStep(next_direction, next_position);
+    logger.logRobotStep(next_step, next_position);
 }
 
 void Robot::run()
@@ -54,16 +62,16 @@ void Robot::run()
 
     while (!shouldStopCleaning(total_steps_performed))
     {
-        Direction next_direction = navigation_system.suggestNextStep();
+        Step next_step = navigation_system.nextStep();
 
-        if (Direction::FINISH == next_direction)
+        if (Step::FINISH == next_step)
         {
             // In case Robot mapped all accessible positions and have nothing left to clean
             is_algorithm_finished = true;
             break;
         }
 
-        move(next_direction);
+        move(next_step);
         total_steps_performed++;
     }
 
@@ -73,7 +81,7 @@ void Robot::run()
     }
 
     unsigned int total_dirt_count = location_manager.getTotalDirtCount();
-    bool is_battery_exhausted = battery_controller.getCurrentAmount() < 1;
+    bool is_battery_exhausted = battery_controller.getBatteryState() < 1;
     bool is_mission_complete = (0 == total_dirt_count) && location_manager.isInDockingStation();
 
     logger.logCleaningStatistics(total_steps_performed,

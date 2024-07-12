@@ -7,11 +7,28 @@
 #include <stdexcept>
 #include <unordered_set>
 
-NavigationSystem::NavigationSystem(BatterySensor& battery_sensor, DirtSensor& dirt_sensor, WallSensor& wall_sensor)
-    : current_position(0, 0), battery_sensor(battery_sensor), dirt_sensor(dirt_sensor), wall_sensor(wall_sensor), full_battery(battery_sensor.getCurrentAmount())
+NavigationSystem::NavigationSystem()
+    : current_position(0, 0)
 {
     // Update current location (docking station) as non-wall
     wall_map[current_position] = false;
+}
+
+void NavigationSystem::setMaxSteps(std::size_t max_steps) {
+    this->max_steps = max_steps;
+}
+
+void NavigationSystem::setBatteryMeter(const BatteryMeter& battery_meter) {
+    this->battery_meter = &battery_meter;
+    full_battery = battery_meter.getBatteryState();
+}
+
+void NavigationSystem::setDirtSensor(const DirtSensor& dirt_sensor) {
+    this->dirt_sensor = &dirt_sensor;
+}
+
+void NavigationSystem::setWallsSensor(const WallsSensor& walls_sensor) {
+    this->walls_sensor = &walls_sensor;
 }
 
 int NavigationSystem::performBFS(PathTree& path_tree, unsigned int start_index, const std::function<bool(Position)>& found_criteria) const
@@ -109,7 +126,7 @@ void NavigationSystem::mapWallsAround()
             continue;
         }
 
-        bool is_wall = wall_sensor.isWall(direction);
+        bool is_wall = walls_sensor.value()->isWall(direction);
         wall_map[position] = is_wall;
 
         if (is_wall)
@@ -121,22 +138,30 @@ void NavigationSystem::mapWallsAround()
     }
 }
 
-void NavigationSystem::getSensorsInfo(unsigned int& dirt_level, float& battery_left, bool& is_battery_full)
+void NavigationSystem::getSensorsInfo(int& dirt_level, std::size_t& reamining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full)
 {
     mapWallsAround();
 
-    dirt_level = dirt_sensor.getDirtLevel();
+    dirt_level = dirt_sensor.value()->dirtLevel();
     if (dirt_level > 0)
     {
         todo_positions.insert(current_position);
+    } else {
+        todo_positions.erase(current_position);
     }
 
-    battery_left = battery_sensor.getCurrentAmount();
+    /* Update current location (docking station) as non-wall */
+    wall_map[current_position] = false;
 
-    is_battery_full = (battery_left >= full_battery);
+    std::size_t remaining_battery_capacity = battery_meter.value()->getBatteryState();
+
+    remaining_steps_total = max_steps.value() - steps_taken;
+    reamining_steps_until_charge = std::min(remaining_battery_capacity, remaining_steps_total);
+
+    is_battery_full = (remaining_battery_capacity >= full_battery);
 }
 
-Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float battery_left, bool is_battery_full)
+Step NavigationSystem::decideNextStep(int dirt_level, std::size_t remaining_steps_until_charge, std::size_t remaining_steps_total, bool is_battery_full)
 {
     std::deque<Direction> path_to_station;
     bool is_found = getPathToStation(path_to_station);
@@ -145,20 +170,21 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
         throw std::runtime_error("Robot cannot find path back to the docking station!");
     }
 
-    // If left no dirty accessible places AND we're in docking station - finish cleaning
-    if (path_to_station.empty() && todo_positions.empty())
+    // If no allowed steps OR
+    // left no dirty accessible places AND we're in docking station - finish cleaning
+    if (remaining_steps_total <= 0 || (path_to_station.empty() && todo_positions.empty()))
     {
-        return Direction::FINISH;
+        return Step::FINISH;
     }
 
     // If charging - charge until battery is full
     if (path_to_station.empty() && !is_battery_full)
     {
-        return Direction::STAY;
+        return Step::STAY;
     }
 
     // If there's not enough battery - go to station
-    if (battery_left < 1 + getPathDistance(path_to_station))
+    if (remaining_steps_until_charge < 1 + getPathDistance(path_to_station))
     {
         return getPathNextStep(path_to_station);
     }
@@ -172,12 +198,12 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
     // If the current position is dirty, stay to clean it
     if (dirt_level > 0)
     {
-        return Direction::STAY;
+        return Step::STAY;
     }
 
     /* If going one step further will cause the battery
        to drain before reaching the station - go to station */
-    if (battery_left < 2 + getPathDistance(path_to_station))
+    if (remaining_steps_until_charge < 2 + getPathDistance(path_to_station))
     {
         return getPathNextStep(path_to_station);
     }
@@ -193,26 +219,38 @@ Direction NavigationSystem::decideNextStep(unsigned int dirt_level, float batter
     return getPathNextStep(path_to_nearest_todo);
 }
 
-Direction NavigationSystem::suggestNextStep()
+Step NavigationSystem::nextStep()
 {
-    unsigned int dirt_level = 0;
-    float battery_left = 0;
+    int dirt_level = 0;
+    std::size_t remaining_steps_until_charge = 0;
+    std::size_t remaining_steps_total = 0;
     bool is_battery_full = false;
 
-    getSensorsInfo(dirt_level, battery_left, is_battery_full);
+    checkInited();
 
-    return decideNextStep(dirt_level, battery_left, is_battery_full);
+    getSensorsInfo(dirt_level, remaining_steps_until_charge, remaining_steps_total, is_battery_full);
+
+    Step step = decideNextStep(dirt_level, remaining_steps_until_charge, remaining_steps_total, is_battery_full);
+
+    move(step);
+
+    return step;
 }
 
-void NavigationSystem::move(Direction direction)
+void NavigationSystem::move(Step step)
 {
-    current_position = Position::computePosition(current_position, direction);
-
-    if (0 == dirt_sensor.getDirtLevel())
+    if (Step::FINISH == step)
     {
-        todo_positions.erase(current_position);
+        return;
     }
 
-    /* Update current location (docking station) as non-wall */
-    wall_map[current_position] = false;
+    steps_taken++;
+
+    if (Step::STAY == step)
+    {
+        return;
+    }
+
+    Direction direction = static_cast<Direction>(step);
+    current_position = Position::computePosition(current_position, direction);
 }

@@ -53,7 +53,7 @@ public:
      * @brief Add a log file based on the input file name.
      * @param input_file_name The name of the input file.
      */
-    void addLogFileFromInput(const std::string& input_file_name)
+    virtual void addLogFileFromInput(const std::string& input_file_name)
     {
         const std::string log_file_name = kOutputFilePrefix + input_file_name;
         addLogFile(log_file_name);
@@ -62,20 +62,20 @@ public:
     /**
      * @brief Log a robot reaching its finish condition.
      */
-    void logRobotFinish()
+    virtual void logRobotFinish()
     {
         logMessage(LogLevel::INFO, LogOutput::FILE, kRobotFinishPrompt);
     }
 
     /**
      * @brief Log a robot step.
-     * @param direction_moved The direction the robot moved.
+     * @param step_moved The step the robot moved.
      * @param current_position The current position of the robot.
      */
-    void logRobotStep(Direction direction_moved, Position current_position)
+    virtual void logRobotStep(Step step_moved, Position current_position)
     {
         std::ostringstream stringStream;
-        stringStream << kStepFormat1 << direction_moved << kStepFormat2 \
+        stringStream << kStepFormat1 << step_moved << kStepFormat2 \
             << current_position.first << kStepFormat3 << current_position.second << kStepFormat4;
 
         logMessage(LogLevel::INFO, LogOutput::FILE, stringStream.str());
@@ -88,7 +88,7 @@ public:
      * @param is_battery_exhausted Whether the vacuum cleaner's battery is exhausted.
      * @param is_mission_complete Whether the cleaning mission is complete.
      */
-    void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, bool is_battery_exhausted, bool is_mission_complete)
+    virtual void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, bool is_battery_exhausted, bool is_mission_complete)
     {
         std::ostringstream stringStream;
         stringStream << kStatisticsFormat1 << kStatisticsFormat2 << total_steps << kStatisticsFormat3 \
@@ -102,7 +102,7 @@ public:
      * @brief Log a warning message.
      * @param warning_message The warning message to log.
      */
-    void logWarning(const std::string warning_message)
+    virtual void logWarning(const std::string warning_message)
     {
         logMessage(LogLevel::WARNING, LogOutput::CONSOLE, warning_message);
     }
@@ -111,7 +111,7 @@ public:
      * @brief Log an error message.
      * @param error_message The error message to log.
      */
-    void logError(const std::string error_message)
+    virtual void logError(const std::string error_message)
     {
         logMessage(LogLevel::ERROR, LogOutput::CONSOLE, error_message);
     }

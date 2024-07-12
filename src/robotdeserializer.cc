@@ -8,8 +8,6 @@
 #include "position.h"
 #include "robot.h"
 
-
-
 const std::map<std::string, RobotDeserializer::ParameterType> RobotDeserializer::parameter_map = {
         {"max_battery_steps", ParameterType::MAX_BATTERY_STEPS},
         {"max_robot_steps", ParameterType::MAX_ROBOT_STEPS},
@@ -174,7 +172,7 @@ void RobotDeserializer::deserializeHouse(std::vector<std::vector<bool>>& wall_ma
     }
 }
 
-Robot RobotDeserializer::deserializeFromFile(const std::string& input_file_name)
+std::unique_ptr<Robot> RobotDeserializer::deserializeFromFile(const std::string& input_file_name)
 {
     RobotLogger& logger = RobotLogger::getInstance();
     std::ifstream input_file;
@@ -207,11 +205,9 @@ Robot RobotDeserializer::deserializeFromFile(const std::string& input_file_name)
     std::vector<std::vector<unsigned int>> dirt_map;
     deserializeHouse(wall_map, dirt_map, docking_station_position, input_file);
 
-    Robot robot(parameters[ParameterType::MAX_ROBOT_STEPS].value,
-                parameters[ParameterType::MAX_BATTERY_STEPS].value,
-                wall_map,
-                dirt_map,
-                docking_station_position);
-
-    return robot;
+    return make_unique<Robot>(parameters[ParameterType::MAX_ROBOT_STEPS].value,
+                              parameters[ParameterType::MAX_BATTERY_STEPS].value,
+                              wall_map,
+                              dirt_map,
+                              docking_station_position);
 }

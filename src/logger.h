@@ -45,7 +45,7 @@ class Logger
 
 protected:
     Logger() {}
-    ~Logger();
+    virtual ~Logger();
 
 public:
     /**
@@ -79,7 +79,7 @@ public:
      * @param log_file_name The name of the log file to add.
      * @throws std::runtime_error if the log file cannot be opened.
      */
-    void addLogFile(const std::string& log_file_name)
+    virtual void addLogFile(const std::string& log_file_name)
     {
         std::ofstream& new_file = log_files.emplace_back();
         new_file.open(log_file_name);
@@ -95,7 +95,7 @@ public:
      * 
      * This method deletes all previously added log files, using `addLogFile()` calls.
      */
-    void deleteAllLogFiles()
+    virtual void deleteAllLogFiles()
     {
         for (int i = log_files.size() - 1; i >= 0; i--)
         {
@@ -116,7 +116,7 @@ public:
      * @param output The log output (file or console).
      * @param message The message to log.
      */
-    void logMessage(LogLevel log_level, LogOutput output, const std::string& message);
+    virtual void logMessage(LogLevel log_level, LogOutput output, const std::string& message);
 };
 
 #endif /* VACUUM_LOGGER_H_ */

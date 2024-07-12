@@ -6,8 +6,8 @@
 #include "batterycontroller.h"
 #include "navigationsystem.h"
 #include "locationmanager.h"
-#include "direction.h"
 #include "position.h"
+#include "step.h"
 
 /**
  * @brief The Robot class represents a vacuum cleaning robot.
@@ -46,7 +46,7 @@ class Robot
      /**
      * @brief Moves the robot to the next position.
      */
-    void move(Direction next_direction);
+    void move(Step next_step);
 
 public:
     /**

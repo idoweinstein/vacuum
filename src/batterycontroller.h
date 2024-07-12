@@ -1,17 +1,18 @@
 #ifndef VACUUM_BATTERYCONTROLLER_H_
 #define VACUUM_BATTERYCONTROLLER_H_
 
-#include "batterysensor.h"
+#include "batterymeter.h"
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 /**
  * @brief The BatteryController class represents a controller for a battery.
  *
- * It inherits from the BatterySensor class and provides functionality to charge and discharge the battery.
+ * It inherits from the BatteryMeter class and provides functionality to charge and discharge the battery.
  */
-class BatteryController : public BatterySensor
+class BatteryController : public BatteryMeter
 {
     static constexpr const float kStepsToFullAmount = 20.0f; // Charging rate (in steps).
     static constexpr const float kDischargeUnit = 1.0f;      // Discharging rate (in steps).
@@ -20,21 +21,25 @@ class BatteryController : public BatterySensor
     float current_amount;                                    // Remaining capacity of the battery (in steps).
 
 public:
+    // Disable copy constructor and assignment operator.
+    BatteryController(const BatteryController&) = delete;
+    BatteryController& operator=(const BatteryController&) = delete;
+
     /**
      * @brief Constructs a new BatteryController object with the specified full amount of the battery.
      *
      * @param full_amount The full amount of the battery (in steps).
      */
-    explicit BatteryController(unsigned int full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
+    explicit BatteryController(std::size_t full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
 
     /**
-     * @brief Gets the current amount of the battery.
+     * @brief Gets the current remaining battery capacity.
      *
-     * @return The current amount of the battery (in steps).
+     * @return The current remaining capacity (in steps).
      */
-    virtual float getCurrentAmount() const
+    virtual std::size_t getBatteryState() const override
     {
-        return current_amount;
+        return std::floor(current_amount);
     }
 
     /**
