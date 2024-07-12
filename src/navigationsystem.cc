@@ -239,15 +239,18 @@ Step NavigationSystem::nextStep()
 
 void NavigationSystem::move(Step step)
 {
-    if (Step::FINISH != step)
+    if (Step::FINISH == step)
     {
-        steps_taken++;
-    
+        return;
     }
 
-    if (Step::STAY != step && Step::FINISH != step)
+    steps_taken++;
+
+    if (Step::STAY == step)
     {
-        Direction direction = static_cast<Direction>(step);
-        current_position = Position::computePosition(current_position, direction);
+        return;
     }
+
+    Direction direction = static_cast<Direction>(step);
+    current_position = Position::computePosition(current_position, direction);
 }
