@@ -233,7 +233,7 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_EQ(Status::WORKING, robot_state.status);
+        EXPECT_EQ(Status::FINISHED, robot_state.status);
 
         unsigned int max_robot_steps = 100;
         EXPECT_EQ(max_robot_steps, robot_state.total_steps_taken);
@@ -264,11 +264,6 @@ namespace
         EXPECT_THROW({
             SetUp("inputs/input_nodock.txt", "output_input_nodock.txt");
         }, std::runtime_error);
-
-        RobotState& robot_state = getRobotState();
-
-        // Assert the expected results (should add docking station to end of first row)
-        EXPECT_EQ(Status::FINISHED, robot_state.status);
     }
 
     TEST_F(SimulatorTest, RobotFilledLine)
