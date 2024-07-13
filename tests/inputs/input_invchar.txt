@@ -1,6 +1,6 @@
 Invalid Character
-MaxStep = 500
-MaxBattey = 80
+MaxSteps = 500
+MaxBattery = 80
 Rows = 3
 Cols = 10 
 WWW*WWWWWW
