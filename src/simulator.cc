@@ -38,6 +38,7 @@ void Simulator::readHouseFile(const std::string& house_file_path)
         throw std::runtime_error("Couldn't open input house file!");
     }
 
+    Deserializer::ignoreInternalName(house_file);
     max_simulator_steps = Deserializer::deserializeMaxSteps(house_file);
     battery = Deserializer::deserializeBattery(house_file);
     house = Deserializer::deserializeHouse(house_file);
@@ -77,14 +78,14 @@ void Simulator::move(Step next_step)
     house->move(next_step);
 }
 
-void Simulator::setAlgorithm(AbstractAlgorithm& alg)
+void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
 {
     /*
      * Use a shared pointer.
      * Pass a custom no-op deleter to prevent calling the actual destructor since
      * we don't own this object.
      */
-    algorithm = std::shared_ptr<AbstractAlgorithm>(&alg, [](const AbstractAlgorithm*){});
+    algorithm = std::shared_ptr<AbstractAlgorithm>(&chosen_algorithm, [](const AbstractAlgorithm*){});
 
     algorithm->setMaxSteps(max_simulator_steps);
     algorithm->setWallsSensor(*house);

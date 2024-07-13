@@ -3,9 +3,10 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <fstream>
 #include <ranges>
+#include <fstream>
 #include <sstream>
+#include <optional>
 #include <stdexcept>
 
 #include "robotlogger.h"
@@ -35,21 +36,18 @@ void trim(std::string& s) {
 
 unsigned int Deserializer::valueToUnsignedInt(const std::string& value)
 {
-    RobotLogger& logger = RobotLogger::getInstance();
     std::istringstream value_stream(value);
     int numerical_value = 0;
 
     value_stream >> numerical_value;
     if (!value_stream)
     {
-        logger.logWarning("Parameter with non-integer value given - Setting default value of '0'...");
-        numerical_value = kDefaultParameterValue;
+        throw std::runtime_error("A parameter with non-integer value was given!");
     }
 
     if (numerical_value < 0)
     {
-        logger.logWarning("Parameter with negative value given - Setting default value of '0'...");
-        numerical_value = kDefaultParameterValue;
+        throw std::runtime_error("A parameter with negative value was given!");
     }
 
     return (unsigned int)numerical_value;
@@ -57,7 +55,7 @@ unsigned int Deserializer::valueToUnsignedInt(const std::string& value)
 
 unsigned int Deserializer::deserializeParameter(std::istream& input_stream, const std::string& parameter_name)
 {
-    Parameter parameter;
+    std::optional<unsigned int> parameter;
 
     std::string line;
     std::getline(input_stream, line);
@@ -74,22 +72,24 @@ unsigned int Deserializer::deserializeParameter(std::istream& input_stream, cons
         if (parameter_name == parameter_key)
         {
             trim(parameter_value);
-            parameter.is_initialized = true;
-            parameter.value = valueToUnsignedInt(parameter_value);
+            parameter = valueToUnsignedInt(parameter_value);
         }
     }
 
     assertParameterSet(parameter, parameter_name);
 
-    return parameter.value;
+    return parameter.value();
 }
 
-unsigned int Deserializer::deserializeMaxSteps(std::istream& input_stream)
+void Deserializer::ignoreInternalName(std::istream& input_stream)
 {
     // Unused input line - used for internal naming
     std::string house_internal_name;
     std::getline(input_stream, house_internal_name);
+}
 
+unsigned int Deserializer::deserializeMaxSteps(std::istream& input_stream)
+{
     unsigned int max_simulator_steps = deserializeParameter(input_stream, kMaxStepsParameter);
 
     return max_simulator_steps;
@@ -104,7 +104,7 @@ std::unique_ptr<Battery> Deserializer::deserializeBattery(std::istream& input_st
 
 std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream)
 {
-    DockingStation docking_station;
+    std::optional<Position> docking_station_position;
 
     unsigned int house_rows_num = deserializeParameter(input_stream, kHouseRowsNumParameter);
     unsigned int house_cols_num = deserializeParameter(input_stream, kHouseColsNumParameter);
@@ -138,12 +138,11 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
                     break;
 
                 case BlockType::DOCKING_STATION:
-                    if (docking_station.is_initialized)
+                    if (docking_station_position.has_value())
                     {
                         throw std::runtime_error("More than one docking station was given in house file!");
                     }
-                    docking_station.position = {row_idx, column_idx};
-                    docking_station.is_initialized = true;
+                    docking_station_position = {row_idx, column_idx};
                     break;
 
                 case BlockType::WALL:
@@ -159,7 +158,7 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
         row_idx++;
     }
 
-    if (!docking_station.is_initialized)
+    if (!docking_station_position.has_value())
     {
         throw std::runtime_error("Missing docking station position in house file!");
     }
@@ -167,5 +166,5 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
     return std::make_unique<House>(
         const_cast<const std::vector<std::vector<bool>>&>(wall_map),
         const_cast<const std::vector<std::vector<unsigned int>>&>(dirt_map),
-        const_cast<const Position&>(docking_station.position));
+        const_cast<const Position&>(docking_station_position.value()));
 }

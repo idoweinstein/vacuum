@@ -29,7 +29,7 @@ namespace std
                 break;
 
             case Status::DEAD:
-                status_string = "S";
+                status_string = "DEAD";
                 break;
         }
 

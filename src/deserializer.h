@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <istream>
+#include <optional>
 #include <stdexcept>
 
 #include "simulator.h"
@@ -20,7 +21,6 @@
 class Deserializer
 {
     static constexpr const char kParameterDelimiter = '=';
-    static constexpr const int kDefaultParameterValue = 0;
 
     static constexpr const bool kDefaultIsWall = false;
     static constexpr const unsigned int kDefaultDirtLevel = 0;
@@ -29,18 +29,6 @@ class Deserializer
     inline static const std::string kMaxBatteryParameter = "MaxBattery";
     inline static const std::string kHouseRowsNumParameter = "Rows";
     inline static const std::string kHouseColsNumParameter = "Cols";
-
-    struct Parameter
-    {
-        bool is_initialized = false;
-        unsigned int value = kDefaultParameterValue;
-    };
-
-    struct DockingStation
-    {
-        bool is_initialized = false;
-        Position position;
-    };
 
     enum BlockType : char
     {
@@ -67,9 +55,9 @@ class Deserializer
         NUMBER_OF_PARAMETERS
     };
 
-    static void assertParameterSet(Parameter& parameter, const std::string& parameter_name)
+    static void assertParameterSet(std::optional<unsigned int>& parameter, const std::string& parameter_name)
     {
-        if (!parameter.is_initialized)
+        if (!parameter.has_value())
         {
             const std::string error_message = "Missing " + parameter_name + " parameter in house file!";
             throw std::runtime_error(error_message);
@@ -98,6 +86,8 @@ class Deserializer
     static unsigned int deserializeParameter(std::istream& input_stream, const std::string& parameter_name);
 
 public:
+    static void ignoreInternalName(std::istream& input_stream);
+
     static unsigned int deserializeMaxSteps(std::istream& input_stream);
 
     static std::unique_ptr<Battery> deserializeBattery(std::istream& input_stream);
