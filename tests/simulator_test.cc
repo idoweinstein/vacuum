@@ -174,7 +174,7 @@ namespace
         }
     };
 
-    TEST_F(RobotTest, RobotSanity)
+    TEST_F(SimulatorTest, RobotSanity)
     {
         SetUp("inputs/input_sanity.txt", "output_input_sanity.txt");
 
@@ -190,7 +190,7 @@ namespace
         EXPECT_TRUE(robot_state.is_mission_succeeded);
     }
 
-    TEST_F(RobotTest, RobotTrappedDirt)
+    TEST_F(SimulatorTest, RobotTrappedDirt)
     {
         SetUp("inputs/input_trappeddirt.txt", "output_input_trappeddirt.txt");
 
@@ -202,7 +202,7 @@ namespace
         EXPECT_FALSE(robot_state.is_mission_succeeded);
     }
 
-    TEST_F(RobotTest, RobotMaze)
+    TEST_F(SimulatorTest, RobotMaze)
     {
         SetUp("inputs/input_maze.txt", "output_input_maze.txt");
 
@@ -214,7 +214,7 @@ namespace
         EXPECT_TRUE(robot_state.is_mission_succeeded);
     }
 
-    TEST_F(RobotTest, RobotMinimalBatteryToComplete)
+    TEST_F(SimulatorTest, RobotMinimalBatteryToComplete)
     {
         SetUp("inputs/input_minbattery.txt", "output_input_minbattery.txt");
 
@@ -244,7 +244,7 @@ namespace
         }
     }
 
-    TEST_F(RobotTest, RobotNoDirt)
+    TEST_F(SimulatorTest, RobotNoDirt)
     {
         SetUp("inputs/input_nodirt.txt", "output_input_nodirt.txt");
 
@@ -258,7 +258,7 @@ namespace
         EXPECT_EQ(0, robot_state.total_steps_taken);
     }
 
-    TEST_F(RobotTest, RobotTooDistantDirt)
+    TEST_F(SimulatorTest, RobotTooDistantDirt)
     {
         SetUp("inputs/input_distantdirt.txt", "output_input_distantdirt.txt");
 
@@ -276,7 +276,7 @@ namespace
         EXPECT_EQ(total_dirt_count, robot_state.total_dirt_left);
     }
 
-    TEST_F(RobotTest, RobotAllCharacters)
+    TEST_F(SimulatorTest, RobotAllCharacters)
     {
         SetUp("inputs/input_allchars.txt", "output_input_allchars.txt");
 
@@ -290,7 +290,7 @@ namespace
         EXPECT_EQ(69, robot_state.total_steps_taken);
     }
 
-    TEST_F(RobotTest, RobotNoHouse)
+    TEST_F(SimulatorTest, RobotNoHouse)
     {
         SetUp("inputs/input_nohouse.txt", "output_input_nohouse.txt");
 
@@ -304,7 +304,7 @@ namespace
         EXPECT_EQ(0, robot_state.total_steps_taken);
     }
 
-    TEST_F(RobotTest, RobotNoDockingStation)
+    TEST_F(SimulatorTest, RobotNoDockingStation)
     {
         SetUp("inputs/input_nodock.txt", "output_input_nodock.txt");
 
