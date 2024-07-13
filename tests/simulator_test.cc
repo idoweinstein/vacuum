@@ -51,7 +51,6 @@ namespace
 
         bool safeFileOpen(const std::string& output_file_name);
         std::string getNextValue();
-        void deserializeStatistics();
 
         static Step charToStep(char step_string)
         {
@@ -286,5 +285,51 @@ namespace
         // Assert the expected results
         EXPECT_EQ(Status::FINISHED, robot_state.status);
         EXPECT_EQ(0, robot_state.total_dirt_left);
+    }
+
+    TEST_F(SimulatorTest, RobotDeterministic)
+    {
+        SetUp("inputs/input_sanity.txt", "output_input_sanity.txt");
+
+        std::vector<Step> first_runtime_steps = getRobotState().runtime_steps;
+
+        SetUp("inputs/input_sanity.txt", "output_input_sanity.txt");
+
+        std::vector<Step> second_runtime_steps = getRobotState().runtime_steps;
+
+        EXPECT_EQ(first_runtime_steps.size(), second_runtime_steps.size());
+
+        for (std::size_t i = 0; i< first_runtime_steps.size(); i++)
+        {
+            EXPECT_EQ(first_runtime_steps.at(i), second_runtime_steps.at(i));
+        }
+    }
+
+    TEST_F(SimulatorTest, RobotAPICallingOrder)
+    {
+        Simulator simulator;
+        Algorithm algorithm;
+
+        EXPECT_THROW({
+            simulator.setAlgorithm(algorithm);
+        }, std::logic_error);
+
+        EXPECT_THROW({
+            simulator.run();
+        }, std::logic_error);
+
+        simulator.readHouseFile("inputs/input_sanity.txt");
+
+        EXPECT_THROW({
+            simulator.run();
+        }, std::logic_error);
+
+        simulator.setAlgorithm(algorithm);
+
+        EXPECT_THROW({
+            simulator.readHouseFile("inputs/input_sanity.txt");
+        }, std::logic_error);
+
+        simulator.run();
     }
 }
