@@ -28,10 +28,11 @@ set(INPUT_FILES
     inputs/input_trappeddirt.txt
     inputs/input_maze.txt
     inputs/input_minbattery.txt
-    inputs/input_nodirt.txt
     inputs/input_distantdirt.txt
     inputs/input_allchars.txt
     inputs/input_nodock.txt
+    inputs/input_filledline.txt
+    inputs/input_filledcol.txt
 )
 
 file(

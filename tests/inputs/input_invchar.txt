@@ -1,6 +1,8 @@
-max_robot_steps 500
-max_battery_steps 80
-house
-XXX*XXXXXX
-X  123@1 X
-XXXX
+Invalid Character
+MaxStep = 500
+MaxBattey = 80
+Rows = 3
+Cols = 10 
+WWW*WWWWWW
+W  123D1 W
+WWWW

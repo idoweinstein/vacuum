@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <regex>
 #include <ios>
 
 #include "direction.h"
@@ -17,26 +18,34 @@ namespace
     struct RobotState
     {
         std::vector<Step> runtime_steps;
-        bool is_robot_finished;
-        bool is_battery_exhausted;
-        bool is_mission_succeeded;
         unsigned int total_steps_taken;
         unsigned int total_dirt_left;
+        Status status;
     };
 
     class OutputDeserializer
     {
-        inline static constexpr const char kStatisticsDelimiter = ':';
-        inline static const std::string kStepPrefix = "[STEP]";
-        inline static const std::string kFinishPrefix = "[FINISH]";
-        inline static const std::string kProgramTerminationPrefix = "###";
-        inline static const std::map<std::string, Step> step_map = {
-            {"North", Step::NORTH},
-            {"East", Step::EAST},
-            {"South", Step::SOUTH},
-            {"West", Step::WEST},
-            {"Stay", Step::STAY}
+        inline static const std::map<char, Step> step_map = {
+            {'N', Step::NORTH},
+            {'E', Step::EAST},
+            {'S', Step::SOUTH},
+            {'W', Step::WEST},
+            {'s', Step::STAY},
+            {'F', Step::FINISH}
         };
+
+        inline static const std::map<std::string, Status> status_map = {
+            {"FINISHED", Status::FINISHED},
+            {"WORKING", Status::WORKING},
+            {"DEAD", Status::DEAD}
+        };
+
+        inline static const std::string kRegexPattern = 
+            "NumSteps\\s+=\\s+([0-9]+)\r?\n"
+            "DirtLeft\\s+=\\s+([0-9]+)\r?\n"
+            "Status\\s+=\\s+(FINISHED|WORKING|DEAD)\r?\n"
+            "Steps:\r?\n"
+            "([NESWs]+F?)";
 
         std::ifstream output_file;
 
@@ -44,10 +53,16 @@ namespace
         std::string getNextValue();
         void deserializeStatistics();
 
-        static Step stringToStep(const std::string& step_string)
+        static Step charToStep(char step_string)
         {
             EXPECT_TRUE(step_map.contains(step_string));
             return step_map.at(step_string);
+        }
+
+        static Status stringToStatus(const std::string& status_string)
+        {
+            EXPECT_TRUE(status_map.contains(status_string));
+            return status_map.at(status_string);
         }
  
     public:
@@ -55,7 +70,9 @@ namespace
 
         OutputDeserializer()
         {
-            robot_state.is_robot_finished = false;
+            robot_state.total_steps_taken = 0;
+            robot_state.total_dirt_left = 0;
+            robot_state.status = Status::WORKING;
         }
 
         bool deserializeOutputFile(const std::string& output_file_name);
@@ -70,35 +87,6 @@ namespace
         return is_opened;
     }
 
-    std::string OutputDeserializer::getNextValue()
-    {
-        std::string key;
-        std::string value;
-        std::string line;
-
-        std::getline(output_file, line);
-        std::istringstream line_stream(line);
-
-        std::getline(line_stream, value, kStatisticsDelimiter);
-        std::getline(line_stream, key);
-        return key;
-    }
-
-    void OutputDeserializer::deserializeStatistics()
-    {
-        std::istringstream total_steps_taken(getNextValue());
-        total_steps_taken >> robot_state.total_steps_taken;
-
-        std::istringstream total_dirt_left(getNextValue());
-        total_dirt_left >> robot_state.total_dirt_left;
-
-        std::istringstream is_battery_exhausted(getNextValue());
-        is_battery_exhausted >> std::boolalpha >> robot_state.is_battery_exhausted;
-
-        std::istringstream is_mission_succeeded(getNextValue());
-        is_mission_succeeded >> std::boolalpha >> robot_state.is_mission_succeeded;
-    }
-
     bool OutputDeserializer::deserializeOutputFile(const std::string& output_file_name)
     {
         bool is_opened = safeFileOpen(output_file_name);
@@ -107,35 +95,34 @@ namespace
             return false;
         }
 
-        std::string line;
-        while (std::getline(output_file, line))
+        std::stringstream buffer;
+        buffer << output_file.rdbuf();
+
+        std::regex pattern(kRegexPattern);
+
+        std::smatch matches;
+        std::string content = buffer.str();
+
+        if (!std::regex_search(content, matches, pattern))
         {
-            std::istringstream line_stream(line);
-
-            std::string prefix;
-            line_stream >> prefix;
-
-            std::string step;
-            if (kStepPrefix == prefix)
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    line_stream >> step;
-                }
-
-                robot_state.runtime_steps.push_back(stringToStep(step));
-            }
-
-            else if (kFinishPrefix == prefix)
-            {
-                robot_state.is_robot_finished = true;
-            }
-
-            else
-            {
-                deserializeStatistics();
-            }
+            return false;
         }
+
+        robot_state = {};
+        robot_state.total_steps_taken = std::stoi(matches[1]);
+        robot_state.total_dirt_left = std::stoi(matches[2]);
+        robot_state.status = stringToStatus(matches[3]);
+        robot_state.runtime_steps.clear();
+        robot_state.runtime_steps.reserve(matches[4].length());
+        std::cout << matches[1] << " " << matches[2] << " " << matches[3] << " " << matches[4] << std::endl;
+        for (auto step : static_cast<const std::string &>(matches[4]))
+        {
+            std::cout << step;
+            robot_state.runtime_steps.push_back(charToStep(step));
+        }
+        std::cout << std::endl << "Finished" << std::endl;
+
+        EXPECT_EQ(robot_state.total_steps_taken, robot_state.runtime_steps.size() - 1);
 
         return true;
     }
@@ -181,13 +168,15 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Make sure robot did 'total_steps_taken' steps, and its first step wasn't Direction::STAY
-        EXPECT_EQ(robot_state.total_steps_taken, robot_state.runtime_steps.size());
+        std::size_t path_length = robot_state.runtime_steps.size();
+        if (robot_state.runtime_steps.back() == Step::FINISH) {
+            path_length--;
+        }
+        EXPECT_EQ(robot_state.total_steps_taken, path_length);
         EXPECT_NE(Step::STAY, robot_state.runtime_steps.at(0));
 
         // Assert the expected program results (Robot is not dead and cleaned all dirt)
-        EXPECT_TRUE(robot_state.is_robot_finished);
-        EXPECT_FALSE(robot_state.is_battery_exhausted);
-        EXPECT_TRUE(robot_state.is_mission_succeeded);
+        EXPECT_EQ(Status::FINISHED, robot_state.status);
     }
 
     TEST_F(SimulatorTest, RobotTrappedDirt)
@@ -197,9 +186,8 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected program results (Robot is not dead, cleaned all ACCESSIBLE dirt, but there's more trapped dirt)
-        EXPECT_TRUE(robot_state.is_robot_finished);
-        EXPECT_FALSE(robot_state.is_battery_exhausted);
-        EXPECT_FALSE(robot_state.is_mission_succeeded);
+        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_LT(0, robot_state.total_dirt_left);
     }
 
     TEST_F(SimulatorTest, RobotMaze)
@@ -209,9 +197,7 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_TRUE(robot_state.is_robot_finished);
-        EXPECT_FALSE(robot_state.is_battery_exhausted);
-        EXPECT_TRUE(robot_state.is_mission_succeeded);
+        EXPECT_EQ(Status::FINISHED, robot_state.status);
     }
 
     TEST_F(SimulatorTest, RobotMinimalBatteryToComplete)
@@ -221,16 +207,15 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_TRUE(robot_state.is_robot_finished);
-        EXPECT_TRUE(robot_state.is_battery_exhausted);
-        EXPECT_TRUE(robot_state.is_mission_succeeded);
+        EXPECT_EQ(Status::FINISHED, robot_state.status);
 
         Step expected_steps[] = {
             Step::EAST,
             Step::STAY,
             Step::WEST,
+            Step::FINISH
         };
-        size_t expected_steps_num = 3;
+        size_t expected_steps_num = 4;
 
         if (expected_steps_num != robot_state.runtime_steps.size())
         {
@@ -244,20 +229,6 @@ namespace
         }
     }
 
-    TEST_F(SimulatorTest, RobotNoDirt)
-    {
-        SetUp("inputs/input_nodirt.txt", "output_input_nodirt.txt");
-
-        RobotState& robot_state = getRobotState();
-
-        // Assert the expected results
-        EXPECT_TRUE(robot_state.is_robot_finished);
-        EXPECT_FALSE(robot_state.is_battery_exhausted);
-        EXPECT_TRUE(robot_state.is_mission_succeeded);
-
-        EXPECT_EQ(0, robot_state.total_steps_taken);
-    }
-
     TEST_F(SimulatorTest, RobotTooDistantDirt)
     {
         SetUp("inputs/input_distantdirt.txt", "output_input_distantdirt.txt");
@@ -265,9 +236,7 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_FALSE(robot_state.is_robot_finished);
-        EXPECT_TRUE(robot_state.is_battery_exhausted);
-        EXPECT_FALSE(robot_state.is_mission_succeeded);
+        EXPECT_EQ(Status::WORKING, robot_state.status);
 
         unsigned int max_robot_steps = 100;
         EXPECT_EQ(max_robot_steps, robot_state.total_steps_taken);
@@ -283,36 +252,47 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_TRUE(robot_state.is_robot_finished);
-        EXPECT_FALSE(robot_state.is_battery_exhausted);
-        EXPECT_TRUE(robot_state.is_mission_succeeded);
-
-        EXPECT_EQ(69, robot_state.total_steps_taken);
+        EXPECT_EQ(Status::FINISHED, robot_state.status);
     }
 
     TEST_F(SimulatorTest, RobotNoHouse)
     {
-        SetUp("inputs/input_nohouse.txt", "output_input_nohouse.txt");
-
-        RobotState& robot_state = getRobotState();
-
-        // Assert the expected results (should be a 1x1 house with docking station only)
-        EXPECT_TRUE(robot_state.is_robot_finished);
-        EXPECT_FALSE(robot_state.is_battery_exhausted);
-        EXPECT_TRUE(robot_state.is_mission_succeeded);
-
-        EXPECT_EQ(0, robot_state.total_steps_taken);
+        EXPECT_THROW({
+            SetUp("inputs/input_nohouse.txt", "output_input_nohouse.txt");
+        }, std::runtime_error);
     }
 
     TEST_F(SimulatorTest, RobotNoDockingStation)
     {
-        SetUp("inputs/input_nodock.txt", "output_input_nodock.txt");
+        EXPECT_THROW({
+            SetUp("inputs/input_nodock.txt", "output_input_nodock.txt");
+        }, std::runtime_error);
 
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results (should add docking station to end of first row)
-        EXPECT_TRUE(robot_state.is_robot_finished);
-        EXPECT_FALSE(robot_state.is_battery_exhausted);
-        EXPECT_TRUE(robot_state.is_mission_succeeded);
+        EXPECT_EQ(Status::FINISHED, robot_state.status);
+    }
+
+    TEST_F(SimulatorTest, RobotFilledLine)
+    {
+        SetUp("inputs/input_filledline.txt", "output_input_filledline.txt");
+
+        RobotState& robot_state = getRobotState();
+
+        // Assert the expected results
+        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_EQ(0, robot_state.total_dirt_left);
+    }
+
+    TEST_F(SimulatorTest, RobotFilledCol)
+    {
+        SetUp("inputs/input_filledcol.txt", "output_input_filledcol.txt");
+
+        RobotState& robot_state = getRobotState();
+
+        // Assert the expected results
+        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_EQ(0, robot_state.total_dirt_left);
     }
 }

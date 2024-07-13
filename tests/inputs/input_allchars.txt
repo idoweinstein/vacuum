@@ -1,6 +1,8 @@
-max_robot_steps 500
-max_battery_steps 80
-house
-!
-@0 0123456789
-#
+All Characters
+MaxSteps= 500
+MaxBattery=80
+Rows =3
+Cols = 13
+!WWWWWWWWWWWW
+D0 0123456789
+#WWWWWWWWWWWW

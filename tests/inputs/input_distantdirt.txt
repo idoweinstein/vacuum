@@ -1,6 +1,8 @@
-max_robot_steps 100
-max_battery_steps 4
-house
-000
-0@001
-000
+Distant Dirt
+MaxSteps = 100
+MaxBattery= 4
+Rows=3
+Cols =5
+000WW
+0D001
+000WW

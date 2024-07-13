@@ -91,6 +91,8 @@ public:
                      << kStepsField << steps_taken.str();
 
         logMessage(LogLevel::INFO, LogOutput::FILE, stringStream.str());
+
+        steps_taken.str("");
     }
 
     /**

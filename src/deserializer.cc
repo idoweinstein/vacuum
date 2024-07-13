@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <fstream>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 
@@ -11,6 +12,26 @@
 #include "position.h"
 #include "battery.h"
 #include "house.h"
+
+/* 
+ * Trim helper function.
+ * Removes leading and trailing whitespaces from a string.
+ * Source: https://stackoverflow.com/questions/66897068/can-trim-of-a-string-be-done-inplace-with-c20-ranges#answer-66897681
+ */
+void trim(std::string& s) {
+    auto not_space = [](unsigned char c){ return !std::isspace(c); };
+
+    // erase the the spaces at the back first
+    // so we don't have to do extra work
+    s.erase(
+        std::ranges::find_if(s | std::views::reverse, not_space).base(),
+        s.end());
+
+    // erase the spaces at the front
+    s.erase(
+        s.begin(),
+        std::ranges::find_if(s, not_space));
+}
 
 unsigned int Deserializer::valueToUnsignedInt(const std::string& value)
 {
@@ -45,11 +66,14 @@ unsigned int Deserializer::deserializeParameter(std::istream& input_stream, cons
     std::string parameter_key;
     if (std::getline(line_stream, parameter_key, kParameterDelimiter))
     {
+        trim(parameter_key);
+
         std::string parameter_value;
         std::getline(line_stream, parameter_value);
 
         if (parameter_name == parameter_key)
         {
+            trim(parameter_value);
             parameter.is_initialized = true;
             parameter.value = valueToUnsignedInt(parameter_value);
         }

@@ -47,9 +47,10 @@ void Simulator::move(Step next_step)
 {
     RobotLogger& logger = RobotLogger::getInstance();
 
+    logger.logRobotStep(next_step);
+
     if (Step::FINISH == next_step)
     {
-        /* Shouldn't happen */
         return;
     }
 
@@ -74,8 +75,6 @@ void Simulator::move(Step next_step)
     }
  
     house->move(next_step);
-
-    logger.logRobotStep(next_step);
 }
 
 void Simulator::setAlgorithm(AbstractAlgorithm& alg)
@@ -99,20 +98,19 @@ void Simulator::run()
     unsigned int total_steps_performed = 0;
     bool is_algorithm_finished = false;
 
-    while (!shouldStopCleaning(total_steps_performed))
+    while (total_steps_performed <= max_simulator_steps)
     {
         Step next_step = algorithm->nextStep();
+        move(next_step);
 
         if (Step::FINISH == next_step)
         {
             // In case Robot mapped all accessible positions and have nothing left to clean
             is_algorithm_finished = true;
-            logger.logRobotStep(next_step);
             break;
+        } else {
+            total_steps_performed++;
         }
-
-        move(next_step);
-        total_steps_performed++;
     }
 
     unsigned int total_dirt_count = house->getTotalDirtCount();

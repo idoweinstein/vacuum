@@ -1,4 +1,6 @@
-max_robot_steps 10
-max_battery_steps 3
-house
-@1
+Minimum Battery
+MaxSteps = 10
+MaxBattery=3
+Rows = 1
+Cols=2
+D1

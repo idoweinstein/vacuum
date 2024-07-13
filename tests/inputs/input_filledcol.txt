@@ -1,0 +1,8 @@
+Filled Column
+MaxSteps=100
+MaxBattery=100
+Rows=3
+Cols=2
+D
+W
+1
