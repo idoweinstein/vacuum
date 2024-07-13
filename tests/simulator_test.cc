@@ -114,13 +114,10 @@ namespace
         robot_state.status = stringToStatus(matches[3]);
         robot_state.runtime_steps.clear();
         robot_state.runtime_steps.reserve(matches[4].length());
-        std::cout << matches[1] << " " << matches[2] << " " << matches[3] << " " << matches[4] << std::endl;
         for (auto step : static_cast<const std::string &>(matches[4]))
         {
-            std::cout << step;
             robot_state.runtime_steps.push_back(charToStep(step));
         }
-        std::cout << std::endl << "Finished" << std::endl;
 
         EXPECT_EQ(robot_state.total_steps_taken, robot_state.runtime_steps.size() - 1);
 
