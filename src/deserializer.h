@@ -59,7 +59,7 @@ class Deserializer
     {
         if (!parameter.has_value())
         {
-            const std::string error_message = "Missing " + parameter_name + " parameter in house file!";
+            const std::string error_message = "Missing '" + parameter_name + "' parameter in house file!";
             throw std::runtime_error(error_message);
         }
     }
