@@ -9,7 +9,7 @@
 /**
  * @brief The Direction enum represents the possible directions for the vacuum cleaner.
  */
-enum class Direction{ NORTH, EAST, SOUTH, WEST, };
+enum class Direction{ North, East, South, West };
 
 // Adapting Direction enum class to be streamable, for logging purposes:
 namespace std
@@ -23,19 +23,19 @@ namespace std
 
         switch (direction)
         {
-            case Direction::NORTH:
+            case Direction::North:
                 string_direction = "North";
                 break;
 
-            case Direction::EAST:
+            case Direction::East:
                 string_direction = "East";
                 break;
 
-            case Direction::SOUTH:
+            case Direction::South:
                 string_direction = "South";
                 break;
 
-            case Direction::WEST:
+            case Direction::West:
                 string_direction = "West";
                 break;
 

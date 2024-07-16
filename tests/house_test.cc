@@ -47,7 +47,7 @@ namespace
             static Step getNextStep()
             {
                 static Step steps[] = {
-                    Step::NORTH, Step::SOUTH, Step::WEST, Step::EAST, Step::STAY, Step::FINISH
+                    Step::North, Step::South, Step::West, Step::East, Step::Stay, Step::Finish
                 };
 
                 Step next_step = steps[direction_iterator % 6];
@@ -106,7 +106,7 @@ namespace
             Step next_step = getNextStep();
             bool is_wall = false;
 
-            if (Step::FINISH != next_step && Step::STAY != next_step)
+            if (Step::Finish != next_step && Step::Stay != next_step)
             {
                 is_wall = house->isWall(static_cast<Direction>(next_step));
             }
@@ -131,19 +131,19 @@ namespace
         House simple_location(wall_map, dirt_map, Position(0,0));
 
         EXPECT_THROW({
-            simple_location.move(Step::NORTH);
+            simple_location.move(Step::North);
         }, std::runtime_error);
 
         EXPECT_THROW({
-            simple_location.move(Step::SOUTH);
+            simple_location.move(Step::South);
         }, std::runtime_error);
  
         EXPECT_THROW({
-            simple_location.move(Step::EAST);
+            simple_location.move(Step::East);
         }, std::runtime_error);
 
         EXPECT_THROW({
-            simple_location.move(Step::WEST);
+            simple_location.move(Step::West);
         }, std::runtime_error);
     }
 }

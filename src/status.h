@@ -3,9 +3,9 @@
 
 enum class Status
 {
-    FINISHED,
-    WORKING,
-    DEAD
+    Finished,
+    Working,
+    Dead
 };
 
 // Adapting Status enum class to be streamable, for logging purposes:
@@ -20,15 +20,15 @@ namespace std
 
         switch (status)
         {
-            case Status::FINISHED:
+            case Status::Finished:
                 status_string = "FINISHED";
                 break;
 
-            case Status::WORKING:
+            case Status::Working:
                 status_string = "WORKING";
                 break;
 
-            case Status::DEAD:
+            case Status::Dead:
                 status_string = "DEAD";
                 break;
         }

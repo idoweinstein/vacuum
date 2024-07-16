@@ -178,13 +178,13 @@ Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until
     // left no dirty accessible places AND we're in docking station - finish cleaning
     if (remaining_steps_total <= 0 || (path_to_station.empty() && todo_positions.empty()))
     {
-        return Step::FINISH;
+        return Step::Finish;
     }
 
     // If charging - charge until battery is full
     if (path_to_station.empty() && !is_battery_full)
     {
-        return Step::STAY;
+        return Step::Stay;
     }
 
     // If there's not enough battery - go to station
@@ -202,7 +202,7 @@ Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until
     // If the current position is dirty, stay to clean it
     if (dirt_level > 0)
     {
-        return Step::STAY;
+        return Step::Stay;
     }
 
     /* If going one step further will cause the battery
@@ -243,14 +243,14 @@ Step Algorithm::nextStep()
 
 void Algorithm::move(Step step)
 {
-    if (Step::FINISH == step)
+    if (Step::Finish == step)
     {
         return;
     }
 
     steps_taken++;
 
-    if (Step::STAY == step)
+    if (Step::Stay == step)
     {
         return;
     }

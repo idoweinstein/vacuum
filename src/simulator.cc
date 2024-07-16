@@ -11,17 +11,17 @@ Status Simulator::getMissionStatus(bool is_algorithm_finished, bool is_mission_c
 {
     if (is_mission_complete || is_algorithm_finished)
     {
-        return Status::FINISHED;
+        return Status::Finished;
     }
 
     else if (is_battery_exhausted)
     {
-        return Status::DEAD;
+        return Status::Dead;
     }
 
     else
     {
-        return Status::WORKING;
+        return Status::Working;
     }
 }
 
@@ -31,13 +31,13 @@ void Simulator::move(Step next_step)
 
     logger.logRobotStep(next_step);
 
-    if (Step::FINISH == next_step)
+    if (Step::Finish == next_step)
     {
         return;
     }
 
     /* If no battery left - discharge() throws an Empty Battery exception */
-    if (Step::STAY == next_step)
+    if (Step::Stay == next_step)
     {
         if (house->isInDockingStation())
         {
@@ -61,7 +61,7 @@ void Simulator::move(Step next_step)
 
 void Simulator::readHouseFile(const std::string& house_file_path)
 {
-    if (SimulatorState::READY == state)
+    if (SimulatorState::Ready == state)
     {
         throw std::logic_error("Called Simulator::readHouseFile() after calling Simulator::setAlgorithm()");
     }
@@ -82,12 +82,12 @@ void Simulator::readHouseFile(const std::string& house_file_path)
     battery = Deserializer::deserializeBattery(house_file);
     house = Deserializer::deserializeHouse(house_file);
 
-    state = SimulatorState::DESERIALIED;
+    state = SimulatorState::Deserialized;
 }
 
 void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
 {
-    if (SimulatorState::INITIAL == state)
+    if (SimulatorState::Initial == state)
     {
         throw std::logic_error("Called Simulator::setAlgorithm() before calling Simulator::readHouseFile()");
     }
@@ -104,12 +104,12 @@ void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
     algorithm->setDirtSensor(*house);
     algorithm->setBatteryMeter(*battery);
 
-    state = SimulatorState::READY;
+    state = SimulatorState::Ready;
 }
 
 void Simulator::run()
 {
-    if (SimulatorState::READY != state)
+    if (SimulatorState::Ready != state)
     {
         throw std::logic_error("Called Simulator::run() before calling Simulator::readHouseFile() or Simulator::setAlgorithm()");
     }
@@ -123,7 +123,7 @@ void Simulator::run()
         Step next_step = algorithm->nextStep();
         move(next_step);
 
-        if (Step::FINISH == next_step)
+        if (Step::Finish == next_step)
         {
             // In case Robot mapped all accessible positions and have nothing left to clean
             is_algorithm_finished = true;

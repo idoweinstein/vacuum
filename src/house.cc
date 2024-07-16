@@ -87,7 +87,7 @@ bool House::isWall(Direction direction) const
 
 void House::move(Step step)
 {
-    if (Step::STAY == step || Step::FINISH == step) {
+    if (Step::Stay == step || Step::Finish == step) {
         return;
     }
 

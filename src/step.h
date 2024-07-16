@@ -7,7 +7,7 @@
 /**
  * @brief The Step enum represents the possible suggestions the algorithm can give to the simulator.
  */
-enum class Step { NORTH, EAST, SOUTH, WEST, STAY, FINISH };
+enum class Step { North, East, South, West, Stay, Finish };
 
 // Adapting Step enum class to be streamable, for logging purposes:
 namespace std
@@ -21,27 +21,27 @@ namespace std
 
         switch (step)
         {
-            case Step::NORTH:
+            case Step::North:
                 string_step = "N";
                 break;
 
-            case Step::EAST:
+            case Step::East:
                 string_step = "E";
                 break;
 
-            case Step::SOUTH:
+            case Step::South:
                 string_step = "S";
                 break;
 
-            case Step::WEST:
+            case Step::West:
                 string_step = "W";
                 break;
 
-            case Step::STAY:
+            case Step::Stay:
                 string_step = "s";
                 break;
 
-            case Step::FINISH:
+            case Step::Finish:
                 string_step = "F";
                 break;
         }

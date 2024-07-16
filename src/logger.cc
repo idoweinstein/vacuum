@@ -9,7 +9,7 @@ void Logger::logMessage(LogLevel log_level, LogOutput output, const std::string&
 {
     const std::string& log_prefix = log_level_prefix.at(log_level);
 
-    if (LogOutput::FILE == output)
+    if (LogOutput::File == output)
     {
         for (std::ofstream& file : log_files)
         {
@@ -17,7 +17,7 @@ void Logger::logMessage(LogLevel log_level, LogOutput output, const std::string&
         }
     }
 
-    else if (LogOutput::CONSOLE == output)
+    else if (LogOutput::Console == output)
     {
         std::cout << log_prefix << message << std::endl;
     }

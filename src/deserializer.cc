@@ -124,20 +124,20 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
         {
             switch (block)
             {
-                case BlockType::DIRT_LEVEL_0:
-                case BlockType::DIRT_LEVEL_1:
-                case BlockType::DIRT_LEVEL_2:
-                case BlockType::DIRT_LEVEL_3:
-                case BlockType::DIRT_LEVEL_4:
-                case BlockType::DIRT_LEVEL_5:
-                case BlockType::DIRT_LEVEL_6:
-                case BlockType::DIRT_LEVEL_7:
-                case BlockType::DIRT_LEVEL_8:
-                case BlockType::DIRT_LEVEL_9:
+                case BlockType::DirtLevel0:
+                case BlockType::DirtLevel1:
+                case BlockType::DirtLevel2:
+                case BlockType::DirtLevel3:
+                case BlockType::DirtLevel4:
+                case BlockType::DirtLevel5:
+                case BlockType::DirtLevel6:
+                case BlockType::DirtLevel7:
+                case BlockType::DirtLevel8:
+                case BlockType::DirtLevel9:
                     dirt_map[row_idx][column_idx] = (unsigned int)(block - '0');
                     break;
 
-                case BlockType::DOCKING_STATION:
+                case BlockType::DockingStation:
                     if (docking_station_position.has_value())
                     {
                         throw std::runtime_error("More than one docking station was given in house file!");
@@ -145,7 +145,7 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
                     docking_station_position = {row_idx, column_idx};
                     break;
 
-                case BlockType::WALL:
+                case BlockType::Wall:
                     wall_map[row_idx][column_idx] = true;
                     break;
 

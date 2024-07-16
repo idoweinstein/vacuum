@@ -99,7 +99,7 @@ namespace
     TEST_F(AlgorithmTest, BlockedByWalls)
     {
         Step suggested_step = algorithm.nextStep();
-        EXPECT_EQ(Step::FINISH, suggested_step);
+        EXPECT_EQ(Step::Finish, suggested_step);
     }
 
     TEST_F(AlgorithmTest, dirtyDockingStation)
@@ -109,7 +109,7 @@ namespace
         EXPECT_CALL(wall_sensor, isWall(testing::_))
             .WillRepeatedly(testing::Return(false));
         Step suggested_step = algorithm.nextStep();
-        EXPECT_EQ(Step::STAY, suggested_step);
+        EXPECT_EQ(Step::Stay, suggested_step);
     }
 
     TEST_F(AlgorithmTest, ReturnToDockingStationBattery)
@@ -128,32 +128,32 @@ namespace
                 return 0;
             }));
 
-        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::EAST)))
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::East)))
             .WillRepeatedly(testing::Return(true));
 
-        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::WEST)))
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::West)))
             .WillRepeatedly(testing::Return(true));
 
-        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::NORTH)))
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::North)))
             .WillRepeatedly(testing::Return(false));
 
-        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::SOUTH)))
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::South)))
             .WillOnce(testing::Return(true))
             .WillRepeatedly(testing::Return(false));
 
         for (int i = 0; i < 2; i++)
         {
             suggested_step = algorithm.nextStep();
-            EXPECT_EQ(Step::NORTH, suggested_step);
+            EXPECT_EQ(Step::North, suggested_step);
         }
 
         isAtLimit = true;
         suggested_step = algorithm.nextStep();
-        EXPECT_EQ(Step::STAY, suggested_step);
+        EXPECT_EQ(Step::Stay, suggested_step);
         for (int i = 0; i < 2; i++)
         {
             suggested_step = algorithm.nextStep();
-            EXPECT_EQ(Step::SOUTH, suggested_step);
+            EXPECT_EQ(Step::South, suggested_step);
         }
     }
 
@@ -166,24 +166,24 @@ namespace
             .WillOnce(testing::Invoke([&]() { return 0; }))
             .WillRepeatedly(testing::Invoke([&]() { return 1; }));
 
-        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::EAST)))
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::East)))
             .WillOnce(testing::Return(true))
             .WillRepeatedly(testing::Return(false));
 
-        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::WEST)))
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::West)))
             .WillRepeatedly(testing::Return(false));
 
-        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::NORTH)))
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::North)))
             .WillRepeatedly(testing::Return(true));
 
-        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::SOUTH)))
+        EXPECT_CALL(wall_sensor, isWall(testing::Eq(Direction::South)))
             .WillRepeatedly(testing::Return(true));
 
-        EXPECT_EQ(Step::WEST, algorithm.nextStep());
+        EXPECT_EQ(Step::West, algorithm.nextStep());
 
-        EXPECT_EQ(Step::EAST, algorithm.nextStep());
+        EXPECT_EQ(Step::East, algorithm.nextStep());
 
-        EXPECT_EQ(Step::FINISH, algorithm.nextStep());
+        EXPECT_EQ(Step::Finish, algorithm.nextStep());
     }
 
     TEST_F(AlgorithmTest, TooLowBatteryToGetFurther)
@@ -194,7 +194,7 @@ namespace
             .WillRepeatedly(testing::Return(false));
 
         Step suggested_step = algorithm.nextStep();
-        EXPECT_EQ(Step::STAY, suggested_step);
+        EXPECT_EQ(Step::Stay, suggested_step);
     }
 
     TEST_F(AlgorithmTest, TooLowBatteryToStay)
@@ -206,13 +206,13 @@ namespace
 
         // At first, we will get further because we can
         Step suggested_step = algorithm.nextStep();
-        EXPECT_NE(Step::STAY, suggested_step);
+        EXPECT_NE(Step::Stay, suggested_step);
 
         // Then, even though there will be dirt, we will have to return
         EXPECT_CALL(dirt_sensor, dirtLevel())
             .WillOnce(testing::Return(9));
 
         suggested_step = algorithm.nextStep();
-        EXPECT_NE(Step::STAY, suggested_step);
+        EXPECT_NE(Step::Stay, suggested_step);
     }
 }

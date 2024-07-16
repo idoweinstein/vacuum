@@ -4,7 +4,7 @@ unsigned int PathTree::insertRoot(Position position)
 {
     node_pool.emplace_back(
         kNoParent,          // PathNode.parent_index
-        Direction::NORTH,   // PathNode.direction (doesn't matter - it's the first path node)
+        Direction::North,   // PathNode.direction (doesn't matter - it's the first path node)
         position,           // PathNode.position
         0                   // PathNode.depth
     );

@@ -13,9 +13,9 @@
  */
 enum class LogLevel
 {
-    INFO = 0,
-    WARNING,
-    ERROR
+    Info = 0,
+    Warning,
+    Error
 };
 
 /**
@@ -23,8 +23,8 @@ enum class LogLevel
  */
 enum class LogOutput
 {
-    FILE,
-    CONSOLE
+    File,
+    Console
 };
 
 /**
@@ -36,9 +36,9 @@ enum class LogOutput
 class Logger
 {
     inline static const std::map<LogLevel, const std::string> log_level_prefix = {
-        {LogLevel::INFO, ""},              // Prefix for information level logs
-        {LogLevel::WARNING, "[WARNING] "}, // Prefix for warning level logs
-        {LogLevel::ERROR, "[ERROR] "}      // Prefix for error level logs
+        {LogLevel::Info, ""},              // Prefix for information level logs
+        {LogLevel::Warning, "[WARNING] "}, // Prefix for warning level logs
+        {LogLevel::Error, "[ERROR] "}      // Prefix for error level logs
     };
 
     std::vector<std::ofstream> log_files;  // Vector of log file streams

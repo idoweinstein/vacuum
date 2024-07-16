@@ -90,7 +90,7 @@ public:
                      << kStatusField << status \
                      << kStepsField << steps_taken.str();
 
-        logMessage(LogLevel::INFO, LogOutput::FILE, stringStream.str());
+        logMessage(LogLevel::Info, LogOutput::File, stringStream.str());
 
         steps_taken.str("");
     }
@@ -101,7 +101,7 @@ public:
      */
     virtual void logWarning(const std::string warning_message)
     {
-        logMessage(LogLevel::WARNING, LogOutput::CONSOLE, warning_message);
+        logMessage(LogLevel::Warning, LogOutput::Console, warning_message);
     }
 
     /**
@@ -110,7 +110,7 @@ public:
      */
     virtual void logError(const std::string error_message)
     {
-        logMessage(LogLevel::ERROR, LogOutput::CONSOLE, error_message);
+        logMessage(LogLevel::Error, LogOutput::Console, error_message);
     }
 };
 

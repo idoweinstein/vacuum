@@ -26,18 +26,18 @@ namespace
     class OutputDeserializer
     {
         inline static const std::map<char, Step> step_map = {
-            {'N', Step::NORTH},
-            {'E', Step::EAST},
-            {'S', Step::SOUTH},
-            {'W', Step::WEST},
-            {'s', Step::STAY},
-            {'F', Step::FINISH}
+            {'N', Step::North},
+            {'E', Step::East},
+            {'S', Step::South},
+            {'W', Step::West},
+            {'s', Step::Stay},
+            {'F', Step::Finish}
         };
 
         inline static const std::map<std::string, Status> status_map = {
-            {"FINISHED", Status::FINISHED},
-            {"WORKING", Status::WORKING},
-            {"DEAD", Status::DEAD}
+            {"FINISHED", Status::Finished},
+            {"WORKING", Status::Working},
+            {"DEAD", Status::Dead}
         };
 
         inline static const std::string kRegexPattern = 
@@ -71,7 +71,7 @@ namespace
         {
             robot_state.total_steps_taken = 0;
             robot_state.total_dirt_left = 0;
-            robot_state.status = Status::WORKING;
+            robot_state.status = Status::Working;
         }
 
         bool deserializeOutputFile(const std::string& output_file_name);
@@ -165,14 +165,14 @@ namespace
 
         // Make sure robot did 'total_steps_taken' steps, and its first step wasn't Direction::STAY
         std::size_t path_length = robot_state.runtime_steps.size();
-        if (robot_state.runtime_steps.back() == Step::FINISH) {
+        if (robot_state.runtime_steps.back() == Step::Finish) {
             path_length--;
         }
         EXPECT_EQ(robot_state.total_steps_taken, path_length);
-        EXPECT_NE(Step::STAY, robot_state.runtime_steps.at(0));
+        EXPECT_NE(Step::Stay, robot_state.runtime_steps.at(0));
 
         // Assert the expected program results (Robot is not dead and cleaned all dirt)
-        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_EQ(Status::Finished, robot_state.status);
     }
 
     TEST_F(SimulatorTest, RobotTrappedDirt)
@@ -182,7 +182,7 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected program results (Robot is not dead, cleaned all ACCESSIBLE dirt, but there's more trapped dirt)
-        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_EQ(Status::Finished, robot_state.status);
         EXPECT_LT(0, robot_state.total_dirt_left);
     }
 
@@ -193,7 +193,7 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_EQ(Status::Finished, robot_state.status);
     }
 
     TEST_F(SimulatorTest, RobotMinimalBatteryToComplete)
@@ -203,13 +203,13 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_EQ(Status::Finished, robot_state.status);
 
         Step expected_steps[] = {
-            Step::EAST,
-            Step::STAY,
-            Step::WEST,
-            Step::FINISH
+            Step::East,
+            Step::Stay,
+            Step::West,
+            Step::Finish
         };
         size_t expected_steps_num = 4;
 
@@ -232,7 +232,7 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_EQ(Status::Finished, robot_state.status);
 
         unsigned int max_robot_steps = 100;
         EXPECT_EQ(max_robot_steps, robot_state.total_steps_taken);
@@ -248,7 +248,7 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_EQ(Status::Finished, robot_state.status);
     }
 
     TEST_F(SimulatorTest, RobotNoHouse)
@@ -272,7 +272,7 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_EQ(Status::Finished, robot_state.status);
         EXPECT_EQ(0, robot_state.total_dirt_left);
     }
 
@@ -283,7 +283,7 @@ namespace
         RobotState& robot_state = getRobotState();
 
         // Assert the expected results
-        EXPECT_EQ(Status::FINISHED, robot_state.status);
+        EXPECT_EQ(Status::Finished, robot_state.status);
         EXPECT_EQ(0, robot_state.total_dirt_left);
     }
 

@@ -33,7 +33,7 @@ class Algorithm : public AbstractAlgorithm
 {
         static constexpr const int kNotFound = -1;     // Constant value representing path not found status.
         inline static const Direction directions[] = { // Directions of movement.
-            Direction::NORTH, Direction::EAST, Direction::SOUTH, Direction::WEST
+            Direction::North, Direction::East, Direction::South, Direction::West
         };
 
         std::size_t steps_taken = 0;                    // Number of steps taken so far.
@@ -98,7 +98,7 @@ class Algorithm : public AbstractAlgorithm
          * @brief Gets the next step in a path.
          *
          * This method gets the next step in a path by returning the front direction of the path.
-         * If the path is empty, it returns Direction::STAY.
+         * If the path is empty, it returns Step::Stay.
          *
          * @param path The path to get the next step from.
          * @return The next step in the path.
@@ -108,7 +108,7 @@ class Algorithm : public AbstractAlgorithm
             // Handle empty path
             if (path.empty())
             {
-                return Step::STAY;
+                return Step::Stay;
             }
             return static_cast<Step>(path.front());
         }

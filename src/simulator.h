@@ -21,12 +21,12 @@ class Simulator
 {
     enum class SimulatorState
     {
-        INITIAL,
-        DESERIALIED,
-        READY
+        Initial,
+        Deserialized,
+        Ready
     };
 
-    SimulatorState state = SimulatorState::INITIAL;
+    SimulatorState state = SimulatorState::Initial;
     unsigned int max_simulator_steps = 0; // The maximum number of steps the simulator can perform.
     std::unique_ptr<Battery> battery; // The battery controller for managing the robot's battery.
     std::unique_ptr<House> house;     // The location manager for tracking the robot's position.

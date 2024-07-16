@@ -32,27 +32,18 @@ class Deserializer
 
     enum BlockType : char
     {
-        DOCKING_STATION = 'D',
-        WALL = 'W',
-        DIRT_LEVEL_0 = '0',
-        DIRT_LEVEL_1 = '1',
-        DIRT_LEVEL_2 = '2',
-        DIRT_LEVEL_3 = '3',
-        DIRT_LEVEL_4 = '4',
-        DIRT_LEVEL_5 = '5',
-        DIRT_LEVEL_6 = '6',
-        DIRT_LEVEL_7 = '7',
-        DIRT_LEVEL_8 = '8',
-        DIRT_LEVEL_9 = '9'
-    };
-
-    enum ParameterType
-    {
-        MAX_BATTERY_STEPS = 0,
-        MAX_SIMULATOR_STEPS,
-        HOUSE_ROWS_NUM,
-        HOUSE_COLS_NUM,
-        NUMBER_OF_PARAMETERS
+        DockingStation = 'D',
+        Wall = 'W',
+        DirtLevel0 = '0',
+        DirtLevel1 = '1',
+        DirtLevel2 = '2',
+        DirtLevel3 = '3',
+        DirtLevel4 = '4',
+        DirtLevel5 = '5',
+        DirtLevel6 = '6',
+        DirtLevel7 = '7',
+        DirtLevel8 = '8',
+        DirtLevel9 = '9'
     };
 
     static void assertParameterSet(std::optional<unsigned int>& parameter, const std::string& parameter_name)
