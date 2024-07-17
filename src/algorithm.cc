@@ -9,10 +9,7 @@
 
 Algorithm::Algorithm()
     : current_position(0, 0)
-{
-    // Update current location (docking station) as non-wall
-    wall_map[current_position] = false;
-}
+{}
 
 void Algorithm::setMaxSteps(std::size_t max_steps)
 {
@@ -150,7 +147,10 @@ void Algorithm::getSensorsInfo(int& dirt_level, std::size_t& reamining_steps_unt
     if (dirt_level > 0)
     {
         todo_positions.insert(current_position);
-    } else {
+    }
+
+    else
+    {
         todo_positions.erase(current_position);
     }
 
