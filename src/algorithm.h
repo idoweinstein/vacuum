@@ -143,12 +143,11 @@ class Algorithm : public AbstractAlgorithm
      */
     virtual bool getPathToStation(std::deque<Direction>& path);
 
-    /**
-     * @brief Maps the walls around the current position.
-     *
-     * This method maps the walls around the current position by updating the wall_map.
-    */
-    virtual void mapWallsAround();
+    virtual void getWallSensorInfo();
+
+    virtual int getDirtSensorInfo();
+
+    virtual void getBatteryMeterInfo(std::size_t& remaining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full) const;
 
     /**
      * @brief Gets the information from the sensors.
@@ -161,6 +160,37 @@ class Algorithm : public AbstractAlgorithm
      * @param battery_is_full The variable to store the battery full status.
      */
     virtual void getSensorsInfo(int& dirt_level, std::size_t& remaining_steps_until_charge, std::size_t& remaining_steps_total, bool& battery_is_full);
+
+    virtual bool shouldFinish(std::size_t station_distance, std::size_t remaining_steps_total)
+    {
+        bool is_finished_cleaning = (0 == station_distance) && todo_positions.empty();
+        return (0 == remaining_steps_total) || is_finished_cleaning;
+    }
+
+    virtual bool shouldCharge(std::size_t station_distance, bool is_battery_full)
+    {
+        return (0 == station_distance) && !is_battery_full;
+    }
+
+    virtual bool lowBatteryToStay(std::size_t station_distance, std::size_t remaining_steps_until_charge)
+    {
+        return (remaining_steps_until_charge < 1 + station_distance);
+    }
+
+    virtual bool noPositionsLeftToVisit()
+    {
+        return todo_positions.empty();
+    }
+
+    virtual bool currentPositionDirty(int dirt_level)
+    {
+        return dirt_level > 0;
+    }
+
+    virtual bool lowBatteryToGetFurther(std::size_t station_distance, std::size_t remaining_steps_until_charge)
+    {
+        return remaining_steps_until_charge < 2 + station_distance;
+    }
 
     /**
      * @brief Decides the next step based on the sensor information.

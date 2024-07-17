@@ -116,7 +116,7 @@ bool Algorithm::getPathToStation(std::deque<Direction>& path)
     );
 }
 
-void Algorithm::mapWallsAround()
+void Algorithm::getWallSensorInfo()
 {
     for (Direction direction : directions)
     {
@@ -137,13 +137,14 @@ void Algorithm::mapWallsAround()
 
         todo_positions.insert(position);
     }
+
+    wall_map[current_position] = false;
 }
 
-void Algorithm::getSensorsInfo(int& dirt_level, std::size_t& reamining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full)
+int Algorithm::getDirtSensorInfo()
 {
-    mapWallsAround();
+    int dirt_level = dirt_sensor.value()->dirtLevel();
 
-    dirt_level = dirt_sensor.value()->dirtLevel();
     if (dirt_level > 0)
     {
         todo_positions.insert(current_position);
@@ -154,66 +155,73 @@ void Algorithm::getSensorsInfo(int& dirt_level, std::size_t& reamining_steps_unt
         todo_positions.erase(current_position);
     }
 
-    /* Update current location (docking station) as non-wall */
-    wall_map[current_position] = false;
+    return dirt_level;
+}
 
+void Algorithm::getBatteryMeterInfo(std::size_t& remaining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full) const
+{
     std::size_t remaining_battery_capacity = battery_meter.value()->getBatteryState();
 
     remaining_steps_total = max_steps.value() - steps_taken;
-    reamining_steps_until_charge = std::min(remaining_battery_capacity, remaining_steps_total);
+    remaining_steps_until_charge = std::min(remaining_battery_capacity, remaining_steps_total);
 
-    is_battery_full = (remaining_battery_capacity >= full_battery);
+    is_battery_full = (remaining_battery_capacity >= full_battery);   
+}
+
+void Algorithm::getSensorsInfo(int& dirt_level, std::size_t& remaining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full)
+{
+    getWallSensorInfo();
+
+    dirt_level = getDirtSensorInfo();
+
+    getBatteryMeterInfo(remaining_steps_until_charge, remaining_steps_total, is_battery_full);
 }
 
 Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until_charge, std::size_t remaining_steps_total, bool is_battery_full)
 {
     std::deque<Direction> path_to_station;
     bool is_found = getPathToStation(path_to_station);
+
     if (!is_found)
     {
         throw std::runtime_error("Simulator cannot find path back to the docking station!");
     }
 
-    // If no allowed steps OR
-    // left no dirty accessible places AND we're in docking station - finish cleaning
-    if (remaining_steps_total <= 0 || (path_to_station.empty() && todo_positions.empty()))
+    std::size_t station_distance = getPathDistance(path_to_station);
+
+    if (shouldFinish(station_distance, remaining_steps_total))
     {
         return Step::Finish;
     }
 
-    // If charging - charge until battery is full
-    if (path_to_station.empty() && !is_battery_full)
+    if (shouldCharge(station_distance, is_battery_full))
     {
         return Step::Stay;
     }
 
-    // If there's not enough battery - go to station
-    if (remaining_steps_until_charge < 1 + getPathDistance(path_to_station))
+    if (lowBatteryToStay(station_distance, remaining_steps_until_charge))
     {
         return getPathNextStep(path_to_station);
     }
 
-    // If no positions left to visit (visited & cleaned all accessible positions) - go to station
-    if (todo_positions.empty())
+    if (noPositionsLeftToVisit())
     {
         return getPathNextStep(path_to_station);
     }
 
-    // If the current position is dirty, stay to clean it
-    if (dirt_level > 0)
+    if (currentPositionDirty(dirt_level))
     {
         return Step::Stay;
     }
 
-    /* If going one step further will cause the battery
-       to drain before reaching the station - go to station */
-    if (remaining_steps_until_charge < 2 + getPathDistance(path_to_station))
+    if (lowBatteryToGetFurther(station_distance, remaining_steps_until_charge))
     {
         return getPathNextStep(path_to_station);
     }
 
     std::deque<Direction> path_to_nearest_todo;
     is_found = getPathToNearestTodo(path_to_nearest_todo);
+
     // If there's no path to a TODO position - go to station
     if (!is_found)
     {
