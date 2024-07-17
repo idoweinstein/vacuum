@@ -21,10 +21,6 @@ class Battery : public BatteryMeter
     float current_amount;                                    // Remaining capacity of the battery (in steps).
 
 public:
-    // Disable copy constructor and assignment operator.
-    Battery(const Battery&) = delete;
-    Battery& operator=(const Battery&) = delete;
-
     /**
      * @brief Constructs a new Battery object with the specified full amount of the battery.
      *

@@ -35,10 +35,6 @@ class House : public WallsSensor, public DirtSensor
     template <typename T> static bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position);
 
 public:
-    // Delete copy constructor and assignment operator
-    House(const House&) = delete;
-    House& operator=(const House&) = delete;
-
     /**
      * @brief Constructs a new House object.
      *

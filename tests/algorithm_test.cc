@@ -10,10 +10,6 @@ namespace
     {
     public:
         MockWallsSensor() = default;
-        // delete copy constructor
-        MockWallsSensor(const MockWallsSensor&) = delete;
-        // delete assignment operator
-        MockWallsSensor& operator=(const MockWallsSensor&) = delete;
 
         MOCK_METHOD(bool, isWall, (Direction direction), (const, override));
     };
@@ -22,10 +18,6 @@ namespace
     {
     public:
         MockDirtSensor() = default;
-        // delete copy constructor
-        MockDirtSensor(const MockDirtSensor&) = delete;
-        // delete assignment operator
-        MockDirtSensor& operator=(const MockDirtSensor&) = delete;
 
         MOCK_METHOD(int, dirtLevel, (), (const, override));
     };
@@ -34,10 +26,6 @@ namespace
     {
     public:
         MockBatteryMeter() = default;
-        // delete copy constructor
-        MockBatteryMeter(const MockBatteryMeter&) = delete;
-        // delete assignment operator
-        MockBatteryMeter& operator=(const MockBatteryMeter&) = delete;
 
         MOCK_METHOD(std::size_t, getBatteryState, (), (const, override));
     };

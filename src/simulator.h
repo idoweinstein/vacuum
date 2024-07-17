@@ -47,6 +47,15 @@ class Simulator
     void move(Step next_step);
 
 public:
+    Simulator() = default;
+    /**
+     * @brief Deleted copy constructor and assignment operator.
+     *
+     * The copy constructor and assignment operator are deleted to prevent using the 'shallow' raw pointer address copy (regarding `algorithm` data member).
+     */
+    Simulator(const Simulator& simulator) = delete;
+    Simulator& operator=(const Simulator& simulator) = delete;
+
     void setAlgorithm(AbstractAlgorithm& algorithm);
 
     void readHouseFile(const std::string& house_file_path);

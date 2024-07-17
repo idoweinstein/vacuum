@@ -77,6 +77,13 @@ class Deserializer
     static unsigned int deserializeParameter(std::istream& input_stream, const std::string& parameter_name);
 
 public:
+    /**
+    * @brief Deleted deault empty constructor.
+    *
+    * The default empty constructor is deleted since it's useless, as all the Deserializer member functions are `static`.
+    */
+    Deserializer() = delete;
+
     static void ignoreInternalName(std::istream& input_stream);
 
     static unsigned int deserializeMaxSteps(std::istream& input_stream);
