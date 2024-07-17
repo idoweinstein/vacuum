@@ -1,10 +1,10 @@
-#ifndef VACUUM_ABSTRACTALGORITHM_H_
-#define VACUUM_ABSTRACTALGORITHM_H_
+#ifndef ABSTRACT_ALGORITHM_H_
+#define ABSTRACT_ALGORITHM_H_
 
-#include "batterymeter.h"
-#include "dirtsensor.h"
-#include "wallssensor.h"
-#include "step.h"
+#include "battery_meter.h"
+#include "dirt_sensor.h"
+#include "wall_sensor.h"
+#include "enums.h"
 
 /**
  * @brief The AbstractAlgorithm class is an abstract base class for vacuum cleaner algorithms.
@@ -53,4 +53,4 @@ public:
     virtual Step nextStep() = 0;
 };
 
-#endif /* VACUUM_ABSTRACTALGORITHM_H_ */
+#endif /* ABSTRACT_ALGORITHM_H_ */

@@ -1,11 +1,11 @@
-#ifndef VACUUM_BATTERY_H_
-#define VACUUM_BATTERY_H_
-
-#include "batterymeter.h"
+#ifndef BATTERY_H_
+#define BATTERY_H_
 
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+
+#include "battery_meter.h"
 
 /**
  * @brief The Battery class represents a robot battery.
@@ -74,4 +74,4 @@ public:
     }
 };
 
-#endif /* VACUUM_BATTERY_H_ */
+#endif /* BATTERY_H_ */

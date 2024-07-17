@@ -1,17 +1,17 @@
 #include "gtest/gtest.h"
 
-#include <sstream>
-#include <fstream>
+#include <ios>
+#include <regex>
 #include <string>
 #include <vector>
-#include <regex>
-#include <ios>
+#include <sstream>
+#include <fstream>
 
-#include "direction.h"
+#include "robot_logger.h"
+#include "deserializer.h"
 #include "simulator.h"
 #include "algorithm.h"
-#include "robotlogger.h"
-#include "deserializer.h"
+#include "enums.h"
 
 namespace
 {

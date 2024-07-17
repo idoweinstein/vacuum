@@ -1,11 +1,11 @@
-#ifndef VACUUM_POSITION_H_
-#define VACUUM_POSITION_H_
+#ifndef POSITION_H_
+#define POSITION_H_
 
 #include <utility>
 #include <stdexcept>
 #include <functional>
 
-#include "direction.h"
+#include "enums.h"
 
 /**
  * @class Position
@@ -90,4 +90,4 @@ namespace std
     };
 };
 
-#endif /* VACUUM_POSITION_H_ */
+#endif /* POSITION_H_ */

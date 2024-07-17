@@ -42,10 +42,10 @@ file(
 
 # Create tests executables
 add_executable(
-    pathtree_test
-    pathtree_test.cc
+    path_tree_test
+    path_tree_test.cc
 )
-target_link_libraries(pathtree_test
+target_link_libraries(path_tree_test
     vacuum_cleaner
     GTest::gtest_main
 )
@@ -99,8 +99,8 @@ target_link_libraries(simulator_test
 
 # Add unit test targets
 add_test(
-    NAME pathtree_test
-    COMMAND pathtree_test
+    NAME path_tree_test
+    COMMAND path_tree_test
 )
 
 add_test(

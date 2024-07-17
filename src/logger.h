@@ -1,5 +1,5 @@
-#ifndef VACUUM_LOGGER_H_
-#define VACUUM_LOGGER_H_
+#ifndef LOGGER_H_
+#define LOGGER_H_
 
 #include <map>
 #include <string>
@@ -119,4 +119,4 @@ public:
     virtual void logMessage(LogLevel log_level, LogOutput output, const std::string& message);
 };
 
-#endif /* VACUUM_LOGGER_H_ */
+#endif /* LOGGER_H_ */

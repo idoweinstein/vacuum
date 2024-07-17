@@ -1,4 +1,4 @@
-#include "pathtree.h"
+#include "path_tree.h"
 
 unsigned int PathTree::insertRoot(Position position)
 {

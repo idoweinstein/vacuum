@@ -1,12 +1,12 @@
-#ifndef VACUUM_HOUSE_H_
-#define VACUUM_HOUSE_H_
+#ifndef HOUSE_H_
+#define HOUSE_H_
 
 #include <vector>
 
-#include "dirtsensor.h"
-#include "wallssensor.h"
-#include "direction.h"
+#include "dirt_sensor.h"
+#include "wall_sensor.h"
 #include "position.h"
+#include "enums.h"
 
 /**
  * @brief The House class represents the house by means of cleaning operations and house state at robot's current location.
@@ -105,4 +105,4 @@ public:
     virtual bool isWall(Direction) const override;
 };
 
-#endif /* VACUUM_HOUSE_H_ */
+#endif /* HOUSE_H_ */

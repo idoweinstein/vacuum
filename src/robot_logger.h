@@ -1,14 +1,15 @@
-#ifndef VACUUM_ROBOTLOGGER_H_
-#define VACUUM_ROBOTLOGGER_H_
+#ifndef ROBOT_LOGGER_H_
+#define ROBOT_LOGGER_H_
 
 #include <vector>
 #include <sstream>
 #include <filesystem>
 
-#include "direction.h"
+#include "enum_operators.h"
 #include "position.h"
 #include "logger.h"
 #include "status.h"
+#include "enums.h"
 
 /**
  * @class RobotLogger
@@ -114,4 +115,4 @@ public:
     }
 };
 
-#endif /* VACUUM_ROBOTLOGGER_H_ */
+#endif /* ROBOT_LOGGER_H_ */

@@ -7,10 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED YES)
 add_library(vacuum_cleaner
     logger.cc
     simulator.cc
-    pathtree.cc
+    path_tree.cc
     house.cc
     algorithm.cc
     deserializer.cc
+    enum_operators.cc
 )
 
 target_include_directories(vacuum_cleaner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -1,5 +1,5 @@
-#ifndef VACUUM_ALGORITHM_H_
-#define VACUUM_ALGORITHM_H_
+#ifndef ALGORITHM_H_
+#define ALGORITHM_H_
 
 #include <deque>
 #include <utility>
@@ -9,14 +9,13 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include "abstractalgorithm.h"
-#include "batterymeter.h"
-#include "dirtsensor.h"
-#include "wallssensor.h"
-#include "direction.h"
+#include "abstract_algorithm.h"
+#include "battery_meter.h"
+#include "dirt_sensor.h"
+#include "wall_sensor.h"
+#include "path_tree.h"
 #include "position.h"
-#include "pathtree.h"
-#include "step.h"
+#include "enums.h"
 
 /**
  * @class Algorithm 
@@ -227,4 +226,4 @@ class Algorithm : public AbstractAlgorithm
         virtual Step nextStep() override;
 };
 
-#endif /* VACUUM_ALGORITHM_H_ */
+#endif /* ALGORITHM_H_ */

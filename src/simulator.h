@@ -1,16 +1,16 @@
-#ifndef VACUUM_SIMULATOR_H_
-#define VACUUM_SIMULATOR_H_
+#ifndef ROBOT_SIMULATOR_H_
+#define ROBOT_SIMULATOR_H_
 
 #include <vector>
 #include <string>
 #include <memory>
 
-#include "abstractalgorithm.h"
+#include "abstract_algorithm.h"
 #include "position.h"
 #include "battery.h"
 #include "status.h"
 #include "house.h"
-#include "step.h"
+#include "enums.h"
 
 /**
  * @brief The Simulator class represents a vacuum cleaning robot.
@@ -62,4 +62,4 @@ public:
     void run();
 };
 
-#endif /* VACUUM_SIMULATOR_H_ */
+#endif /* ROBOT_SIMULATOR_H_ */

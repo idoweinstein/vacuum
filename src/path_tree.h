@@ -1,11 +1,11 @@
-#ifndef VACUUM_PATHTREE_H_
-#define VACUUM_PATHTREE_H_
+#ifndef PATH_TREE_H_
+#define PATH_TREE_H_
 
 #include <vector>
 #include <stdexcept>
 
-#include "direction.h"
 #include "position.h"
+#include "enums.h"
 
 /**
  * @brief Represents a node in the path tree.
@@ -105,4 +105,4 @@ public:
     std::size_t getDepth(unsigned int node_index) { return safeNodeAccess(node_index).depth; }
 };
 
-#endif /* VACUUM_PATHTREE_H_ */
+#endif /* PATH_TREE_H_ */

@@ -4,7 +4,7 @@
 #include <fstream>
 
 #include "deserializer.h"
-#include "robotlogger.h"
+#include "robot_logger.h"
 #include "status.h"
 
 Status Simulator::getMissionStatus(bool is_algorithm_finished, bool is_mission_complete, bool is_battery_exhausted)

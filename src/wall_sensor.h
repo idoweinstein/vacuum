@@ -1,7 +1,7 @@
-#ifndef VACUUM_WALLSSENSOR_H_
-#define VACUUM_WALLSSENSOR_H_
+#ifndef WALL_SENSOR_H_
+#define WALL_SENSOR_H_
 
-#include "direction.h"
+#include "enums.h"
 
 /**
  * @brief The WallsSensor is an abstract class representing a sensor that detects walls in different directions.
@@ -22,4 +22,4 @@ class WallsSensor
         virtual bool isWall(Direction direction) const = 0;
 };
 
-#endif /* VACUUM_WALLSSENSOR_H_ */
+#endif /* WALL_SENSOR_H_ */

@@ -2,7 +2,7 @@
 #include "gmock/gmock.h"
 
 #include "algorithm.h"
-#include "direction.h"
+#include "enums.h"
 
 namespace
 {

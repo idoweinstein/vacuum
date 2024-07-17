@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include "pathtree.h"
+#include "path_tree.h"
 #include "position.h"
-#include "direction.h"
+#include "enums.h"
 
 namespace
 {
