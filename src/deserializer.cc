@@ -99,7 +99,7 @@ std::unique_ptr<Battery> Deserializer::deserializeBattery(std::istream& input_st
 {
     unsigned int full_battery_capacity = deserializeParameter(input_stream, kMaxBatteryParameter);
 
-    return std::make_unique<Battery>(full_battery_capacity);
+    return std::move(std::make_unique<Battery>(full_battery_capacity));
 }
 
 std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream)
@@ -114,14 +114,24 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
     std::vector<std::vector<unsigned int>> dirt_map(house_rows_num, std::vector<unsigned int> (house_cols_num, kDefaultDirtLevel));
 
     std::string house_block_row;
-    int row_idx = 0;
+    unsigned int row_idx = 0;
 
     while (std::getline(input_stream, house_block_row))
     {
-        int column_idx = 0;
+        if (row_idx >= house_rows_num)
+        {
+            break;
+        }
+
+        unsigned int column_idx = 0;
 
         for (char block: house_block_row)
         {
+            if (column_idx >= house_cols_num)
+            {
+                break;
+            }
+
             switch (block)
             {
                 case BlockType::DirtLevel0:
@@ -142,7 +152,7 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
                     {
                         throw std::runtime_error("More than one docking station was given in house file!");
                     }
-                    docking_station_position = {row_idx, column_idx};
+                    docking_station_position = {(int)row_idx, (int)column_idx};
                     break;
 
                 case BlockType::Wall:
@@ -163,8 +173,5 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
         throw std::runtime_error("Missing docking station position in house file!");
     }
 
-    return std::make_unique<House>(
-        const_cast<const std::vector<std::vector<bool>>&>(wall_map),
-        const_cast<const std::vector<std::vector<unsigned int>>&>(dirt_map),
-        const_cast<const Position&>(docking_station_position.value()));
+    return std::move(std::make_unique<House>(wall_map, dirt_map, docking_station_position.value()));
 }

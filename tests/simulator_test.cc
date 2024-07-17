@@ -161,7 +161,7 @@ namespace
     {
         SetUp("inputs/input_sanity.txt", "output_input_sanity.txt");
 
-        RobotState& robot_state = getRobotState();
+        RobotState robot_state = getRobotState();
 
         // Make sure robot did 'total_steps_taken' steps, and its first step wasn't Direction::STAY
         std::size_t path_length = robot_state.runtime_steps.size();
@@ -179,7 +179,7 @@ namespace
     {
         SetUp("inputs/input_trappeddirt.txt", "output_input_trappeddirt.txt");
 
-        RobotState& robot_state = getRobotState();
+        RobotState robot_state = getRobotState();
 
         // Assert the expected program results (Robot is not dead, cleaned all ACCESSIBLE dirt, but there's more trapped dirt)
         EXPECT_EQ(Status::Finished, robot_state.status);
@@ -190,7 +190,7 @@ namespace
     {
         SetUp("inputs/input_maze.txt", "output_input_maze.txt");
 
-        RobotState& robot_state = getRobotState();
+        RobotState robot_state = getRobotState();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);
@@ -200,7 +200,7 @@ namespace
     {
         SetUp("inputs/input_minbattery.txt", "output_input_minbattery.txt");
 
-        RobotState& robot_state = getRobotState();
+        RobotState robot_state = getRobotState();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);
@@ -229,7 +229,7 @@ namespace
     {
         SetUp("inputs/input_distantdirt.txt", "output_input_distantdirt.txt");
 
-        RobotState& robot_state = getRobotState();
+        RobotState robot_state = getRobotState();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);
@@ -245,7 +245,7 @@ namespace
     {
         SetUp("inputs/input_allchars.txt", "output_input_allchars.txt");
 
-        RobotState& robot_state = getRobotState();
+        RobotState robot_state = getRobotState();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);
@@ -269,7 +269,7 @@ namespace
     {
         SetUp("inputs/input_filledline.txt", "output_input_filledline.txt");
 
-        RobotState& robot_state = getRobotState();
+        RobotState robot_state = getRobotState();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);
@@ -280,7 +280,7 @@ namespace
     {
         SetUp("inputs/input_filledcol.txt", "output_input_filledcol.txt");
 
-        RobotState& robot_state = getRobotState();
+        RobotState robot_state = getRobotState();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);

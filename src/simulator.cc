@@ -97,12 +97,12 @@ void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
      * Pass a custom no-op deleter to prevent calling the actual destructor since
      * we don't own this object.
      */
-    algorithm = std::shared_ptr<AbstractAlgorithm>(&chosen_algorithm, [](const AbstractAlgorithm*){});
+    algorithm = &chosen_algorithm;
 
     algorithm->setMaxSteps(max_simulator_steps);
-    algorithm->setWallsSensor(*house);
-    algorithm->setDirtSensor(*house);
-    algorithm->setBatteryMeter(*battery);
+    algorithm->setWallsSensor(static_cast<const WallsSensor&>(*house));
+    algorithm->setDirtSensor(static_cast<const DirtSensor&>(*house));
+    algorithm->setBatteryMeter(static_cast<const BatteryMeter&>(*battery));
 
     state = SimulatorState::Ready;
 }
