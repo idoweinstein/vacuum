@@ -31,21 +31,36 @@
 class Algorithm : public AbstractAlgorithm
 {
     static constexpr const int kNotFound = -1;     // Constant value representing path not found status.
+    inline static const Position kDockingStationPosition = Position(0, 0);
     inline static const Direction directions[] = { // Directions of movement.
         Direction::North, Direction::East, Direction::South, Direction::West
     };
 
-    std::size_t steps_taken = 0;                    // Number of steps taken so far.
+    std::optional<std::size_t> total_steps_left;           // Maximum number of steps to take.
 
-    std::optional<std::size_t> max_steps;           // Maximum number of steps to take.
+    struct HouseModel
+    {
+        std::unordered_map<Position, bool> wall_map;    // Internal algorithm's mapping of the house walls.
+        std::unordered_set<Position> todo_positions;    // A set of positions to visit (unvisited / dirty positions).
+    };
 
-    std::unordered_map<Position, bool> wall_map;    // Internal algorithm's mapping of the house walls.
-    std::unordered_set<Position> todo_positions;    // A set of positions to visit (unvisited / dirty positions).
+    struct BatteryModel
+    {
+        std::size_t full_capacity;
+        std::size_t amount_left;
+    };
 
-    Position current_position;                      // The current position of the vacuum cleaner.
+    struct CurrentTile
+    {
+        Position position = kDockingStationPosition;
+        unsigned int dirt_level;
+    };
+
+    HouseModel house;
+    BatteryModel battery;
+    CurrentTile current_tile;
 
     std::optional<const BatteryMeter*> battery_meter;
-    unsigned int full_battery;                      // Full battery power (in steps).
 
     std::optional<const DirtSensor*> dirt_sensor;   // Reference to the dirt sensor.
 
@@ -58,7 +73,7 @@ class Algorithm : public AbstractAlgorithm
     */
     void assertAllInitialied() const 
     { 
-        if (!(max_steps.has_value()
+        if (!(total_steps_left.has_value()
             && battery_meter.has_value() 
             && dirt_sensor.has_value()
             && walls_sensor.has_value()))
@@ -145,9 +160,9 @@ class Algorithm : public AbstractAlgorithm
 
     virtual void getWallSensorInfo();
 
-    virtual int getDirtSensorInfo();
+    virtual void getDirtSensorInfo();
 
-    virtual void getBatteryMeterInfo(std::size_t& remaining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full) const;
+    virtual void getBatteryMeterInfo();
 
     /**
      * @brief Gets the information from the sensors.
@@ -159,37 +174,49 @@ class Algorithm : public AbstractAlgorithm
      * @param remaining_steps_total The variable to store the remaining total steps.
      * @param battery_is_full The variable to store the battery full status.
      */
-    virtual void getSensorsInfo(int& dirt_level, std::size_t& remaining_steps_until_charge, std::size_t& remaining_steps_total, bool& battery_is_full);
+    virtual void getSensorsInfo();
 
-    virtual bool shouldFinish(std::size_t station_distance, std::size_t remaining_steps_total)
+    virtual bool isAtDockingStation()
     {
-        bool is_finished_cleaning = (0 == station_distance) && todo_positions.empty();
-        return (0 == remaining_steps_total) || is_finished_cleaning;
+        return kDockingStationPosition == current_tile.position;
     }
 
-    virtual bool shouldCharge(std::size_t station_distance, bool is_battery_full)
+    virtual bool isBatteryFull()
     {
-        return (0 == station_distance) && !is_battery_full;
+        return battery.amount_left == battery.full_capacity;
     }
 
-    virtual bool lowBatteryToStay(std::size_t station_distance, std::size_t remaining_steps_until_charge)
+    virtual bool shouldFinish()
     {
-        return (remaining_steps_until_charge < 1 + station_distance);
+        bool is_finished_cleaning = isAtDockingStation() && house.todo_positions.empty();
+        return (0 == total_steps_left.value()) || is_finished_cleaning;
+    }
+
+    virtual bool shouldCharge()
+    {
+        return isAtDockingStation() && !isBatteryFull();
+    }
+
+    virtual bool lowBatteryToStay(std::size_t station_distance)
+    {
+        std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left.value());
+        return (possible_steps_left < 1 + station_distance);
     }
 
     virtual bool noPositionsLeftToVisit()
     {
-        return todo_positions.empty();
+        return house.todo_positions.empty();
     }
 
-    virtual bool currentPositionDirty(int dirt_level)
+    virtual bool currentPositionDirty()
     {
-        return dirt_level > 0;
+        return current_tile.dirt_level > 0;
     }
 
-    virtual bool lowBatteryToGetFurther(std::size_t station_distance, std::size_t remaining_steps_until_charge)
+    virtual bool lowBatteryToGetFurther(std::size_t station_distance)
     {
-        return remaining_steps_until_charge < 2 + station_distance;
+        std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left.value());
+        return possible_steps_left < 2 + station_distance;
     }
 
     /**
@@ -203,7 +230,17 @@ class Algorithm : public AbstractAlgorithm
      * @param battery_is_full The battery full status.
      * @return The next step to take.
      */
-    virtual Step decideNextStep(int dirt_level, std::size_t remaining_steps_until_charge, std::size_t remaining_steps_total, bool battery_is_full);
+    virtual Step decideNextStep();
+
+    virtual void safeDecreaseStepsLeft()
+    {
+        if ((int)total_steps_left.value() - 1 < 0)
+        {
+            throw std::runtime_error("Robot exceeded the allowed maximal steps!");
+        }
+
+        total_steps_left = total_steps_left.value() - 1;
+    }
 
     /**
      * @brief Moves the algorithm's vacuum cleaner representation one step in the specified direction.
@@ -215,6 +252,7 @@ class Algorithm : public AbstractAlgorithm
     virtual void move(Step);
 
 public:
+    Algorithm() = default;
     /**
      * @brief Deleted copy constructor and assignment operator.
      *
@@ -222,11 +260,6 @@ public:
      */
     Algorithm(const Algorithm& algorithm) = delete;
     Algorithm& operator=(const Algorithm& algorithm) = delete;
-
-    /**
-     * @brief Constructs a new Algorithm object.
-     */
-    Algorithm();
 
     /**
      * @brief Set the maximum number of steps the algorithm can take.

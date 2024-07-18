@@ -7,19 +7,15 @@
 #include <stdexcept>
 #include <unordered_set>
 
-Algorithm::Algorithm()
-    : current_position(0, 0)
-{}
-
 void Algorithm::setMaxSteps(std::size_t max_steps)
 {
-    this->max_steps = max_steps;
+    this->total_steps_left = max_steps;
 }
 
 void Algorithm::setBatteryMeter(const BatteryMeter& battery_meter)
 {
     this->battery_meter = &battery_meter;
-    full_battery = battery_meter.getBatteryState();
+    battery.full_capacity = battery_meter.getBatteryState();
 }
 
 void Algorithm::setDirtSensor(const DirtSensor& dirt_sensor)
@@ -57,7 +53,7 @@ int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const s
             Position child_position = Position::computePosition(parent_position, direction);
 
             bool is_visited = visited_positions.contains(child_position);
-            bool is_navigable = wall_map.contains(child_position) && !wall_map.at(child_position);
+            bool is_navigable = house.wall_map.contains(child_position) && !house.wall_map.at(child_position);
 
             if (is_visited || !is_navigable)
             {
@@ -82,7 +78,7 @@ bool Algorithm::getPathByFoundCriteria(std::deque<Direction>& path, const std::f
 {
     PathTree path_tree;
 
-    unsigned int root_index = path_tree.insertRoot(current_position);
+    unsigned int root_index = path_tree.insertRoot(current_tile.position);
 
     int path_end_index = performBFS(path_tree, root_index, found_criteria);
     if (kNotFound == path_end_index)
@@ -104,7 +100,7 @@ bool Algorithm::getPathToNearestTodo(std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(path,
                                   [&](Position position)
-                                  { return todo_positions.contains(position); }
+                                  { return house.todo_positions.contains(position); }
     );
 }
 
@@ -112,7 +108,7 @@ bool Algorithm::getPathToStation(std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(path,
                                   [&](Position position)
-                                  { return position == std::make_pair(0, 0); }
+                                  { return position == kDockingStationPosition; }
     );
 }
 
@@ -120,64 +116,55 @@ void Algorithm::getWallSensorInfo()
 {
     for (Direction direction : directions)
     {
-        Position position = Position::computePosition(current_position, direction);
+        Position position = Position::computePosition(current_tile.position, direction);
 
-        if (wall_map.contains(position))
+        if (house.wall_map.contains(position))
         {
             continue;
         }
 
         bool is_wall = walls_sensor.value()->isWall(direction);
-        wall_map[position] = is_wall;
+        house.wall_map[position] = is_wall;
 
         if (is_wall)
         {
             continue;
         }
 
-        todo_positions.insert(position);
+        house.todo_positions.insert(position);
     }
 
-    wall_map[current_position] = false;
+    house.wall_map[current_tile.position] = false;
 }
 
-int Algorithm::getDirtSensorInfo()
+void Algorithm::getDirtSensorInfo()
 {
-    int dirt_level = dirt_sensor.value()->dirtLevel();
+    current_tile.dirt_level = dirt_sensor.value()->dirtLevel();
 
-    if (dirt_level > 0)
+    if (current_tile.dirt_level > 0)
     {
-        todo_positions.insert(current_position);
+        house.todo_positions.insert(current_tile.position);
     }
 
     else
     {
-        todo_positions.erase(current_position);
+        house.todo_positions.erase(current_tile.position);
     }
-
-    return dirt_level;
 }
 
-void Algorithm::getBatteryMeterInfo(std::size_t& remaining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full) const
+void Algorithm::getBatteryMeterInfo()
 {
-    std::size_t remaining_battery_capacity = battery_meter.value()->getBatteryState();
-
-    remaining_steps_total = max_steps.value() - steps_taken;
-    remaining_steps_until_charge = std::min(remaining_battery_capacity, remaining_steps_total);
-
-    is_battery_full = (remaining_battery_capacity >= full_battery);   
+    battery.amount_left = battery_meter.value()->getBatteryState();
 }
 
-void Algorithm::getSensorsInfo(int& dirt_level, std::size_t& remaining_steps_until_charge, std::size_t& remaining_steps_total, bool& is_battery_full)
+void Algorithm::getSensorsInfo()
 {
     getWallSensorInfo();
-
-    dirt_level = getDirtSensorInfo();
-
-    getBatteryMeterInfo(remaining_steps_until_charge, remaining_steps_total, is_battery_full);
+    getDirtSensorInfo();
+    getBatteryMeterInfo();
 }
 
-Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until_charge, std::size_t remaining_steps_total, bool is_battery_full)
+Step Algorithm::decideNextStep()
 {
     std::deque<Direction> path_to_station;
     bool is_found = getPathToStation(path_to_station);
@@ -189,17 +176,17 @@ Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until
 
     std::size_t station_distance = getPathDistance(path_to_station);
 
-    if (shouldFinish(station_distance, remaining_steps_total))
+    if (shouldFinish())
     {
         return Step::Finish;
     }
 
-    if (shouldCharge(station_distance, is_battery_full))
+    if (shouldCharge())
     {
         return Step::Stay;
     }
 
-    if (lowBatteryToStay(station_distance, remaining_steps_until_charge))
+    if (lowBatteryToStay(station_distance))
     {
         return getPathNextStep(path_to_station);
     }
@@ -209,12 +196,12 @@ Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until
         return getPathNextStep(path_to_station);
     }
 
-    if (currentPositionDirty(dirt_level))
+    if (currentPositionDirty())
     {
         return Step::Stay;
     }
 
-    if (lowBatteryToGetFurther(station_distance, remaining_steps_until_charge))
+    if (lowBatteryToGetFurther(station_distance))
     {
         return getPathNextStep(path_to_station);
     }
@@ -233,16 +220,11 @@ Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until
 
 Step Algorithm::nextStep()
 {
-    int dirt_level = 0;
-    std::size_t remaining_steps_until_charge = 0;
-    std::size_t remaining_steps_total = 0;
-    bool is_battery_full = false;
-
     assertAllInitialied();
 
-    getSensorsInfo(dirt_level, remaining_steps_until_charge, remaining_steps_total, is_battery_full);
+    getSensorsInfo();
 
-    Step step = decideNextStep(dirt_level, remaining_steps_until_charge, remaining_steps_total, is_battery_full);
+    Step step = decideNextStep();
 
     move(step);
 
@@ -256,7 +238,7 @@ void Algorithm::move(Step step)
         return;
     }
 
-    steps_taken++;
+    safeDecreaseStepsLeft();
 
     if (Step::Stay == step)
     {
@@ -264,5 +246,5 @@ void Algorithm::move(Step step)
     }
 
     Direction direction = static_cast<Direction>(step);
-    current_position = Position::computePosition(current_position, direction);
+    current_tile.position = Position::computePosition(current_tile.position, direction);
 }
