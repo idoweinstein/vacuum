@@ -35,14 +35,23 @@ class Algorithm : public AbstractAlgorithm
         Direction::North, Direction::East, Direction::South, Direction::West
     };
 
+    struct CompareDistance
+    {
+        bool operator()(const std::pair<Position, std::size_t>& left, const std::pair<Position, std::size_t>& right) const
+        {
+            return left.second < right.second;
+        }
+    };
+
     std::size_t steps_taken = 0;                    // Number of steps taken so far.
 
     std::optional<std::size_t> max_steps;           // Maximum number of steps to take.
 
     std::unordered_map<Position, bool> wall_map;    // Internal algorithm's mapping of the house walls.
-    std::unordered_set<Position> todo_positions;    // A set of positions to visit (unvisited / dirty positions).
+    std::unordered_map<Position, std::size_t> todo_positions;    // A set of positions to visit (unvisited / dirty positions).
 
     Position current_position;                      // The current position of the vacuum cleaner.
+    std::size_t current_distance = 0;
 
     std::optional<const BatteryMeter*> battery_meter;
     unsigned int full_battery;                      // Full battery power (in steps).
@@ -161,9 +170,11 @@ class Algorithm : public AbstractAlgorithm
      */
     virtual void getSensorsInfo(int& dirt_level, std::size_t& remaining_steps_until_charge, std::size_t& remaining_steps_total, bool& battery_is_full);
 
+    virtual bool cleanedAllReachable(std::size_t remaining_steps_total);
+
     virtual bool shouldFinish(std::size_t station_distance, std::size_t remaining_steps_total)
     {
-        bool is_finished_cleaning = (0 == station_distance) && todo_positions.empty();
+        bool is_finished_cleaning = (0 == station_distance) && cleanedAllReachable(remaining_steps_total);
         return (0 == remaining_steps_total) || is_finished_cleaning;
     }
 
@@ -182,7 +193,7 @@ class Algorithm : public AbstractAlgorithm
         return todo_positions.empty();
     }
 
-    virtual bool currentPositionDirty(int dirt_level)
+    virtual bool isCurrentPositionDirty(int dirt_level)
     {
         return dirt_level > 0;
     }

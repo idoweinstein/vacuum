@@ -4,6 +4,7 @@
 #include <cmath>
 #include <queue>
 #include <deque>
+#include <algorithm>
 #include <stdexcept>
 #include <unordered_set>
 
@@ -135,7 +136,7 @@ void Algorithm::getWallSensorInfo()
             continue;
         }
 
-        todo_positions.insert(position);
+        todo_positions[position] = std::min(todo_positions[position], current_distance + 1);
     }
 
     wall_map[current_position] = false;
@@ -147,7 +148,7 @@ int Algorithm::getDirtSensorInfo()
 
     if (dirt_level > 0)
     {
-        todo_positions.insert(current_position);
+        todo_positions[current_position] = std::min(todo_positions[current_position], current_distance);
     }
 
     else
@@ -177,6 +178,29 @@ void Algorithm::getSensorsInfo(int& dirt_level, std::size_t& remaining_steps_unt
     getBatteryMeterInfo(remaining_steps_until_charge, remaining_steps_total, is_battery_full);
 }
 
+bool Algorithm::cleanedAllReachable(std::size_t remaining_steps_total)
+{
+    if (todo_positions.empty())
+    {
+        return true;
+    }
+
+    std::pair<Position, std::size_t> closest_todo = *std::min_element(todo_positions.begin(), todo_positions.end(), CompareDistance());
+    std::size_t min_todo_distance = closest_todo.second;
+    // To clean this position, we need to reach it, Stay, and return back to station
+    std::size_t min_cleaning_cost = 1 + 2 * min_todo_distance;
+
+    int steps_left_to_fully_charged = ((float)full_battery / 20) * (full_battery - battery_meter.value()->getBatteryState());
+    std::size_t remaining_steps_after_charge = std::max(0, (int)remaining_steps_total - steps_left_to_fully_charged);
+    std::size_t max_possible_steps = std::min((std::size_t)full_battery, remaining_steps_after_charge);
+    if (min_cleaning_cost > max_possible_steps)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until_charge, std::size_t remaining_steps_total, bool is_battery_full)
 {
     std::deque<Direction> path_to_station;
@@ -188,6 +212,10 @@ Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until
     }
 
     std::size_t station_distance = getPathDistance(path_to_station);
+    if (0 == station_distance)
+    {
+        current_distance = 0;
+    }
 
     if (shouldFinish(station_distance, remaining_steps_total))
     {
@@ -201,21 +229,24 @@ Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until
 
     if (lowBatteryToStay(station_distance, remaining_steps_until_charge))
     {
+        current_distance--;
         return getPathNextStep(path_to_station);
     }
 
     if (noPositionsLeftToVisit())
     {
+        current_distance--;
         return getPathNextStep(path_to_station);
     }
 
-    if (currentPositionDirty(dirt_level))
+    if (isCurrentPositionDirty(dirt_level))
     {
         return Step::Stay;
     }
 
     if (lowBatteryToGetFurther(station_distance, remaining_steps_until_charge))
     {
+        current_distance--;
         return getPathNextStep(path_to_station);
     }
 
@@ -227,6 +258,8 @@ Step Algorithm::decideNextStep(int dirt_level, std::size_t remaining_steps_until
     {
         return getPathNextStep(path_to_station);
     }
+
+    current_distance++;
 
     return getPathNextStep(path_to_nearest_todo);
 }
