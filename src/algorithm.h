@@ -36,7 +36,8 @@ class Algorithm : public AbstractAlgorithm
         Direction::North, Direction::East, Direction::South, Direction::West
     };
 
-    std::optional<std::size_t> total_steps_left;           // Maximum number of steps to take.
+    std::optional<std::size_t> max_steps;           // Maximum number of steps to take.
+    std::size_t total_steps_left;
 
     struct HouseModel
     {
@@ -73,7 +74,7 @@ class Algorithm : public AbstractAlgorithm
     */
     void assertAllInitialied() const 
     { 
-        if (!(total_steps_left.has_value()
+        if (!(max_steps.has_value()
             && battery_meter.has_value() 
             && dirt_sensor.has_value()
             && walls_sensor.has_value()))
@@ -186,10 +187,14 @@ class Algorithm : public AbstractAlgorithm
         return battery.amount_left == battery.full_capacity;
     }
 
-    virtual bool shouldFinish()
+    virtual std::size_t getMaxReachableDistance() const;
+
+    virtual bool cleanedAllReachable();
+
+    virtual bool shouldFinish(bool is_cleaned_all_reachable)
     {
-        bool is_finished_cleaning = isAtDockingStation() && house.todo_positions.empty();
-        return (0 == total_steps_left.value()) || is_finished_cleaning;
+        bool is_finished_cleaning = isAtDockingStation() && is_cleaned_all_reachable;
+        return (0 == total_steps_left) || is_finished_cleaning;
     }
 
     virtual bool shouldCharge()
@@ -199,13 +204,8 @@ class Algorithm : public AbstractAlgorithm
 
     virtual bool lowBatteryToStay(std::size_t station_distance)
     {
-        std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left.value());
+        std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left);
         return (possible_steps_left < 1 + station_distance);
-    }
-
-    virtual bool noPositionsLeftToVisit()
-    {
-        return house.todo_positions.empty();
     }
 
     virtual bool currentPositionDirty()
@@ -215,7 +215,7 @@ class Algorithm : public AbstractAlgorithm
 
     virtual bool lowBatteryToGetFurther(std::size_t station_distance)
     {
-        std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left.value());
+        std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left);
         return possible_steps_left < 2 + station_distance;
     }
 
@@ -234,12 +234,12 @@ class Algorithm : public AbstractAlgorithm
 
     virtual void safeDecreaseStepsLeft()
     {
-        if ((int)total_steps_left.value() - 1 < 0)
+        if ((int)total_steps_left - 1 < 0)
         {
             throw std::runtime_error("Robot exceeded the allowed maximal steps!");
         }
 
-        total_steps_left = total_steps_left.value() - 1;
+        total_steps_left = total_steps_left - 1;
     }
 
     /**

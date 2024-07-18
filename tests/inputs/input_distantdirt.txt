@@ -1,8 +1,8 @@
 Distant Dirt
-MaxSteps = 100
-MaxBattery= 4
+MaxSteps =500
+MaxBattery= 8
 Rows=3
-Cols =5
-000WW
-0D001
-000WW
+Cols =6
+000WWW
+0D0001
+000WWW

@@ -234,11 +234,9 @@ namespace
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);
 
-        unsigned int max_robot_steps = 100;
-        EXPECT_EQ(max_robot_steps, robot_state.total_steps_taken);
+        EXPECT_GE(50, robot_state.total_steps_taken);
 
-        unsigned int total_dirt_count = 1;
-        EXPECT_EQ(total_dirt_count, robot_state.total_dirt_left);
+        EXPECT_EQ(1, robot_state.total_dirt_left);
     }
 
     TEST_F(SimulatorTest, RobotAllCharacters)

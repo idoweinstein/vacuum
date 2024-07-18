@@ -9,7 +9,8 @@
 
 void Algorithm::setMaxSteps(std::size_t max_steps)
 {
-    this->total_steps_left = max_steps;
+    this->max_steps = max_steps;
+    total_steps_left = max_steps;
 }
 
 void Algorithm::setBatteryMeter(const BatteryMeter& battery_meter)
@@ -166,6 +167,42 @@ void Algorithm::getSensorsInfo()
     getBatteryMeterInfo();
 }
 
+std::size_t Algorithm::getMaxReachableDistance() const
+{
+    std::size_t max_reachable_steps = std::min(battery.full_capacity, max_steps.value());
+
+    if (0 == max_reachable_steps)
+    {
+        return 0;
+    }
+
+    /*
+     * Number of Steps := Distance (to position) +
+     *                    1        (minimal cleaning cost) +
+     *                    Distance (back to home)
+     */
+    std::size_t max_reachable_distance = (max_reachable_steps - 1) / 2;
+    return max_reachable_distance;
+}
+
+bool Algorithm::cleanedAllReachable()
+{
+    std::deque<Direction> found_path;
+    bool is_found = getPathToNearestTodo(kDockingStationPosition, found_path);
+
+    if (!is_found)
+    {
+        return true;
+    }
+
+    if (getPathDistance(found_path) > getMaxReachableDistance())
+    {
+        return true;
+    }
+
+    return false;
+}
+
 Step Algorithm::decideNextStep()
 {
     std::deque<Direction> path_to_station;
@@ -177,8 +214,9 @@ Step Algorithm::decideNextStep()
     }
 
     std::size_t station_distance = getPathDistance(path_to_station);
+    bool is_cleaned_all_reachable = cleanedAllReachable();
 
-    if (shouldFinish())
+    if (shouldFinish(is_cleaned_all_reachable))
     {
         return Step::Finish;
     }
@@ -188,12 +226,7 @@ Step Algorithm::decideNextStep()
         return Step::Stay;
     }
 
-    if (lowBatteryToStay(station_distance))
-    {
-        return getPathNextStep(path_to_station);
-    }
-
-    if (noPositionsLeftToVisit())
+    if (lowBatteryToStay(station_distance) || is_cleaned_all_reachable)
     {
         return getPathNextStep(path_to_station);
     }
