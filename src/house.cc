@@ -6,9 +6,9 @@
 
 void House::setTotalDirtCount()
 {
-    for (std::vector<unsigned int>& row : dirt_map)
+    for (const auto& row : dirt_map)
     {
-        for (unsigned int& dirt : row)
+        for (unsigned int dirt : row)
         {
             total_dirt_count += dirt;
         }

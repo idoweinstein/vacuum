@@ -11,7 +11,7 @@ void Logger::logMessage(LogLevel log_level, LogOutput output, const std::string&
 
     if (LogOutput::File == output)
     {
-        for (std::ofstream& file : log_files)
+        for (auto& file : log_files)
         {
             file << log_prefix << message << std::endl;
         }
