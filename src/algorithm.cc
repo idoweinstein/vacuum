@@ -74,11 +74,11 @@ int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const s
     return kNotFound;
 }
 
-bool Algorithm::getPathByFoundCriteria(std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria)
+bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria)
 {
     PathTree path_tree;
 
-    unsigned int root_index = path_tree.insertRoot(current_tile.position);
+    unsigned int root_index = path_tree.insertRoot(start_position);
 
     int path_end_index = performBFS(path_tree, root_index, found_criteria);
     if (kNotFound == path_end_index)
@@ -96,9 +96,10 @@ bool Algorithm::getPathByFoundCriteria(std::deque<Direction>& path, const std::f
     return true;
 }
 
-bool Algorithm::getPathToNearestTodo(std::deque<Direction>& path)
+bool Algorithm::getPathToNearestTodo(Position start_position, std::deque<Direction>& path)
 {
-    return getPathByFoundCriteria(path,
+    return getPathByFoundCriteria(start_position,
+                                  path,
                                   [&](Position position)
                                   { return house.todo_positions.contains(position); }
     );
@@ -106,7 +107,8 @@ bool Algorithm::getPathToNearestTodo(std::deque<Direction>& path)
 
 bool Algorithm::getPathToStation(std::deque<Direction>& path)
 {
-    return getPathByFoundCriteria(path,
+    return getPathByFoundCriteria(current_tile.position,
+                                  path,
                                   [&](Position position)
                                   { return position == kDockingStationPosition; }
     );
@@ -207,7 +209,7 @@ Step Algorithm::decideNextStep()
     }
 
     std::deque<Direction> path_to_nearest_todo;
-    is_found = getPathToNearestTodo(path_to_nearest_todo);
+    is_found = getPathToNearestTodo(current_tile.position, path_to_nearest_todo);
 
     // If there's no path to a TODO position - go to station
     if (!is_found)
