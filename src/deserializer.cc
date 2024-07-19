@@ -99,7 +99,7 @@ std::unique_ptr<Battery> Deserializer::deserializeBattery(std::istream& input_st
 {
     unsigned int full_battery_capacity = deserializeParameter(input_stream, kMaxBatteryParameter);
 
-    return std::move(std::make_unique<Battery>(full_battery_capacity));
+    return std::make_unique<Battery>(full_battery_capacity);
 }
 
 std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream)
@@ -173,5 +173,5 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
         throw std::runtime_error("Missing docking station position in house file!");
     }
 
-    return std::move(std::make_unique<House>(wall_map, dirt_map, docking_station_position.value()));
+    return std::make_unique<House>(wall_map, dirt_map, docking_station_position.value());
 }
