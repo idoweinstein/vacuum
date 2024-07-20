@@ -25,22 +25,22 @@
 ## Solution Approach
 The house is a 4-connected grid, where each node contains either a wall, an empty space (with a predefined amount of dirt) or a docking station. <br>
 In the solution there are several components, each represented by a designated class. <br>
-The `Robot` class is the main class of the project. It creates a `LocationManager` and a `BatteryController` which together represent the true state of the simulation at any given time. <br>
-The `LocationManager` and `BatteryController` together implement the `DirtSensor`, `WallsSensor`, and `BatteryMeter` interfaces, which allow getting the state of the simulation without mutating it.
-The `NavigationSystem` implements the navgiation algorithm, and uses information from all sensors to make its decisions.
+The `Simulator` class is the main class of the project. It creates a `House` and a `Battery` which together represent the true state of the simulation at any given time. <br>
+The `House` and `Battery` together implement the `DirtSensor`, `WallsSensor`, and `BatteryMeter` interfaces, which allow getting the state of the simulation without mutating it.
+The `Algorithm` implements the navgiation algorithm, and uses information from all sensors to make its decisions.
 More information can be found in the HLD document.
 
 ## Inputs and Outputs
 ### Input File
 The input format is as follows:
 ```
-max_robot_steps <value>
+max_simulator_steps <value>
 max_battery_steps <value>
 house
 <map>
 ```
 
-The `max_robot_steps` and `max_battery_steps` values must be non-negative integers.
+The `max_simulator_steps` and `max_battery_steps` values must be non-negative integers.
 The map is a jagged array of characters, following the legend below:
 ```
 @	docking station

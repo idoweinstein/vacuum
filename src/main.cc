@@ -1,17 +1,14 @@
 #include <string>
 #include <exception>
-#include <filesystem>
 
-#include "robotdeserializer.h"
-#include "robotlogger.h"
-#include "robot.h"
-
-namespace fs = std::filesystem;
+#include "robot_logger.h"
+#include "algorithm.h"
+#include "simulator.h"
 
 namespace Constants
 {
     constexpr int kNumberOfArguments = 2;
-    constexpr int kInputFileArgument = 1;
+    constexpr int kHouseFileArgument = 1;
 }
 
 int main(int argc, char* argv[])
@@ -20,16 +17,16 @@ int main(int argc, char* argv[])
 
     if (Constants::kNumberOfArguments == argc)
     {
-        const std::string input_file_path(argv[Constants::kInputFileArgument]);
+        const std::string input_file_path(argv[Constants::kHouseFileArgument]);
 
         try
         {
-            std::string input_file_name = fs::path(input_file_path).filename().string();
-            logger.addLogFileFromInput(input_file_name);
+            Simulator simulator;
+            Algorithm algorithm;
 
-            std::unique_ptr<Robot> robot = RobotDeserializer::deserializeFromFile(input_file_path);
-
-            robot->run();
+            simulator.readHouseFile(input_file_path);
+            simulator.setAlgorithm(algorithm);
+            simulator.run();
         }
         catch(const std::exception& exception)
         {

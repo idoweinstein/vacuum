@@ -1,11 +1,11 @@
-#ifndef VACUUM_POSITION_H_
-#define VACUUM_POSITION_H_
+#ifndef POSITION_H_
+#define POSITION_H_
 
 #include <utility>
 #include <stdexcept>
 #include <functional>
 
-#include "direction.h"
+#include "enums.h"
 
 /**
  * @class Position
@@ -15,10 +15,10 @@
 class Position : public std::pair<int, int>
 {
         inline static const std::unordered_map<Direction, std::pair<int, int>> direction_map = {
-            {Direction::NORTH, std::make_pair(-1, 0)},
-            {Direction::SOUTH, std::make_pair(1, 0)},
-            {Direction::WEST, std::make_pair(0, -1)},
-            {Direction::EAST, std::make_pair(0, 1)},
+            {Direction::North, std::make_pair(-1, 0)},
+            {Direction::South, std::make_pair(1, 0)},
+            {Direction::West, std::make_pair(0, -1)},
+            {Direction::East, std::make_pair(0, 1)},
         };
 
     public:
@@ -90,4 +90,4 @@ namespace std
     };
 };
 
-#endif /* VACUUM_POSITION_H_ */
+#endif /* POSITION_H_ */

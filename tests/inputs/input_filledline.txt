@@ -1,0 +1,6 @@
+Filled Line
+MaxSteps = 100
+MaxBattery = 100
+Rows = 2
+Cols = 3
+DW1

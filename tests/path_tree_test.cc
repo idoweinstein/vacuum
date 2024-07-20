@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include "pathtree.h"
+#include "path_tree.h"
 #include "position.h"
-#include "direction.h"
+#include "enums.h"
 
 namespace
 {
@@ -37,14 +37,14 @@ namespace
     {
         // Check negative parent index
         EXPECT_THROW({
-            path_tree.insertChild(-1, Direction::NORTH, Position(5,-9));
+            path_tree.insertChild(-1, Direction::North, Position(5,-9));
         }, std::out_of_range);
 
-        path_tree.insertChild(root_index, Direction::NORTH, Position(5,-9));
+        path_tree.insertChild(root_index, Direction::North, Position(5,-9));
 
         // Check out of bounds parent index
         EXPECT_THROW({
-            path_tree.insertChild(2, Direction::EAST, Position(3,17));
+            path_tree.insertChild(2, Direction::East, Position(3,17));
         }, std::out_of_range);
     }
 
@@ -71,12 +71,12 @@ namespace
     {
         int children[] = {
             0, // Root index
-            (int)path_tree.insertChild(0, Direction::EAST, Position(3,7)),
-            (int)path_tree.insertChild(1, Direction::NORTH, Position(0,0)),
-            (int)path_tree.insertChild(2, Direction::EAST, Position(-1,9)),
-            (int)path_tree.insertChild(3, Direction::WEST, Position(2,2564)),
-            (int)path_tree.insertChild(4, Direction::EAST, Position(0,0)),
-            (int)path_tree.insertChild(5, Direction::SOUTH, Position(1,-99))
+            (int)path_tree.insertChild(0, Direction::East, Position(3,7)),
+            (int)path_tree.insertChild(1, Direction::North, Position(0,0)),
+            (int)path_tree.insertChild(2, Direction::East, Position(-1,9)),
+            (int)path_tree.insertChild(3, Direction::West, Position(2,2564)),
+            (int)path_tree.insertChild(4, Direction::East, Position(0,0)),
+            (int)path_tree.insertChild(5, Direction::South, Position(1,-99))
         };
 
         for (unsigned int i = 1; i < 7; i++)
@@ -86,15 +86,15 @@ namespace
             EXPECT_EQ(path_tree.getDepth(parent_index) + 1, path_tree.getDepth(children[i]));
         }
 
-        EXPECT_EQ(Direction::WEST, path_tree.getDirection(children[4]));
+        EXPECT_EQ(Direction::West, path_tree.getDirection(children[4]));
         
         int another_branch[] = {
             children[0],
             children[1],
             children[2],
-            (int)path_tree.insertChild(children[2], Direction::NORTH, Position(0,0)),
-            (int)path_tree.insertChild(7, Direction::SOUTH, Position(-1,9)),
-            (int)path_tree.insertChild(8, Direction::WEST, Position(2,2564))
+            (int)path_tree.insertChild(children[2], Direction::North, Position(0,0)),
+            (int)path_tree.insertChild(7, Direction::South, Position(-1,9)),
+            (int)path_tree.insertChild(8, Direction::West, Position(2,2564))
         };
 
         for (unsigned int i = 1; i < 6; i++)

@@ -1,5 +1,5 @@
-#ifndef VACUUM_DIRTSENSOR_H_
-#define VACUUM_DIRTSENSOR_H_
+#ifndef DIRT_SENSOR_H_
+#define DIRT_SENSOR_H_
 
 /**
  * @brief The DirtSensor class is an abstract base class for dirt sensors used in a vacuum cleaner.
@@ -22,4 +22,4 @@ class DirtSensor
         virtual int dirtLevel() const = 0;
 };
 
-#endif /* VACUUM_DIRTSENSOR_H_ */
+#endif /* DIRT_SENSOR_H_ */

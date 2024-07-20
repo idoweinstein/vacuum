@@ -4,11 +4,11 @@
 #include <memory>
 #include <cstdlib>
 
-#include "locationmanager.h"
+#include "house.h"
 
 namespace
 {
-    class LocationManagerTest : public testing::Test
+    class HouseTest : public testing::Test
     {
             static void initializeMaps(std::vector<std::vector<bool>>& wall_map, std::vector<std::vector<unsigned int>>& dirt_map)
             {
@@ -42,12 +42,12 @@ namespace
             inline static unsigned int direction_iterator = 0;
             inline static Position docking_station_position = Position(3,9);
 
-            inline static std::unique_ptr<LocationManager> location_manager;
+            inline static std::unique_ptr<House> house;
 
             static Step getNextStep()
             {
                 static Step steps[] = {
-                    Step::NORTH, Step::SOUTH, Step::WEST, Step::EAST, Step::STAY, Step::FINISH
+                    Step::North, Step::South, Step::West, Step::East, Step::Stay, Step::Finish
                 };
 
                 Step next_step = steps[direction_iterator % 6];
@@ -58,57 +58,59 @@ namespace
             static void SetUpTestCase()
             {
                 
-                std::vector<std::vector<bool>> wall_map;
-                std::vector<std::vector<unsigned int>> dirt_map;
+                std::unique_ptr<std::vector<std::vector<bool>>> wall_map =
+                    std::make_unique<std::vector<std::vector<bool>>>();
+                std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map =
+                    std::make_unique<std::vector<std::vector<unsigned int>>>();
 
-                initializeMaps(wall_map, dirt_map);
+                initializeMaps(*wall_map, *dirt_map);
 
-                location_manager = std::unique_ptr<LocationManager>(new LocationManager(
-                    wall_map,
-                    dirt_map,
+                house = std::unique_ptr<House>(new House(
+                    std::move(wall_map),
+                    std::move(dirt_map),
                     docking_station_position
                 ));
             }
             
             static void TearDownTestCase()
             {
-                location_manager.reset();
+                house.reset();
             }
     };
 
-    TEST_F(LocationManagerTest, TotalDirtCountSanity)
+    TEST_F(HouseTest, TotalDirtCountSanity)
     {
-        EXPECT_EQ(total_dirt_count, location_manager->getTotalDirtCount());
+        EXPECT_EQ(total_dirt_count, house->getTotalDirtCount());
     }
 
-    TEST_F(LocationManagerTest, StartingAtDockingStation)
+    TEST_F(HouseTest, StartingAtDockingStation)
     {
-        EXPECT_TRUE(location_manager->isInDockingStation());
+        EXPECT_TRUE(house->isInDockingStation());
     }
 
-    TEST_F(LocationManagerTest, OverCleaningPosition)
+    TEST_F(HouseTest, OverCleaningPosition)
     {
-        while(location_manager->dirtLevel() > 0)
+        while(house->dirtLevel() > 0)
         {
-            location_manager->cleanCurrentPosition();
+            house->cleanCurrentPosition();
         }
 
-        location_manager->cleanCurrentPosition(); // Redundant cleaning
-        EXPECT_EQ(0, location_manager->dirtLevel());
+        house->cleanCurrentPosition(); // Redundant cleaning
+        EXPECT_EQ(0, house->dirtLevel());
     }
 
-    TEST_F(LocationManagerTest, RandomNavigation)
+    TEST_F(HouseTest, RandomNavigation)
     {
         for(int i = 0; i < 50; i++)
         {
-            location_manager->cleanCurrentPosition();
+            house->cleanCurrentPosition();
 
             Step next_step = getNextStep();
             bool is_wall = false;
 
-            if (Step::FINISH != next_step && Step::STAY != next_step)
+            if (Step::Finish != next_step && Step::Stay != next_step)
             {
-                is_wall = location_manager->isWall(static_cast<Direction>(next_step));
+                is_wall = house->isWall(static_cast<Direction>(next_step));
             }
 
             if(is_wall)
@@ -116,34 +118,36 @@ namespace
                 continue;
             }
 
-            location_manager->move(next_step); // Should never throw an error
+            house->move(next_step); // Should never throw an error
         }
     }
 
-    TEST_F(LocationManagerTest, MoveOutOfBounds)
+    TEST_F(HouseTest, MoveOutOfBounds)
     {
-        std::vector<std::vector<bool>> wall_map;
-        std::vector<std::vector<unsigned int>> dirt_map;
+        std::unique_ptr<std::vector<std::vector<bool>>> wall_map =
+            std::make_unique<std::vector<std::vector<bool>>>();
+        std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map =
+            std::make_unique<std::vector<std::vector<unsigned int>>>();
 
-        wall_map.push_back({false});
-        dirt_map.push_back({0});
+        (*wall_map).push_back({false});
+        (*dirt_map).push_back({0});
 
-        LocationManager simple_location(wall_map, dirt_map, Position(0,0));
+        House simple_location(std::move(wall_map), std::move(dirt_map), Position(0,0));
 
         EXPECT_THROW({
-            simple_location.move(Step::NORTH);
+            simple_location.move(Step::North);
         }, std::runtime_error);
 
         EXPECT_THROW({
-            simple_location.move(Step::SOUTH);
+            simple_location.move(Step::South);
         }, std::runtime_error);
  
         EXPECT_THROW({
-            simple_location.move(Step::EAST);
+            simple_location.move(Step::East);
         }, std::runtime_error);
 
         EXPECT_THROW({
-            simple_location.move(Step::WEST);
+            simple_location.move(Step::West);
         }, std::runtime_error);
     }
 }

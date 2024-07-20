@@ -1,18 +1,18 @@
-#ifndef VACUUM_BATTERYCONTROLLER_H_
-#define VACUUM_BATTERYCONTROLLER_H_
-
-#include "batterymeter.h"
+#ifndef BATTERY_H_
+#define BATTERY_H_
 
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
 
+#include "battery_meter.h"
+
 /**
- * @brief The BatteryController class represents a controller for a battery.
+ * @brief The Battery class represents a robot battery.
  *
  * It inherits from the BatteryMeter class and provides functionality to charge and discharge the battery.
  */
-class BatteryController : public BatteryMeter
+class Battery : public BatteryMeter
 {
     static constexpr const float kStepsToFullAmount = 20.0f; // Charging rate (in steps).
     static constexpr const float kDischargeUnit = 1.0f;      // Discharging rate (in steps).
@@ -21,16 +21,12 @@ class BatteryController : public BatteryMeter
     float current_amount;                                    // Remaining capacity of the battery (in steps).
 
 public:
-    // Disable copy constructor and assignment operator.
-    BatteryController(const BatteryController&) = delete;
-    BatteryController& operator=(const BatteryController&) = delete;
-
     /**
-     * @brief Constructs a new BatteryController object with the specified full amount of the battery.
+     * @brief Constructs a new Battery object with the specified full amount of the battery.
      *
      * @param full_amount The full amount of the battery (in steps).
      */
-    explicit BatteryController(std::size_t full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
+    explicit Battery(std::size_t full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
 
     /**
      * @brief Gets the current remaining battery capacity.
@@ -74,4 +70,4 @@ public:
     }
 };
 
-#endif /* VACUUM_BATTERYCONTROLLER_H_ */
+#endif /* BATTERY_H_ */

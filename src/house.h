@@ -1,27 +1,28 @@
-#ifndef VACUUM_LOCATIONMANAGER_H_
-#define VACUUM_LOCATIONMANAGER_H_
+#ifndef HOUSE_H_
+#define HOUSE_H_
 
+#include <memory>
 #include <vector>
 
-#include "dirtsensor.h"
-#include "wallssensor.h"
-#include "direction.h"
+#include "dirt_sensor.h"
+#include "wall_sensor.h"
 #include "position.h"
+#include "enums.h"
 
 /**
- * @brief The LocationManager class manages the location and cleaning operations of a vacuum cleaner.
+ * @brief The House class represents the house by means of cleaning operations and house state at robot's current location.
  *
  * It keeps track of the wall map, dirt map, current position, docking station position, and total dirt count.
  */
-class LocationManager : public WallsSensor, public DirtSensor
+class House : public WallsSensor, public DirtSensor
 {
-    static constexpr const unsigned int kDirtCleaningUnit = 1; // Units of dirt to clean when cleaning a position
+    static constexpr const unsigned int kDirtCleaningUnit = 1;        // Units of dirt to clean when cleaning a position
 
-    std::vector<std::vector<bool>> wall_map;                   // The map representing the walls in the environment.
-    std::vector<std::vector<unsigned int>> dirt_map;           // The map representing the dirt levels in the environment.
-    Position current_position;                                 // The current position of the vacuum cleaner.
-    Position docking_station_position;                         // The position of the docking station.
-    unsigned int total_dirt_count;                             // The total count of dirt in the environment.
+    std::unique_ptr<std::vector<std::vector<bool>>> wall_map;         // The map representing the walls in the environment.
+    std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map; // The map representing the dirt levels in the environment.
+    Position current_position;                                        // The current position of the vacuum cleaner.
+    Position docking_station_position;                                // The position of the docking station.
+    unsigned int total_dirt_count;                                    // The total count of dirt in the environment.
 
     virtual void setTotalDirtCount();
 
@@ -35,20 +36,16 @@ class LocationManager : public WallsSensor, public DirtSensor
     template <typename T> static bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position);
 
 public:
-    // Delete copy constructor and assignment operator
-    LocationManager(const LocationManager&) = delete;
-    LocationManager& operator=(const LocationManager&) = delete;
-
     /**
-     * @brief Constructs a new LocationManager object.
+     * @brief Constructs a new House object.
      *
      * @param wall_map The map representing the walls in the environment.
      * @param dirt_map The map representing the dirt levels in the environment.
      * @param docking_station_position The position of the docking station.
      */
-    explicit LocationManager(const std::vector<std::vector<bool>>& wall_map,
-                             const std::vector<std::vector<unsigned int>>& dirt_map,
-                             const Position& docking_station_position);
+    explicit House(std::unique_ptr<std::vector<std::vector<bool>>> wall_map,
+                   std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map,
+                   const Position& docking_station_position);
     /**
      * @brief Gets the total count of dirt in the environment.
      *
@@ -105,4 +102,4 @@ public:
     virtual bool isWall(Direction) const override;
 };
 
-#endif /* VACUUM_LOCATIONMANAGER_H_ */
+#endif /* HOUSE_H_ */

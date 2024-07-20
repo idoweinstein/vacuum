@@ -1,2 +1,5 @@
-max_robot_steps 500
-max_battery_steps 80
+No House
+MaxSteps=500
+MaxBattery= 80
+Rows= 10
+Cols =50

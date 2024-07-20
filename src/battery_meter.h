@@ -1,5 +1,7 @@
-#ifndef VACUUM_BATTERYMETER_H_
-#define VACUUM_BATTERYMETER_H_
+#ifndef BATTERY_METER_H_
+#define BATTERY_METER_H_
+
+#include <cstddef>
 
 /**
  * @brief The BatteryMeter class is a pure abstract base class for battery meters (sensors).
@@ -20,4 +22,4 @@ class BatteryMeter
         virtual std::size_t getBatteryState() const = 0;
 };
 
-#endif /* VACUUM_BATTERYMETER_H_ */
+#endif /* BATTERY_METER_H_ */
