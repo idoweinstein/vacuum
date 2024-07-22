@@ -1,8 +1,8 @@
 Maze
 MaxSteps =500
 MaxBattery =80
-Rows =13
-Cols =9
+Rows =9
+Cols = 13
 WWWWWWWWWWWWW
 WDW         W
 W WW W WWW WW
