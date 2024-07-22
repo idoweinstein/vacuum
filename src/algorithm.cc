@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <unordered_set>
 
+#include <iostream>
+
 void Algorithm::setMaxSteps(std::size_t max_steps)
 {
     this->max_steps = max_steps;
@@ -29,15 +31,40 @@ void Algorithm::setWallsSensor(const WallsSensor& walls_sensor)
     this->walls_sensor = &walls_sensor;
 }
 
-int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const std::function<bool(Position)>& found_criteria) const
+unsigned int Algorithm::scoreByNewTilesDiscovery(Position& position) const
 {
+    if (house.visited_positions.contains(position))
+    {
+        return 0;
+    }
+
+    unsigned int not_mapped_neighbors_count = 0;
+
+    for (Direction direction : directions)
+    {
+        Position neighbor_position = Position::computePosition(position, direction);
+        if (!house.wall_map.contains(neighbor_position))
+        {
+            not_mapped_neighbors_count++;
+        }
+    }
+
+    return not_mapped_neighbors_count;
+}
+
+bool Algorithm::performBFS(PathTree& path_tree,
+                           unsigned int start_index,
+                           const std::function<bool(Position)>& found_criteria) const
+{
+    std::optional<std::size_t> min_depth_found;
     std::unordered_set<Position> visited_positions;
     std::queue<unsigned int> index_queue;
 
     // If current position satisfies found_criteria - Return empty path
     if (found_criteria(path_tree.getPosition(start_index)))
     {
-        return start_index;
+        path_tree.markAsPathEnd(start_index);
+        return true;
     }
 
     index_queue.push(start_index);
@@ -47,6 +74,11 @@ int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const s
     {
         unsigned int parent_index = index_queue.front();
         index_queue.pop();
+
+        if (min_depth_found.has_value() && (path_tree.getDepth(parent_index) >= min_depth_found.value()))
+        {
+            continue;
+        }
 
         for (Direction direction : directions)
         {
@@ -61,18 +93,42 @@ int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const s
                 continue;
             }
 
-            unsigned int child_index = path_tree.insertChild(parent_index, direction, child_position);
+            unsigned int child_index = path_tree.insertChild(parent_index, direction, child_position, scoreByNewTilesDiscovery(child_position));
             index_queue.push(child_index);
             visited_positions.insert(child_position);
 
             if (found_criteria(child_position))
             {
-                return child_index; // Index of last path node
+                path_tree.markAsPathEnd(child_index);
+
+                if (!min_depth_found.has_value())
+                {
+                    min_depth_found = path_tree.getDepth(child_index);
+                }
             }
         }
     }
 
-    return kNotFound;
+    if (min_depth_found.has_value())
+    {
+        return true;
+    }
+    return false;
+}
+
+unsigned int Algorithm::getBestScorePath(PathTree& path_tree)
+{
+    unsigned int best_index = *std::max_element(path_tree.begin(), path_tree.end(), [&path_tree](unsigned int first_index, unsigned int second_index)
+                                                                 { return path_tree.getScore(first_index) < path_tree.getScore(second_index); }
+    );
+
+    std::cout << "$&&&&&&& OH SHIT &&&&&&&" << std::endl;
+    for (unsigned int leaf : path_tree)
+    {
+        std::cout << "@@@@@@@@@@@@@@@@@@@@ DEPTH = " << path_tree.getDepth(leaf) << std::endl;
+    }
+
+    return best_index;
 }
 
 bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria)
@@ -81,12 +137,15 @@ bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direc
 
     unsigned int root_index = path_tree.insertRoot(start_position);
 
-    int path_end_index = performBFS(path_tree, root_index, found_criteria);
-    if (kNotFound == path_end_index)
+    bool is_found = performBFS(path_tree, root_index, found_criteria);
+    if (!is_found)
     {
         return false;
     }
 
+    unsigned int path_end_index = getBestScorePath(path_tree);
+
+    // Reconstruct Best Score Found Path
     unsigned int current_index = path_end_index;
     while (path_tree.hasParent(current_index))
     {
@@ -101,7 +160,7 @@ bool Algorithm::getPathToNearestTodo(Position start_position, std::deque<Directi
 {
     return getPathByFoundCriteria(start_position,
                                   path,
-                                  [&](Position position)
+                                  [this](Position position)
                                   { return house.todo_positions.contains(position); }
     );
 }
@@ -110,7 +169,7 @@ bool Algorithm::getPathToStation(std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(current_tile.position,
                                   path,
-                                  [&](Position position)
+                                  [](Position position)
                                   { return position == kDockingStationPosition; }
     );
 }
@@ -162,6 +221,8 @@ void Algorithm::getBatteryMeterInfo()
 
 void Algorithm::getSensorsInfo()
 {
+    house.visited_positions.insert(current_tile.position);
+
     getWallSensorInfo();
     getDirtSensorInfo();
     getBatteryMeterInfo();

@@ -168,8 +168,10 @@ namespace
         if (robot_state.runtime_steps.back() == Step::Finish) {
             path_length--;
         }
+
         EXPECT_EQ(robot_state.total_steps_taken, path_length);
         EXPECT_NE(Step::Stay, robot_state.runtime_steps.at(0));
+        EXPECT_EQ(0, robot_state.total_dirt_left);
 
         // Assert the expected program results (Robot is not dead and cleaned all dirt)
         EXPECT_EQ(Status::Finished, robot_state.status);

@@ -30,19 +30,19 @@
  */
 class Algorithm : public AbstractAlgorithm
 {
-    static constexpr const int kNotFound = -1;     // Constant value representing path not found status.
     inline static const Position kDockingStationPosition = Position(0, 0);
     inline static const Direction directions[] = { // Directions of movement.
         Direction::North, Direction::East, Direction::South, Direction::West
     };
 
-    std::optional<std::size_t> max_steps;           // Maximum number of steps to take.
+    std::optional<std::size_t> max_steps;               // Maximum number of steps to take.
     std::size_t total_steps_left;
 
     struct HouseModel
     {
         std::unordered_map<Position, bool> wall_map;    // Internal algorithm's mapping of the house walls.
         std::unordered_set<Position> todo_positions;    // A set of positions to visit (unvisited / dirty positions).
+        std::unordered_set<Position> visited_positions; // A set of already visiter positions (for optimization purposes).
     };
 
     struct BatteryModel
@@ -83,6 +83,8 @@ class Algorithm : public AbstractAlgorithm
         }
     }
 
+    virtual unsigned int scoreByNewTilesDiscovery(Position& position) const;
+
     /**
      * @brief Performs a breadth-first search (BFS) to find a path that satisfies the given criteria.
      *
@@ -95,9 +97,9 @@ class Algorithm : public AbstractAlgorithm
      * @param found_criteria The criteria function to determine if a position is found.
      * @return The index of the found position in the path_tree, or kNotFound if not found.
      */
-    virtual int performBFS(PathTree& path_tree,
-                           unsigned int start_index,
-                           const std::function<bool(Position)>& found_criteria) const;
+    virtual bool performBFS(PathTree& path_tree,
+                            unsigned int start_index,
+                            const std::function<bool(Position)>& found_criteria) const;
 
     /**
      * @brief Calculates the distance of a path.
@@ -127,6 +129,8 @@ class Algorithm : public AbstractAlgorithm
         }
         return static_cast<Step>(path.front());
     }
+
+    virtual unsigned int getBestScorePath(PathTree& path_tree);
 
     /**
      * @brief Finds a path that satisfies the given criteria.
