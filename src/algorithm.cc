@@ -118,17 +118,9 @@ bool Algorithm::performBFS(PathTree& path_tree,
 
 unsigned int Algorithm::getBestScorePath(PathTree& path_tree)
 {
-    unsigned int best_index = *std::max_element(path_tree.begin(), path_tree.end(), [&path_tree](unsigned int first_index, unsigned int second_index)
+    return *std::max_element(path_tree.begin(), path_tree.end(), [&path_tree](unsigned int first_index, unsigned int second_index)
                                                                  { return path_tree.getScore(first_index) < path_tree.getScore(second_index); }
     );
-
-    std::cout << "$&&&&&&& OH SHIT &&&&&&&" << std::endl;
-    for (unsigned int leaf : path_tree)
-    {
-        std::cout << "@@@@@@@@@@@@@@@@@@@@ DEPTH = " << path_tree.getDepth(leaf) << std::endl;
-    }
-
-    return best_index;
 }
 
 bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria)
