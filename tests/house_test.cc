@@ -58,14 +58,16 @@ namespace
             static void SetUpTestCase()
             {
                 
-                std::vector<std::vector<bool>> wall_map;
-                std::vector<std::vector<unsigned int>> dirt_map;
+                std::unique_ptr<std::vector<std::vector<bool>>> wall_map =
+                    std::make_unique<std::vector<std::vector<bool>>>();
+                std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map =
+                    std::make_unique<std::vector<std::vector<unsigned int>>>();
 
-                initializeMaps(wall_map, dirt_map);
+                initializeMaps(*wall_map, *dirt_map);
 
                 house = std::unique_ptr<House>(new House(
-                    wall_map,
-                    dirt_map,
+                    std::move(wall_map),
+                    std::move(dirt_map),
                     docking_station_position
                 ));
             }
@@ -122,13 +124,15 @@ namespace
 
     TEST_F(HouseTest, MoveOutOfBounds)
     {
-        std::vector<std::vector<bool>> wall_map;
-        std::vector<std::vector<unsigned int>> dirt_map;
+        std::unique_ptr<std::vector<std::vector<bool>>> wall_map =
+            std::make_unique<std::vector<std::vector<bool>>>();
+        std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map =
+            std::make_unique<std::vector<std::vector<unsigned int>>>();
 
-        wall_map.push_back({false});
-        dirt_map.push_back({0});
+        (*wall_map).push_back({false});
+        (*dirt_map).push_back({0});
 
-        House simple_location(wall_map, dirt_map, Position(0,0));
+        House simple_location(std::move(wall_map), std::move(dirt_map), Position(0,0));
 
         EXPECT_THROW({
             simple_location.move(Step::North);

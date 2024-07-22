@@ -110,8 +110,10 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
     unsigned int house_cols_num = deserializeParameter(input_stream, kHouseColsNumParameter);
 
     // Initialize Dirt & Wall maps with their default values
-    std::vector<std::vector<bool>> wall_map(house_rows_num, std::vector<bool> (house_cols_num, kDefaultIsWall));
-    std::vector<std::vector<unsigned int>> dirt_map(house_rows_num, std::vector<unsigned int> (house_cols_num, kDefaultDirtLevel));
+    std::unique_ptr<std::vector<std::vector<bool>>> wall_map = std::make_unique<std::vector<std::vector<bool>>>(
+        std::vector<std::vector<bool>>(house_rows_num, std::vector<bool> (house_cols_num, kDefaultIsWall)));
+    std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map = std::make_unique<std::vector<std::vector<unsigned int>>>(
+        std::vector<std::vector<unsigned int>>(house_rows_num, std::vector<unsigned int> (house_cols_num, kDefaultDirtLevel)));
 
     std::string house_block_row;
     unsigned int row_idx = 0;
@@ -144,7 +146,7 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
                 case BlockType::DirtLevel7:
                 case BlockType::DirtLevel8:
                 case BlockType::DirtLevel9:
-                    dirt_map[row_idx][column_idx] = (unsigned int)(block - '0');
+                    (*dirt_map)[row_idx][column_idx] = (unsigned int)(block - '0');
                     break;
 
                 case BlockType::DockingStation:
@@ -156,7 +158,7 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
                     break;
 
                 case BlockType::Wall:
-                    wall_map[row_idx][column_idx] = true;
+                    (*wall_map)[row_idx][column_idx] = true;
                     break;
 
                 default:
@@ -173,5 +175,5 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
         throw std::runtime_error("Missing docking station position in house file!");
     }
 
-    return std::make_unique<House>(wall_map, dirt_map, docking_station_position.value());
+    return std::make_unique<House>(std::move(wall_map), std::move(dirt_map), docking_station_position.value());
 }

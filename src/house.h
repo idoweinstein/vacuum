@@ -1,6 +1,7 @@
 #ifndef HOUSE_H_
 #define HOUSE_H_
 
+#include <memory>
 #include <vector>
 
 #include "dirt_sensor.h"
@@ -15,13 +16,13 @@
  */
 class House : public WallsSensor, public DirtSensor
 {
-    static constexpr const unsigned int kDirtCleaningUnit = 1; // Units of dirt to clean when cleaning a position
+    static constexpr const unsigned int kDirtCleaningUnit = 1;        // Units of dirt to clean when cleaning a position
 
-    std::vector<std::vector<bool>> wall_map;                   // The map representing the walls in the environment.
-    std::vector<std::vector<unsigned int>> dirt_map;           // The map representing the dirt levels in the environment.
-    Position current_position;                                 // The current position of the vacuum cleaner.
-    Position docking_station_position;                         // The position of the docking station.
-    unsigned int total_dirt_count;                             // The total count of dirt in the environment.
+    std::unique_ptr<std::vector<std::vector<bool>>> wall_map;         // The map representing the walls in the environment.
+    std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map; // The map representing the dirt levels in the environment.
+    Position current_position;                                        // The current position of the vacuum cleaner.
+    Position docking_station_position;                                // The position of the docking station.
+    unsigned int total_dirt_count;                                    // The total count of dirt in the environment.
 
     virtual void setTotalDirtCount();
 
@@ -42,9 +43,9 @@ public:
      * @param dirt_map The map representing the dirt levels in the environment.
      * @param docking_station_position The position of the docking station.
      */
-    explicit House(const std::vector<std::vector<bool>>& wall_map,
-                             const std::vector<std::vector<unsigned int>>& dirt_map,
-                             const Position& docking_station_position);
+    explicit House(std::unique_ptr<std::vector<std::vector<bool>>> wall_map,
+                   std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map,
+                   const Position& docking_station_position);
     /**
      * @brief Gets the total count of dirt in the environment.
      *
