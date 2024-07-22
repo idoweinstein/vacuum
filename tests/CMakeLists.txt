@@ -33,6 +33,7 @@ set(INPUT_FILES
     inputs/input_nodock.txt
     inputs/input_filledline.txt
     inputs/input_filledcol.txt
+    inputs/input_returnbest.txt
 )
 
 file(

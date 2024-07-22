@@ -330,4 +330,32 @@ namespace
 
         simulator.run();
     }
+
+    TEST_F(SimulatorTest, BestReturnPath)
+    {
+        SetUp("inputs/input_returnbest.txt", "output_input_returnbest.txt");
+
+        RobotState robot_state = getRobotState();
+
+        EXPECT_EQ(9, robot_state.total_steps_taken);
+        EXPECT_EQ(Status::Finished, robot_state.status);
+        EXPECT_EQ(0, robot_state.total_dirt_left);
+
+        EXPECT_EQ(Step::Stay, robot_state.runtime_steps.at(4));
+
+        if (Step::North == robot_state.runtime_steps.at(0))
+        {
+            EXPECT_EQ(Step::South, robot_state.runtime_steps.at(5));
+        }
+
+        else if (Step::West == robot_state.runtime_steps.at(0))
+        {
+            EXPECT_EQ(Step::East, robot_state.runtime_steps.at(5));
+        }
+
+        else
+        {
+            FAIL();
+        }
+    }
 }
