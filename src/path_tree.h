@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <stdexcept>
+#include <unordered_set>
 
 #include "position.h"
 #include "enums.h"
@@ -12,10 +13,12 @@
  */
 struct PathNode
 {
-    int parent_index;    // Index of the parent node in the path tree.
-    Direction direction; // Direction from the parent node to this node.
-    Position position;   // Position of this node.
-    std::size_t depth;   // Depth of this node in the path tree.
+    int parent_index;                // Index of the parent node in the path tree.
+    bool is_path_end;                // Boolean inidicating whether or not this node is end of a valid path.
+    Direction direction;             // Direction from the parent node to this node.
+    Position position;               // Position of this node.
+    std::size_t depth;               // Depth of this node in the path tree.
+    unsigned int accumulated_score;  // Accumulated Score of the path prefix ends at this node.
 };
 
 /**
@@ -26,6 +29,7 @@ class PathTree
     static constexpr const int kNoParent = -1; // Constant representing no parent index.
 
     std::vector<PathNode> node_pool;           // Pool of path nodes.
+    std::vector<unsigned int> leaf_nodes;
 
     /**
      * @brief Validates the given node index.
@@ -67,7 +71,7 @@ public:
      * @param child_position The position of the child node.
      * @return The index of the inserted child node.
      */
-    unsigned int insertChild(unsigned int parent_index, Direction direction_to_child, Position child_position);
+    unsigned int insertChild(unsigned int parent_index, Direction direction_to_child, Position child_position, unsigned int child_score);
 
     /**
      * @brief Gets the index of the parent node for the given node index.
@@ -103,6 +107,20 @@ public:
      * @return The depth of the node.
      */
     std::size_t getDepth(unsigned int node_index) { return safeNodeAccess(node_index).depth; }
+
+    unsigned int getScore(unsigned int node_index) { return safeNodeAccess(node_index).accumulated_score; }
+
+    void markAsPathEnd(unsigned int node_index)
+    {
+        leaf_nodes.push_back(node_index);
+        safeNodeAccess(node_index).is_path_end = true;
+    }
+
+    std::vector<unsigned int>::iterator begin() { return leaf_nodes.begin(); }
+    std::vector<unsigned int>::const_iterator cbegin() const { return leaf_nodes.cbegin(); }
+
+    std::vector<unsigned int>::iterator end() { return leaf_nodes.end(); }
+    std::vector<unsigned int>::const_iterator cend() const { return leaf_nodes.cend(); }
 };
 
 #endif /* PATH_TREE_H_ */
