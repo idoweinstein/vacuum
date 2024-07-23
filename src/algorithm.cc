@@ -185,6 +185,22 @@ std::size_t Algorithm::getMaxReachableDistance() const
     return max_reachable_distance;
 }
 
+bool Algorithm::areStepsLeftToClean()
+{
+    std::deque<Direction> path;
+    bool is_found = getPathToNearestTodo(current_tile.position, path);
+    if (is_found)
+    {
+        std::size_t cleaning_cost = 2 * path.size() + 1;
+        if (cleaning_cost >= total_steps_left)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool Algorithm::cleanedAllReachable()
 {
     std::deque<Direction> found_path;
@@ -221,7 +237,7 @@ Step Algorithm::decideNextStep()
         return Step::Finish;
     }
 
-    if (shouldCharge())
+    if (shouldKeepCharging())
     {
         return Step::Stay;
     }

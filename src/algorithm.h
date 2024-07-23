@@ -197,9 +197,11 @@ class Algorithm : public AbstractAlgorithm
         return (0 == total_steps_left) || is_finished_cleaning;
     }
 
-    virtual bool shouldCharge()
+    virtual bool areStepsLeftToClean();
+
+    virtual bool shouldKeepCharging()
     {
-        return isAtDockingStation() && !isBatteryFull();
+        return isAtDockingStation() && !isBatteryFull() && areStepsLeftToClean();
     }
 
     virtual bool lowBatteryToStay(std::size_t station_distance)
