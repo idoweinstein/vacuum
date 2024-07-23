@@ -33,9 +33,11 @@ void Algorithm::setWallsSensor(const WallsSensor& walls_sensor)
 
 unsigned int Algorithm::scoreByNewTilesDiscovery(Position& position) const
 {
+    unsigned int score = 0;
+
     if (house.visited_positions.contains(position))
     {
-        return 0;
+        return score;
     }
 
     unsigned int not_mapped_neighbors_count = 0;
@@ -49,7 +51,8 @@ unsigned int Algorithm::scoreByNewTilesDiscovery(Position& position) const
         }
     }
 
-    return not_mapped_neighbors_count;
+    score = not_mapped_neighbors_count + 99;
+    return score;
 }
 
 bool Algorithm::performBFS(PathTree& path_tree,
@@ -135,7 +138,17 @@ bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direc
         return false;
     }
 
+    std::cout << "#### BFS RUN ####" << std::endl;
+    std::cout << "################# Current = (" << current_tile.position.first << "," << current_tile.position.second << ")" << std::endl;
+    std::cout << "################# Start = (" << start_position.first << "," << start_position.second << ")" << std::endl;
+    for  (unsigned int leaf : path_tree)
+    {
+        std::cout << "################# Leaf = (" << path_tree.getPosition(leaf).first << "," << path_tree.getPosition(leaf).second << ")" << std::endl;
+    }
+
     unsigned int path_end_index = getBestScorePath(path_tree);
+    std::cout << "################# Chosen = (" << path_tree.getPosition(path_end_index).first << "," << path_tree.getPosition(path_end_index).second << ")" << std::endl;
+
 
     // Reconstruct Best Score Found Path
     unsigned int current_index = path_end_index;

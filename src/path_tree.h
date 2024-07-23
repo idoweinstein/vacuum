@@ -29,7 +29,7 @@ class PathTree
     static constexpr const int kNoParent = -1; // Constant representing no parent index.
 
     std::vector<PathNode> node_pool;           // Pool of path nodes.
-    std::unordered_set<unsigned int> leaf_nodes;
+    std::vector<unsigned int> leaf_nodes;
 
     /**
      * @brief Validates the given node index.
@@ -112,15 +112,15 @@ public:
 
     void markAsPathEnd(unsigned int node_index)
     {
-        leaf_nodes.insert(node_index);
+        leaf_nodes.push_back(node_index);
         safeNodeAccess(node_index).is_path_end = true;
     }
 
-    std::unordered_set<unsigned int>::iterator begin() { return leaf_nodes.begin(); }
-    std::unordered_set<unsigned int>::const_iterator cbegin() const { return leaf_nodes.cbegin(); }
+    std::vector<unsigned int>::iterator begin() { return leaf_nodes.begin(); }
+    std::vector<unsigned int>::const_iterator cbegin() const { return leaf_nodes.cbegin(); }
 
-    std::unordered_set<unsigned int>::iterator end() { return leaf_nodes.end(); }
-    std::unordered_set<unsigned int>::const_iterator cend() const { return leaf_nodes.cend(); }
+    std::vector<unsigned int>::iterator end() { return leaf_nodes.end(); }
+    std::vector<unsigned int>::const_iterator cend() const { return leaf_nodes.cend(); }
 };
 
 #endif /* PATH_TREE_H_ */
