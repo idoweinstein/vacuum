@@ -101,7 +101,7 @@ bool Algorithm::getPathToNearestTodo(Position start_position, std::deque<Directi
 {
     return getPathByFoundCriteria(start_position,
                                   path,
-                                  [&](Position position)
+                                  [this](Position position)
                                   { return house.todo_positions.contains(position); }
     );
 }
@@ -110,7 +110,7 @@ bool Algorithm::getPathToStation(std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(current_tile.position,
                                   path,
-                                  [&](Position position)
+                                  [](Position position)
                                   { return position == kDockingStationPosition; }
     );
 }
