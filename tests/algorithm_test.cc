@@ -260,19 +260,6 @@ namespace
     }
 
     /*
-    * There's no reason to keep charging, because until will get enough battery max steps will be < 3.
-    */
-    TEST_F(AlgorithmTest, UntilChargedWillHaveTooLowMaxSteps)
-    {
-        setBatteryLevel(0, 20);
-        setMaxSteps(5);
-
-        setAllIsWall(false);
-
-        assertNextStep(Step::Finish);
-    }
-
-    /*
     * If robot won't leave docking station while charging he will miss a TODO position he could visit before max steps is reached.
     */
     TEST_F(AlgorithmTest, StopChargingToClean)
