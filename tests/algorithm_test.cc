@@ -286,8 +286,13 @@ namespace
         setIsWall(true, Direction::North);
         setIsWall(true, Direction::South);
 
+        EXPECT_CALL(dirt_sensor, dirtLevel())
+            .WillOnce(testing::Invoke([&]() { return 0; }))
+            .WillRepeatedly(testing::Invoke([&]() { return 1; }));
+
         // Robot will stop charging to clean before max steps reached 
         assertNextStep(Step::West);
+        assertNextStep(Step::Stay);
         assertNextStep(Step::East);
         assertNextStep(Step::Finish);
     }
