@@ -28,9 +28,6 @@ namespace
         Position root_position = path_tree.getPosition(root_index);
         EXPECT_EQ(-1, root_position.first);
         EXPECT_EQ(3, root_position.second);
-
-        // Check Root Depth
-        EXPECT_EQ(0, path_tree.getDepth(root_index));
     }
 
     TEST_F(PathTreeTest, BadParentIndex)
@@ -83,7 +80,6 @@ namespace
         {
             unsigned int parent_index = path_tree.getParentIndex(children[i]);
             EXPECT_EQ(children[i-1], parent_index);
-            EXPECT_EQ(path_tree.getDepth(parent_index) + 1, path_tree.getDepth(children[i]));
         }
 
         EXPECT_EQ(Direction::West, path_tree.getDirection(children[4]));
@@ -101,7 +97,6 @@ namespace
         {
             unsigned int parent_index = path_tree.getParentIndex(another_branch[i]);
             EXPECT_EQ(another_branch[i-1], parent_index);
-            EXPECT_EQ(path_tree.getDepth(parent_index) + 1, path_tree.getDepth(children[i]));
         }
     }
 }

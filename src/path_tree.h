@@ -15,7 +15,6 @@ struct PathNode
     int parent_index;    // Index of the parent node in the path tree.
     Direction direction; // Direction from the parent node to this node.
     Position position;   // Position of this node.
-    std::size_t depth;   // Depth of this node in the path tree.
 };
 
 /**
@@ -96,13 +95,6 @@ public:
      * @return The direction from the parent node to the node.
      */
     Direction getDirection(unsigned int node_index) { return safeNodeAccess(node_index).direction; }
-
-    /**
-     * @brief Gets the depth of the node at the given index.
-     * @param node_index The index of the node.
-     * @return The depth of the node.
-     */
-    std::size_t getDepth(unsigned int node_index) { return safeNodeAccess(node_index).depth; }
 };
 
 #endif /* PATH_TREE_H_ */

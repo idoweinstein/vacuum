@@ -30,14 +30,11 @@
  */
 class Algorithm : public AbstractAlgorithm
 {
-    static constexpr const int kNotFound = -1;     // Constant value representing path not found status.
+    static constexpr const int kNotFound = -1;          // Constant value representing path not found status.
     inline static const Position kDockingStationPosition = Position(0, 0);
-    inline static const Direction directions[] = { // Directions of movement.
+    inline static const Direction directions[] = {      // Directions of movement.
         Direction::North, Direction::East, Direction::South, Direction::West
     };
-
-    std::optional<std::size_t> max_steps;           // Maximum number of steps to take.
-    std::size_t total_steps_left;
 
     struct HouseModel
     {
@@ -61,11 +58,14 @@ class Algorithm : public AbstractAlgorithm
     BatteryModel battery;
     CurrentTile current_tile;
 
+    std::optional<std::size_t> max_steps;               // Maximal allowed steps to take.
+    std::size_t total_steps_left;                       // Number of allowed steps left.
+
     std::optional<const BatteryMeter*> battery_meter;
 
-    std::optional<const DirtSensor*> dirt_sensor;   // Reference to the dirt sensor.
+    std::optional<const DirtSensor*> dirt_sensor;       // Reference to the dirt sensor.
 
-    std::optional<const WallsSensor*> walls_sensor; // Reference to the walls sensor.
+    std::optional<const WallsSensor*> walls_sensor;     // Reference to the walls sensor.
 
     /**
      * @brief Checks if the algorithm is fully initialized.
