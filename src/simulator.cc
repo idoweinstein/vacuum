@@ -7,21 +7,24 @@
 #include "robot_logger.h"
 #include "status.h"
 
-Status Simulator::getMissionStatus(bool is_algorithm_finished, bool is_mission_complete, bool is_battery_exhausted)
+void Simulator::updateMissionStatus(Step next_step)
 {
-    if (is_mission_complete || is_algorithm_finished)
+    if (Step::Finish == next_step)
     {
-        return Status::Finished;
+        if (house->isInDockingStation())
+        {
+            mission_status = Status::Finished;
+        }
+
+        else
+        {
+            mission_status = Status::Dead;
+        }
     }
 
-    else if (is_battery_exhausted)
+    else if (!house->isInDockingStation() && battery->isBatteryExhausted())
     {
-        return Status::Dead;
-    }
-
-    else
-    {
-        return Status::Working;
+        mission_status = Status::Dead;
     }
 }
 
@@ -33,6 +36,7 @@ void Simulator::move(Step next_step)
 
     if (Step::Finish == next_step)
     {
+        updateMissionStatus(next_step);
         return;
     }
 
@@ -57,6 +61,9 @@ void Simulator::move(Step next_step)
     }
  
     house->move(next_step);
+    total_steps_taken++;
+
+    updateMissionStatus(next_step);
 }
 
 void Simulator::readHouseFile(const std::string& house_file_path)
@@ -92,11 +99,6 @@ void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
         throw std::logic_error("Called Simulator::setAlgorithm() before calling Simulator::readHouseFile()");
     }
 
-    /*
-     * Use a shared pointer.
-     * Pass a custom no-op deleter to prevent calling the actual destructor since
-     * we don't own this object.
-     */
     algorithm = &chosen_algorithm;
 
     algorithm->setMaxSteps(max_simulator_steps);
@@ -115,29 +117,17 @@ void Simulator::run()
     }
 
     RobotLogger& logger = RobotLogger::getInstance();
-    unsigned int total_steps_performed = 0;
-    bool is_algorithm_finished = false;
 
-    while (total_steps_performed <= max_simulator_steps)
+    while (total_steps_taken <= max_simulator_steps)
     {
         Step next_step = algorithm->nextStep();
-        move(next_step);
 
-        if (Step::Finish == next_step)
+        move(next_step);
+        if (Status::Finished == mission_status || Status::Dead == mission_status)
         {
-            // In case Robot mapped all accessible positions and have nothing left to clean
-            is_algorithm_finished = true;
             break;
-        } else {
-            total_steps_performed++;
         }
     }
 
-    unsigned int total_dirt_count = house->getTotalDirtCount();
-
-    bool is_battery_exhausted = battery->getBatteryState() < 1;
-    bool is_mission_complete = (0 == total_dirt_count) && house->isInDockingStation();
-    Status status = getMissionStatus(is_algorithm_finished, is_mission_complete, is_battery_exhausted);
-
-    logger.logCleaningStatistics(total_steps_performed, total_dirt_count, status);
+    logger.logCleaningStatistics(total_steps_taken, house->getTotalDirtCount(), mission_status);
 }

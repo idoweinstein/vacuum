@@ -29,20 +29,15 @@ class Simulator
         Ready
     };
 
+    std::size_t total_steps_taken = 0;
     SimulatorState state = SimulatorState::Initial;     // Simulator's initialization current state.
+    Status mission_status = Status::Working;            // Simulator's mission status.
     unsigned int max_simulator_steps = 0;               // Maximum number of steps the simulator can perform.
     std::unique_ptr<Battery> battery = nullptr;         // Simulator's battery (for charging / discharging and getting battery level).
     std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
     AbstractAlgorithm* algorithm = nullptr;             // Simulator's algorithm to suggest its next steps.
 
-    /**
-     * @brief Checks if the cleaning mission is complete.
-     *
-     * @return true if the cleaning mission is complete, false otherwise.
-     */
-    bool isMissionComplete() const { return (house->isFinished() && house->isInDockingStation()); }
-
-    static Status getMissionStatus(bool is_algorithm_finished, bool is_mission_complete, bool is_battery_exhausted);
+    void updateMissionStatus(Step next_step);
 
     /**
      * @brief Moves the simulator to the next position.

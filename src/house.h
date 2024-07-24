@@ -73,11 +73,11 @@ public:
     virtual bool isInDockingStation() const { return current_position == docking_station_position; }
 
     /**
-     * @brief Checks if the cleaning operation is finished.
+     * @brief Checks if the house is clean (cleaning operation is finished).
      *
-     * @return true if the cleaning operation is finished, false otherwise.
+     * @return true if the house is clean, false otherwise.
      */
-    virtual bool isFinished() const { return total_dirt_count == 0; }
+    virtual bool isClean() const { return total_dirt_count == 0; }
 
     /**
      * @brief Gets the dirt level at the current position.
