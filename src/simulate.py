@@ -194,7 +194,6 @@ def parse_args():
 def main():
     args = parse_args()
     max_robot_steps, max_battery_steps, start_position, map = parse_input_file(args.input_file)
-    import ipdb; ipdb.set_trace()
     num_steps, dirt_left, status, steps = pase_output_file(args.output_file)
     simulate(max_robot_steps, max_battery_steps, start_position, map, steps, args.fps)
     print_empty_line()
