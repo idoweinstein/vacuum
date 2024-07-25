@@ -6,6 +6,7 @@
 #include <ranges>
 #include <fstream>
 #include <sstream>
+#include <cstddef>
 #include <optional>
 #include <stdexcept>
 
@@ -19,22 +20,24 @@
  * Removes leading and trailing whitespaces from a string.
  * Source: https://stackoverflow.com/questions/66897068/can-trim-of-a-string-be-done-inplace-with-c20-ranges#answer-66897681
  */
-void trim(std::string& s) {
-    auto not_space = [](unsigned char c){ return !std::isspace(c); };
+void Deserializer::trimSpaces(std::string& input_string)
+{
+    auto is_not_space = [](unsigned char input_char){ return !std::isspace(input_char); };
 
-    // erase the the spaces at the back first
-    // so we don't have to do extra work
-    s.erase(
-        std::ranges::find_if(s | std::views::reverse, not_space).base(),
-        s.end());
+    // Erase the the spaces at the back first - so we don't have to do extra work
+    input_string.erase(
+        std::ranges::find_if(input_string | std::views::reverse, is_not_space).base(),
+        input_string.end()
+    );
 
-    // erase the spaces at the front
-    s.erase(
-        s.begin(),
-        std::ranges::find_if(s, not_space));
+    // Erase the spaces at the front
+    input_string.erase(
+        input_string.begin(),
+        std::ranges::find_if(input_string, is_not_space)
+    );
 }
 
-unsigned int Deserializer::valueToUnsignedInt(const std::string& value)
+std::size_t Deserializer::valueToUnsignedNumber(const std::string& value)
 {
     std::istringstream value_stream(value);
     int numerical_value = 0;
@@ -50,12 +53,12 @@ unsigned int Deserializer::valueToUnsignedInt(const std::string& value)
         throw std::runtime_error("A parameter with negative value was given!");
     }
 
-    return (unsigned int)numerical_value;
+    return (std::size_t)numerical_value;
 }
 
-unsigned int Deserializer::deserializeParameter(std::istream& input_stream, const std::string& parameter_name)
+std::size_t Deserializer::deserializeParameter(std::istream& input_stream, const std::string& parameter_name)
 {
-    std::optional<unsigned int> parameter;
+    std::optional<std::size_t> parameter;
 
     std::string line;
     std::getline(input_stream, line);
@@ -64,15 +67,15 @@ unsigned int Deserializer::deserializeParameter(std::istream& input_stream, cons
     std::string parameter_key;
     if (std::getline(line_stream, parameter_key, kParameterDelimiter))
     {
-        trim(parameter_key);
+        trimSpaces(parameter_key);
 
         std::string parameter_value;
         std::getline(line_stream, parameter_value);
 
         if (parameter_name == parameter_key)
         {
-            trim(parameter_value);
-            parameter = valueToUnsignedInt(parameter_value);
+            trimSpaces(parameter_value);
+            parameter = valueToUnsignedNumber(parameter_value);
         }
     }
 
@@ -88,16 +91,16 @@ void Deserializer::ignoreInternalName(std::istream& input_stream)
     std::getline(input_stream, house_internal_name);
 }
 
-unsigned int Deserializer::deserializeMaxSteps(std::istream& input_stream)
+std::size_t Deserializer::deserializeMaxSteps(std::istream& input_stream)
 {
-    unsigned int max_simulator_steps = deserializeParameter(input_stream, kMaxStepsParameter);
+    std::size_t max_simulator_steps = deserializeParameter(input_stream, kMaxStepsParameter);
 
     return max_simulator_steps;
 }
 
 std::unique_ptr<Battery> Deserializer::deserializeBattery(std::istream& input_stream)
 {
-    unsigned int full_battery_capacity = deserializeParameter(input_stream, kMaxBatteryParameter);
+    std::size_t full_battery_capacity = deserializeParameter(input_stream, kMaxBatteryParameter);
 
     return std::make_unique<Battery>(full_battery_capacity);
 }
@@ -106,30 +109,39 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
 {
     std::optional<Position> docking_station_position;
 
-    unsigned int house_rows_num = deserializeParameter(input_stream, kHouseRowsNumParameter);
-    unsigned int house_cols_num = deserializeParameter(input_stream, kHouseColsNumParameter);
+    std::size_t house_rows_num = deserializeParameter(input_stream, kHouseRowsNumParameter);
+    std::size_t house_cols_num = deserializeParameter(input_stream, kHouseColsNumParameter);
 
     // Initialize Dirt & Wall maps with their default values
-    std::unique_ptr<std::vector<std::vector<bool>>> wall_map = std::make_unique<std::vector<std::vector<bool>>>(
-        std::vector<std::vector<bool>>(house_rows_num, std::vector<bool> (house_cols_num, kDefaultIsWall)));
-    std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map = std::make_unique<std::vector<std::vector<unsigned int>>>(
-        std::vector<std::vector<unsigned int>>(house_rows_num, std::vector<unsigned int> (house_cols_num, kDefaultDirtLevel)));
+    auto wall_map = std::make_unique<std::vector<std::vector<bool>>>(
+        std::vector<std::vector<bool>>(
+            house_rows_num,
+            std::vector<bool> (house_cols_num, kDefaultIsWall)
+        )
+    );
+
+    auto dirt_map = std::make_unique<std::vector<std::vector<unsigned int>>>(
+        std::vector<std::vector<unsigned int>>(
+            house_rows_num,
+            std::vector<unsigned int> (house_cols_num, kDefaultDirtLevel)
+        )
+    );
 
     std::string house_block_row;
-    unsigned int row_idx = 0;
+    std::size_t row_index = 0;
 
     while (std::getline(input_stream, house_block_row))
     {
-        if (row_idx >= house_rows_num)
+        if (row_index >= house_rows_num)
         {
             break;
         }
 
-        unsigned int column_idx = 0;
+        std::size_t column_index = 0;
 
         for (char block: house_block_row)
         {
-            if (column_idx >= house_cols_num)
+            if (column_index >= house_cols_num)
             {
                 break;
             }
@@ -146,7 +158,7 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
                 case BlockType::DirtLevel7:
                 case BlockType::DirtLevel8:
                 case BlockType::DirtLevel9:
-                    (*dirt_map)[row_idx][column_idx] = (unsigned int)(block - '0');
+                    (*dirt_map)[row_index][column_index] = (unsigned int)(block - '0');
                     break;
 
                 case BlockType::DockingStation:
@@ -154,20 +166,19 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
                     {
                         throw std::runtime_error("More than one docking station was given in house file!");
                     }
-                    docking_station_position = {(int)row_idx, (int)column_idx};
+                    docking_station_position = {(int)row_index, (int)column_index};
                     break;
 
                 case BlockType::Wall:
-                    (*wall_map)[row_idx][column_idx] = true;
+                    (*wall_map)[row_index][column_index] = true;
                     break;
 
                 default:
-                    // Space as well as any invalid characters means Clear Block (dirt level of '0')
-                    break;
+                    break; // Space as well as any invalid characters means Clear Block (dirt level of '0')
             }
-            column_idx++;
+            column_index++;
         }
-        row_idx++;
+        row_index++;
     }
 
     if (!docking_station_position.has_value())

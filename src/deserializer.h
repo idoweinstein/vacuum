@@ -46,7 +46,9 @@ class Deserializer
         DirtLevel9 = '9'
     };
 
-    static void assertParameterSet(std::optional<unsigned int>& parameter, const std::string& parameter_name)
+    static void trimSpaces(std::string& input_string);
+
+    static void assertParameterSet(std::optional<std::size_t>& parameter, const std::string& parameter_name)
     {
         if (!parameter.has_value())
         {
@@ -63,7 +65,7 @@ class Deserializer
      * @param value The string value to convert.
      * @return The converted unsigned integer value.
      */
-    static unsigned int valueToUnsignedInt(const std::string& value);
+    static std::size_t valueToUnsignedNumber(const std::string& value);
 
     /**
      * @brief Deserializes the parameters from an input stream.
@@ -74,7 +76,7 @@ class Deserializer
      * @param input_stream The input stream to read the parameters from.
      * @return The value of the deserialized parameter.
      */
-    static unsigned int deserializeParameter(std::istream& input_stream, const std::string& parameter_name);
+    static std::size_t deserializeParameter(std::istream& input_stream, const std::string& parameter_name);
 
 public:
     /**
@@ -86,7 +88,7 @@ public:
 
     static void ignoreInternalName(std::istream& input_stream);
 
-    static unsigned int deserializeMaxSteps(std::istream& input_stream);
+    static std::size_t deserializeMaxSteps(std::istream& input_stream);
 
     static std::unique_ptr<Battery> deserializeBattery(std::istream& input_stream);
 
