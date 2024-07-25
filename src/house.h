@@ -43,8 +43,8 @@ public:
      * @param dirt_map The map representing the dirt levels in the environment.
      * @param docking_station_position The position of the docking station.
      */
-    explicit House(std::unique_ptr<std::vector<std::vector<bool>>> wall_map,
-                   std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map,
+    explicit House(std::unique_ptr<std::vector<std::vector<bool>>>&& wall_map,
+                   std::unique_ptr<std::vector<std::vector<unsigned int>>>&& dirt_map,
                    const Position& docking_station_position);
     /**
      * @brief Gets the total count of dirt in the environment.

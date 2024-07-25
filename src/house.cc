@@ -15,8 +15,8 @@ void House::setTotalDirtCount()
     }
 }
 
-House::House(std::unique_ptr<std::vector<std::vector<bool>>> wall_map,
-             std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map,
+House::House(std::unique_ptr<std::vector<std::vector<bool>>>&& wall_map,
+             std::unique_ptr<std::vector<std::vector<unsigned int>>>&& dirt_map,
              const Position& docking_station_position)
             : wall_map(std::move(wall_map)),
               dirt_map(std::move(dirt_map)),
