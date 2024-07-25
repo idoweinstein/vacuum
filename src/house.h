@@ -24,7 +24,7 @@ class House : public WallsSensor, public DirtSensor
     Position docking_station_position;                                // The position of the docking station.
     unsigned int total_dirt_count;                                    // The total count of dirt in the environment.
 
-    virtual void setTotalDirtCount();
+    virtual void computeTotalDirtCount();
 
     /**
      * @brief Checks if a given position is out of bounds of a given map.
@@ -70,14 +70,7 @@ public:
      *
      * @return true if the vacuum cleaner is in the docking station, false otherwise.
      */
-    virtual bool isInDockingStation() const { return current_position == docking_station_position; }
-
-    /**
-     * @brief Checks if the house is clean (cleaning operation is finished).
-     *
-     * @return true if the house is clean, false otherwise.
-     */
-    virtual bool isClean() const { return total_dirt_count == 0; }
+    virtual bool isAtDockingStation() const { return current_position == docking_station_position; }
 
     /**
      * @brief Gets the dirt level at the current position.
@@ -85,13 +78,6 @@ public:
      * @return The dirt level at the current position.
      */
     virtual int dirtLevel() const override;
-
-    /**
-     * @brief Gets the current position of the vacuum cleaner.
-     *
-     * @return The current position.
-     */
-    virtual Position getCurrentPosition() const { return current_position; }
 
     /**
      * @brief Checks if there is a wall in the specified direction.

@@ -296,6 +296,6 @@ void Algorithm::move(Step step)
         return;
     }
 
-    Direction direction = static_cast<Direction>(step);
+    Direction direction = static_cast<Direction>(step); // Safe due to prior checks
     current_tile.position = Position::computePosition(current_tile.position, direction);
 }

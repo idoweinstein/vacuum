@@ -85,7 +85,7 @@ namespace
 
     TEST_F(HouseTest, StartingAtDockingStation)
     {
-        EXPECT_TRUE(house->isInDockingStation());
+        EXPECT_TRUE(house->isAtDockingStation());
     }
 
     TEST_F(HouseTest, OverCleaningPosition)
@@ -110,7 +110,7 @@ namespace
 
             if (Step::Finish != next_step && Step::Stay != next_step)
             {
-                is_wall = house->isWall(static_cast<Direction>(next_step));
+                is_wall = house->isWall(static_cast<Direction>(next_step)); // Safe due to prior checks
             }
 
             if(is_wall)

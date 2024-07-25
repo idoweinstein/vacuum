@@ -4,7 +4,7 @@
 
 #include "robot_logger.h"
 
-void House::setTotalDirtCount()
+void House::computeTotalDirtCount()
 {
     for (const auto& row : *dirt_map)
     {
@@ -24,7 +24,7 @@ House::House(std::unique_ptr<std::vector<std::vector<bool>>>&& wall_map,
               docking_station_position(docking_station_position),
               total_dirt_count(0)
 {
-    setTotalDirtCount();
+    computeTotalDirtCount();
 }
 
 template <typename T>
@@ -91,7 +91,7 @@ void House::move(Step step)
         return;
     }
 
-    Direction direction = static_cast<Direction>(step);
+    Direction direction = static_cast<Direction>(step); // Safe due to prior checks
 
     if (isWall(direction))
     {
