@@ -30,9 +30,8 @@
  */
 class Algorithm : public AbstractAlgorithm
 {
-    static constexpr const int kNotFound = -1;          // Constant value representing path not found status.
-    inline static const Position kDockingStationPosition = {0,0};
-    inline static const Direction directions[] = {      // Directions of movement.
+    inline static const Position kDockingStationPosition = {0,0};       // Docking Station (relative) position.
+    inline static const Direction kDirections[] = {                     // Directions of movement.
         Direction::North, Direction::East, Direction::South, Direction::West
     };
 
@@ -44,14 +43,14 @@ class Algorithm : public AbstractAlgorithm
 
     struct BatteryModel
     {
-        std::size_t full_capacity;
-        std::size_t amount_left;
+        std::size_t full_capacity;                      // Battery full capacity.
+        std::size_t amount_left;                        // Battery amount left.
     };
 
     struct CurrentTile
     {
-        Position position = kDockingStationPosition;
-        unsigned int dirt_level;
+        Position position = kDockingStationPosition;    // Robot current (relative) position.
+        unsigned int dirt_level;                        // Robot current dirt level.
     };
 
     HouseModel house;
@@ -61,11 +60,9 @@ class Algorithm : public AbstractAlgorithm
     std::optional<std::size_t> max_steps;               // Maximal allowed steps to take.
     std::size_t total_steps_left;                       // Number of allowed steps left.
 
-    std::optional<const BatteryMeter*> battery_meter;
-
-    std::optional<const DirtSensor*> dirt_sensor;       // Reference to the dirt sensor.
-
-    std::optional<const WallsSensor*> walls_sensor;     // Reference to the walls sensor.
+    std::optional<const BatteryMeter*> battery_meter;   // Pointer to the battery meter.
+    std::optional<const DirtSensor*> dirt_sensor;       // Pointer to the dirt sensor.
+    std::optional<const WallsSensor*> walls_sensor;     // Pointer to the walls sensor.
 
     /**
      * @brief Checks if the algorithm is fully initialized.
@@ -125,6 +122,7 @@ class Algorithm : public AbstractAlgorithm
         {
             return Step::Stay;
         }
+
         return static_cast<Step>(path.front());
     }
 
@@ -163,7 +161,7 @@ class Algorithm : public AbstractAlgorithm
 
     virtual void getDirtSensorInfo();
 
-    virtual void getBatteryMeterInfo();
+    virtual void getBatteryMeterInfo() { battery.amount_left = battery_meter.value()->getBatteryState(); }
 
     /**
      * @brief Gets the information from the sensors.
@@ -175,21 +173,20 @@ class Algorithm : public AbstractAlgorithm
      * @param remaining_steps_total The variable to store the remaining total steps.
      * @param battery_is_full The variable to store the battery full status.
      */
-    virtual void getSensorsInfo();
-
-    virtual bool isAtDockingStation()
+    virtual void getSensorsInfo()
     {
-        return kDockingStationPosition == current_tile.position;
+        getWallSensorInfo();
+        getDirtSensorInfo();
+        getBatteryMeterInfo();
     }
 
-    virtual bool isBatteryFull()
-    {
-        return battery.amount_left == battery.full_capacity;
-    }
+    virtual bool isAtDockingStation() { return kDockingStationPosition == current_tile.position; }
+
+    virtual bool isBatteryFull() { return battery.amount_left == battery.full_capacity; }
 
     virtual std::size_t getMaxReachableDistance() const;
 
-    virtual bool cleanedAllReachable();
+    virtual bool isCleanedAllReachable();
 
     virtual bool shouldFinish(bool is_cleaned_all_reachable)
     {
@@ -197,25 +194,19 @@ class Algorithm : public AbstractAlgorithm
         return (0 == total_steps_left) || is_finished_cleaning;
     }
 
-    virtual bool areStepsLeftToClean();
+    virtual bool enoughStepsLeftToClean();
 
-    virtual bool shouldKeepCharging()
-    {
-        return isAtDockingStation() && !isBatteryFull() && areStepsLeftToClean();
-    }
+    virtual bool shouldKeepCharging() { return isAtDockingStation() && !isBatteryFull() && enoughStepsLeftToClean(); }
 
-    virtual bool lowBatteryToStay(std::size_t station_distance)
+    virtual bool isTooLowBatteryToStay(std::size_t station_distance)
     {
         std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left);
         return (possible_steps_left < 1 + station_distance);
     }
 
-    virtual bool currentPositionDirty()
-    {
-        return current_tile.dirt_level > 0;
-    }
+    virtual bool isCurrentPositionDirty() { return current_tile.dirt_level > 0; }
 
-    virtual bool lowBatteryToGetFurther(std::size_t station_distance)
+    virtual bool isTooLowBatteryToGetFurther(std::size_t station_distance)
     {
         std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left);
         return possible_steps_left < 2 + station_distance;
