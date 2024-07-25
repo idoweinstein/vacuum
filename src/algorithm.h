@@ -95,9 +95,9 @@ class Algorithm : public AbstractAlgorithm
      * @param found_criteria The criteria function to determine if a position is found.
      * @return The index of the found position in the path_tree, or kNotFound if not found.
      */
-    virtual int performBFS(PathTree& path_tree,
-                           unsigned int start_index,
-                           const std::function<bool(Position)>& found_criteria) const;
+    virtual std::optional<std::size_t> performBFS(PathTree& path_tree,
+                                                  std::size_t start_index,
+                                                  const std::function<bool(Position)>& found_criteria) const;
 
     /**
      * @brief Calculates the distance of a path.

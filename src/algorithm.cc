@@ -29,10 +29,13 @@ void Algorithm::setWallsSensor(const WallsSensor& walls_sensor)
     this->walls_sensor = &walls_sensor;
 }
 
-int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const std::function<bool(Position)>& found_criteria) const
+std::optional<std::size_t> Algorithm::performBFS(PathTree& path_tree,
+                                                 std::size_t start_index,
+                                                 const std::function<bool(Position)>& found_criteria) const
 {
     std::unordered_set<Position> visited_positions;
-    std::queue<unsigned int> index_queue;
+    std::queue<std::size_t> index_queue;
+    std::optional<std::size_t> path_end_index;
 
     // If current position satisfies found_criteria - Return empty path
     if (found_criteria(path_tree.getPosition(start_index)))
@@ -45,7 +48,7 @@ int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const s
     // Perform BFS
     while (!index_queue.empty())
     {
-        unsigned int parent_index = index_queue.front();
+        std::size_t parent_index = index_queue.front();
         index_queue.pop();
 
         for (Direction direction : directions)
@@ -61,18 +64,19 @@ int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const s
                 continue;
             }
 
-            unsigned int child_index = path_tree.insertChild(parent_index, direction, child_position);
+            std::size_t child_index = path_tree.insertChild(parent_index, direction, child_position);
             index_queue.push(child_index);
             visited_positions.insert(child_position);
 
             if (found_criteria(child_position))
             {
-                return child_index; // Index of last path node
+                path_end_index = child_index;
+                return path_end_index;
             }
         }
     }
 
-    return kNotFound;
+    return path_end_index;
 }
 
 bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria)
@@ -81,13 +85,13 @@ bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direc
 
     unsigned int root_index = path_tree.insertRoot(start_position);
 
-    int path_end_index = performBFS(path_tree, root_index, found_criteria);
-    if (kNotFound == path_end_index)
+    auto path_end_index = performBFS(path_tree, root_index, found_criteria);
+    if (!path_end_index.has_value())
     {
         return false;
     }
 
-    std::size_t current_index = path_end_index;
+    std::size_t current_index = path_end_index.value();
     while (path_tree.hasParent(current_index))
     {
         path.push_front(path_tree.getDirection(current_index));
