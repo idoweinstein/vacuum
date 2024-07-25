@@ -87,7 +87,7 @@ bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direc
         return false;
     }
 
-    unsigned int current_index = path_end_index;
+    std::size_t current_index = path_end_index;
     while (path_tree.hasParent(current_index))
     {
         path.push_front(path_tree.getDirection(current_index));

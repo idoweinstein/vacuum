@@ -31,7 +31,7 @@
 class Algorithm : public AbstractAlgorithm
 {
     static constexpr const int kNotFound = -1;          // Constant value representing path not found status.
-    inline static const Position kDockingStationPosition = Position(0, 0);
+    inline static const Position kDockingStationPosition = {0,0};
     inline static const Direction directions[] = {      // Directions of movement.
         Direction::North, Direction::East, Direction::South, Direction::West
     };
