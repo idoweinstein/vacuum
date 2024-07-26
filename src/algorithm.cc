@@ -58,7 +58,9 @@ std::optional<std::size_t> Algorithm::performBFS(PathTree& path_tree,
     return path_end_index;
 }
 
-bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria)
+bool Algorithm::getPathByFoundCriteria(const Position& start_position,
+                                       std::deque<Direction>& path,
+                                       const std::function<bool(Position)>& found_criteria)
 {
     PathTree path_tree;
 
@@ -81,11 +83,11 @@ bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direc
     return true;
 }
 
-bool Algorithm::getPathToNearestTodo(Position start_position, std::deque<Direction>& path)
+bool Algorithm::getPathToNearestTodo(const Position& start_position, std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(start_position,
                                   path,
-                                  [this](Position position)
+                                  [this](const Position& position)
                                   { return house.todo_positions.contains(position); }
     );
 }
@@ -94,7 +96,7 @@ bool Algorithm::getPathToStation(std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(current_tile.position,
                                   path,
-                                  [](Position position)
+                                  [](const Position& position)
                                   { return kDockingStationPosition == position; }
     );
 }

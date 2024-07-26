@@ -45,7 +45,7 @@ class PathTree
      * @return Reference to the node at the given index.
      * @throws std::out_of_range if the node index is invalid.
      */
-    PathNode& safeNodeAccess(std::size_t node_index)
+    const PathNode& safeNodeAccess(std::size_t node_index) const
     {
         validateIndex(node_index);
         return node_pool.at(node_index);
@@ -57,7 +57,7 @@ public:
      * @param position The position of the root node.
      * @return The index of the inserted root node.
      */
-    std::size_t insertRoot(Position position);
+    std::size_t insertRoot(const Position& position);
 
     /**
      * @brief Inserts a child node into the path tree.
@@ -66,35 +66,35 @@ public:
      * @param child_position The position of the child node.
      * @return The index of the inserted child node.
      */
-    std::size_t insertChild(std::size_t parent_index, Direction direction_to_child, Position child_position);
+    std::size_t insertChild(std::size_t parent_index, Direction direction_to_child, const Position& child_position);
 
     /**
      * @brief Gets the index of the parent node for the given node index.
      * @param node_index The index of the node.
      * @return The index of the parent node.
      */
-    std::size_t getParentIndex(std::size_t node_index) { return safeNodeAccess(node_index).parent_index.value(); }
+    std::size_t getParentIndex(std::size_t node_index) const { return safeNodeAccess(node_index).parent_index.value(); }
 
     /**
      * @brief Checks if the given node has a parent.
      * @param node_index The index of the node.
      * @return True if the node has a parent, false otherwise.
      */
-    bool hasParent(std::size_t node_index) { return safeNodeAccess(node_index).parent_index.has_value(); }
+    bool hasParent(std::size_t node_index) const { return safeNodeAccess(node_index).parent_index.has_value(); }
 
     /**
      * @brief Gets the position of the node at the given index.
      * @param node_index The index of the node.
      * @return The position of the node.
      */
-    Position getPosition(std::size_t node_index) { return safeNodeAccess(node_index).position; }
+    Position getPosition(std::size_t node_index) const { return safeNodeAccess(node_index).position; }
 
     /**
      * @brief Gets the direction from the parent node to the node at the given index.
      * @param node_index The index of the node.
      * @return The direction from the parent node to the node.
      */
-    Direction getDirection(std::size_t node_index) { return safeNodeAccess(node_index).direction; }
+    Direction getDirection(std::size_t node_index) const { return safeNodeAccess(node_index).direction; }
 };
 
 #endif /* PATH_TREE_H_ */

@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-std::size_t PathTree::insertRoot(Position position)
+std::size_t PathTree::insertRoot(const Position& position)
 {
     node_pool.emplace_back(
         std::nullopt,       // PathNode.parent_index
@@ -13,7 +13,7 @@ std::size_t PathTree::insertRoot(Position position)
     return 0; // Root Node Index
 }
 
-std::size_t PathTree::insertChild(std::size_t parent_index, Direction direction_to_child, Position child_position)
+std::size_t PathTree::insertChild(std::size_t parent_index, Direction direction_to_child, const Position& child_position)
 {
     validateIndex(parent_index);
 

@@ -135,7 +135,9 @@ class Algorithm : public AbstractAlgorithm
      * @param found_criteria The criteria function to determine if a position is found.
      * @return True if a path is found, false otherwise.
     */
-    virtual bool getPathByFoundCriteria(Position start_position, std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria);
+    virtual bool getPathByFoundCriteria(const Position& start_position,
+                                        std::deque<Direction>& path,
+                                        const std::function<bool(Position)>& found_criteria);
 
     /**
      * @brief Finds a path to the nearest position in the todo_positions set.
@@ -145,7 +147,8 @@ class Algorithm : public AbstractAlgorithm
      * @param path The path to store the result in.
      * @return True if a path is found, false otherwise.
     */
-    virtual bool getPathToNearestTodo(Position start_position, std::deque<Direction>& path);
+    virtual bool getPathToNearestTodo(const Position& start_position,
+                                      std::deque<Direction>& path);
 
     /**
      * @brief Finds a path to the station position.

@@ -2,6 +2,7 @@
 #define ROBOT_LOGGER_H_
 
 #include <vector>
+#include <cstddef>
 #include <sstream>
 #include <filesystem>
 
@@ -83,7 +84,7 @@ public:
      * @param is_battery_exhausted Whether the vacuum cleaner's battery is exhausted.
      * @param is_mission_complete Whether the cleaning mission is complete.
      */
-    virtual void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, Status status)
+    virtual void logCleaningStatistics(std::size_t total_steps, std::size_t total_dirt, Status status)
     {
         std::ostringstream stringStream;
         stringStream << kStepsNumField << total_steps \
@@ -100,7 +101,7 @@ public:
      * @brief Log a warning message.
      * @param warning_message The warning message to log.
      */
-    virtual void logWarning(const std::string warning_message)
+    virtual void logWarning(const std::string& warning_message)
     {
         logMessage(LogLevel::Warning, LogOutput::Console, warning_message);
     }
@@ -109,7 +110,7 @@ public:
      * @brief Log an error message.
      * @param error_message The error message to log.
      */
-    virtual void logError(const std::string error_message)
+    virtual void logError(const std::string& error_message)
     {
         logMessage(LogLevel::Error, LogOutput::Console, error_message);
     }

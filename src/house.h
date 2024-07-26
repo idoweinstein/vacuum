@@ -51,7 +51,7 @@ public:
      *
      * @return The total count of dirt.
      */
-    virtual int getTotalDirtCount() const { return total_dirt_count; }
+    virtual std::size_t getTotalDirtCount() const { return total_dirt_count; }
 
     /**
      * @brief Cleans the current position by reducing the dirt level (by reduction unit of 1).
