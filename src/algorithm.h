@@ -180,15 +180,15 @@ class Algorithm : public AbstractAlgorithm
         getBatteryMeterInfo();
     }
 
-    virtual bool isAtDockingStation() { return kDockingStationPosition == current_tile.position; }
+    virtual bool isAtDockingStation() const { return kDockingStationPosition == current_tile.position; }
 
-    virtual bool isBatteryFull() { return battery.amount_left == battery.full_capacity; }
+    virtual bool isBatteryFull() const { return battery.amount_left == battery.full_capacity; }
 
     virtual std::size_t getMaxReachableDistance() const;
 
     virtual bool isCleanedAllReachable();
 
-    virtual bool shouldFinish(bool is_cleaned_all_reachable)
+    virtual bool shouldFinish(bool is_cleaned_all_reachable) const
     {
         bool is_finished_cleaning = isAtDockingStation() && is_cleaned_all_reachable;
         return (0 == total_steps_left) || is_finished_cleaning;
@@ -198,15 +198,15 @@ class Algorithm : public AbstractAlgorithm
 
     virtual bool shouldKeepCharging() { return isAtDockingStation() && !isBatteryFull() && enoughStepsLeftToClean(); }
 
-    virtual bool isTooLowBatteryToStay(std::size_t station_distance)
+    virtual bool isTooLowBatteryToStay(std::size_t station_distance) const
     {
         std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left);
         return (possible_steps_left < 1 + station_distance);
     }
 
-    virtual bool isCurrentPositionDirty() { return current_tile.dirt_level > 0; }
+    virtual bool isCurrentPositionDirty() const { return current_tile.dirt_level > 0; }
 
-    virtual bool isTooLowBatteryToGetFurther(std::size_t station_distance)
+    virtual bool isTooLowBatteryToGetFurther(std::size_t station_distance) const
     {
         std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left);
         return possible_steps_left < 2 + station_distance;
