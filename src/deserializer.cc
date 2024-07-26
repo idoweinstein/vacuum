@@ -139,7 +139,7 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
 
         std::size_t column_index = 0;
 
-        for (char block: house_block_row)
+        for (char block : house_block_row)
         {
             if (column_index >= house_cols_num)
             {

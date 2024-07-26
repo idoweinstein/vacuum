@@ -17,10 +17,10 @@ namespace
 
                 for (int i = 0; i < 24; i++)
                 {
-                    wall_map.push_back({});
+                    wall_map.emplace_back();
                     wall_map[i].reserve(row_num);
 
-                    dirt_map.push_back({});
+                    dirt_map.emplace_back();
                     dirt_map[i].reserve(row_num);
 
                     for (unsigned int j = 0; j < row_num; j++)
