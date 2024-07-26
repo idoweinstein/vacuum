@@ -230,7 +230,7 @@ class Algorithm : public AbstractAlgorithm
 
     virtual void safeDecreaseStepsLeft()
     {
-        if ((int)total_steps_left - 1 < 0)
+        if (static_cast<int>(total_steps_left) - 1 < 0)
         {
             throw std::runtime_error("Robot exceeded the allowed maximal steps!");
         }

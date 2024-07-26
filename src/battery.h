@@ -27,7 +27,7 @@ public:
      *
      * @param full_amount The full amount of the battery (in steps).
      */
-    explicit Battery(std::size_t full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
+    explicit Battery(std::size_t full_amount) : full_amount(static_cast<float>(full_amount)), current_amount(full_amount) {}
 
     /**
      * @brief Gets the current remaining battery capacity.

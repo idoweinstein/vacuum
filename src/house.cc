@@ -10,7 +10,7 @@ void House::computeTotalDirtCount()
     {
         for (unsigned int dirt : row)
         {
-            total_dirt_count += (std::size_t)dirt;
+            total_dirt_count += static_cast<std::size_t>(dirt);
         }
     }
 }
@@ -35,12 +35,12 @@ bool House::isOutOfBounds(const std::vector<std::vector<T>>& map, const Position
         return true;
     }
 
-    if ((size_t) position.first >= map.size())
+    if (static_cast<size_t>(position.first) >= map.size())
     {
         return true;
     }
 
-    if ((size_t) position.second >= map[position.first].size())
+    if (static_cast<size_t>(position.second) >= map[position.first].size())
     {
         return true;
     }
