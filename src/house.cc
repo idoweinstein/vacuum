@@ -63,7 +63,7 @@ int House::dirtLevel() const
 
 void House::cleanCurrentPosition()
 {
-    if (dirtLevel() == 0) // dirtLevel() calls isOutOfBounds() already
+    if (0 == dirtLevel()) // dirtLevel() calls isOutOfBounds() already
     {
         return;
     }

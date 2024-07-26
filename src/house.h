@@ -24,7 +24,7 @@ class House : public WallsSensor, public DirtSensor
     Position docking_station_position;                                // The position of the docking station.
     std::size_t total_dirt_count;                                     // The total count of dirt in the environment.
 
-    virtual void computeTotalDirtCount();
+    void computeTotalDirtCount();
 
     /**
      * @brief Checks if a given position is out of bounds of a given map.
@@ -51,33 +51,33 @@ public:
      *
      * @return The total count of dirt.
      */
-    virtual std::size_t getTotalDirtCount() const { return total_dirt_count; }
+    std::size_t getTotalDirtCount() const { return total_dirt_count; }
 
     /**
      * @brief Cleans the current position by reducing the dirt level (by reduction unit of 1).
      */
-    virtual void cleanCurrentPosition();
+    void cleanCurrentPosition();
 
     /**
      * @brief Moves the vacuum cleaner one step in the specified direction.
      *
      * @param step The step to move (a Direction or Stay / Finish).
      */
-    virtual void move(Step);
+    void move(Step);
 
     /**
      * @brief Checks if the vacuum cleaner is in the docking station.
      *
      * @return true if the vacuum cleaner is in the docking station, false otherwise.
      */
-    virtual bool isAtDockingStation() const { return current_position == docking_station_position; }
+    bool isAtDockingStation() const { return current_position == docking_station_position; }
 
     /**
      * @brief Gets the dirt level at the current position.
      *
      * @return The dirt level at the current position.
      */
-    virtual int dirtLevel() const override;
+    int dirtLevel() const override;
 
     /**
      * @brief Checks if there is a wall in the specified direction.
@@ -85,7 +85,7 @@ public:
      * @param direction The direction to check.
      * @return true if there is a wall, false otherwise.
      */
-    virtual bool isWall(Direction) const override;
+    bool isWall(Direction) const override;
 };
 
 #endif /* HOUSE_H_ */
