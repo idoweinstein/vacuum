@@ -22,7 +22,7 @@ class House : public WallsSensor, public DirtSensor
     std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map; // The map representing the dirt levels in the environment.
     Position current_position;                                        // The current position of the vacuum cleaner.
     Position docking_station_position;                                // The position of the docking station.
-    unsigned int total_dirt_count;                                    // The total count of dirt in the environment.
+    std::size_t total_dirt_count;                                     // The total count of dirt in the environment.
 
     virtual void computeTotalDirtCount();
 

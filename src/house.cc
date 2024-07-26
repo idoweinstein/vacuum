@@ -10,7 +10,7 @@ void House::computeTotalDirtCount()
     {
         for (unsigned int dirt : row)
         {
-            total_dirt_count += dirt;
+            total_dirt_count += (std::size_t)dirt;
         }
     }
 }
