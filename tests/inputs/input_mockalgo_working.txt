@@ -1,0 +1,9 @@
+Mock Algorithm - Working Robot
+MaxSteps= 2
+MaxBattery =80
+Rows =5
+Cols = 12
+WWWWWWWWWWWW
+W        D W
+W 12 W     
+W     9   

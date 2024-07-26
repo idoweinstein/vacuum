@@ -121,6 +121,10 @@ void Simulator::run()
     while (total_steps_taken <= max_simulator_steps)
     {
         Step next_step = algorithm->nextStep();
+        if (total_steps_taken == max_simulator_steps && Step::Finish != next_step)
+        {
+            break;
+        }
 
         move(next_step);
         if (Status::Finished == mission_status || Status::Dead == mission_status)
