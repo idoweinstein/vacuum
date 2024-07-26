@@ -22,9 +22,8 @@ int main(int argc, char* argv[])
         try
         {
             Simulator simulator;
-            Algorithm algorithm;
-
             simulator.readHouseFile(input_file_path);
+            Algorithm algorithm;
             simulator.setAlgorithm(algorithm);
             simulator.run();
         }
