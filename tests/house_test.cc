@@ -65,11 +65,11 @@ namespace
 
                 initializeMaps(*wall_map, *dirt_map);
 
-                house = std::unique_ptr<House>(new House(
+                house = std::make_unique<House>(
                     std::move(wall_map),
                     std::move(dirt_map),
                     docking_station_position
-                ));
+                );
             }
             
             static void TearDownTestCase()
