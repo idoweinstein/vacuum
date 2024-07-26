@@ -101,7 +101,7 @@ bool Algorithm::getPathToStation(std::deque<Direction>& path)
     );
 }
 
-void Algorithm::getWallSensorInfo()
+void Algorithm::sampleWallSensor()
 {
     for (Direction direction : kDirections)
     {
@@ -126,7 +126,7 @@ void Algorithm::getWallSensorInfo()
     house.wall_map[current_tile.position] = false;
 }
 
-void Algorithm::getDirtSensorInfo()
+void Algorithm::sampleDirtSensor()
 {
     current_tile.dirt_level = dirt_sensor.value()->dirtLevel();
 
@@ -289,7 +289,7 @@ Step Algorithm::nextStep()
 {
     assertAllInitialied();
 
-    getSensorsInfo();
+    sampleSensors();
 
     Step step = decideNextStep();
 

@@ -160,11 +160,11 @@ class Algorithm : public AbstractAlgorithm
      */
     bool getPathToStation(std::deque<Direction>& path);
 
-    void getWallSensorInfo();
+    void sampleWallSensor();
 
-    void getDirtSensorInfo();
+    void sampleDirtSensor();
 
-    void getBatteryMeterInfo() { battery.amount_left = battery_meter.value()->getBatteryState(); }
+    void sampleBatteryMeter() { battery.amount_left = battery_meter.value()->getBatteryState(); }
 
     /**
      * @brief Gets the information from the sensors.
@@ -176,11 +176,11 @@ class Algorithm : public AbstractAlgorithm
      * @param remaining_steps_total The variable to store the remaining total steps.
      * @param battery_is_full The variable to store the battery full status.
      */
-    void getSensorsInfo()
+    void sampleSensors()
     {
-        getWallSensorInfo();
-        getDirtSensorInfo();
-        getBatteryMeterInfo();
+        sampleWallSensor();
+        sampleDirtSensor();
+        sampleBatteryMeter();
     }
 
     bool isAtDockingStation() const { return kDockingStationPosition == current_tile.position; }
