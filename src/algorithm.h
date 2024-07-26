@@ -94,7 +94,7 @@ class Algorithm : public AbstractAlgorithm
      */
     virtual std::optional<std::size_t> performBFS(PathTree& path_tree,
                                                   std::size_t start_index,
-                                                  const std::function<bool(Position)>& found_criteria) const;
+                                                  std::function<bool(const Position&)> const & found_criteria) const;
 
     /**
      * @brief Calculates the distance of a path.
@@ -137,7 +137,7 @@ class Algorithm : public AbstractAlgorithm
     */
     virtual bool getPathByFoundCriteria(const Position& start_position,
                                         std::deque<Direction>& path,
-                                        const std::function<bool(Position)>& found_criteria);
+                                        std::function<bool(const Position&)> const & found_criteria);
 
     /**
      * @brief Finds a path to the nearest position in the todo_positions set.

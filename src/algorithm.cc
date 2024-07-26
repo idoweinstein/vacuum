@@ -9,7 +9,7 @@
 
 std::optional<std::size_t> Algorithm::performBFS(PathTree& path_tree,
                                                  std::size_t start_index,
-                                                 const std::function<bool(Position)>& found_criteria) const
+                                                 std::function<bool(const Position&)> const & found_criteria) const
 {
     std::unordered_set<Position> visited_positions;
     std::queue<std::size_t> index_queue;
@@ -60,7 +60,7 @@ std::optional<std::size_t> Algorithm::performBFS(PathTree& path_tree,
 
 bool Algorithm::getPathByFoundCriteria(const Position& start_position,
                                        std::deque<Direction>& path,
-                                       const std::function<bool(Position)>& found_criteria)
+                                       std::function<bool(const Position&)> const & found_criteria)
 {
     PathTree path_tree;
 
