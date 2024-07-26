@@ -1,4 +1,5 @@
 #include <string>
+#include <cstdlib>
 #include <exception>
 
 #include "robot_logger.h"
@@ -30,11 +31,15 @@ int main(int argc, char* argv[])
         catch(const std::exception& exception)
         {
             logger.logError(exception.what());
+            return EXIT_FAILURE;
         }
     }
 
     else
     {
         logger.logError("Invalid number of arguments!\nUsage: myrobot <input_file>");
+        return EXIT_FAILURE;
     }
+
+    return EXIT_SUCCESS;
 }
