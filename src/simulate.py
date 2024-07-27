@@ -117,7 +117,7 @@ def pase_output_file(output_file):
              r"""DirtLeft\s*=\s*(?P<dirt_left>\d+)[\r]?\n""" +
              r"""Status\s*=\s*(?P<status>\w+)[\r]?\n""" +
              r"""Steps:[\r]?\n""" +
-             r"""(?P<steps>(?:N|E|S|W|s|F)+)[\r]?\n?""")
+             r"""(?P<steps>(?:N|E|S|W|s)+)F?[\r]?\n?""")
 
     match = re.search(regex, content)
 
@@ -143,7 +143,7 @@ def parse_house(house):
                 start_position = (len(map), line.index(DOCKING_STATION))
             else:
                 raise ValueError('Multiple docking stations found')
-        map.append(list(line))
+        map.append(list(line.replace(ZERO_DIRT, CLEAR_BLOCK)))
 
     if not is_station_found:
         raise ValueError('No docking station found')
