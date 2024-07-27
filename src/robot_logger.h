@@ -2,6 +2,7 @@
 #define ROBOT_LOGGER_H_
 
 #include <vector>
+#include <cstddef>
 #include <sstream>
 #include <filesystem>
 
@@ -49,7 +50,7 @@ public:
         return robot_logger_instance;
     }
 
-    virtual std::string getFileName(const std::string& file_path) const
+    std::string getFileName(const std::string& file_path) const
     {
         std::string file_name = std::filesystem::path(file_path).filename().string();
         return file_name;
@@ -59,7 +60,7 @@ public:
      * @brief Add a log file based on the input house file path.
      * @param house_file_path The path of the input house file.
      */
-    virtual void initializeLogFile(const std::string& house_file_path)
+    void initializeLogFile(const std::string& house_file_path)
     {
         std::string house_file_name = getFileName(house_file_path);
         const std::string log_file_name = kOutputFilePrefix + house_file_name;
@@ -71,7 +72,7 @@ public:
      * @param step_moved The step the robot moved.
      * @param current_position The current position of the robot.
      */
-    virtual void logRobotStep(Step step_moved)
+    void logRobotStep(Step step_moved)
     {
         steps_taken << step_moved;
     }
@@ -83,7 +84,7 @@ public:
      * @param is_battery_exhausted Whether the vacuum cleaner's battery is exhausted.
      * @param is_mission_complete Whether the cleaning mission is complete.
      */
-    virtual void logCleaningStatistics(unsigned int total_steps, unsigned int total_dirt, Status status)
+    void logCleaningStatistics(std::size_t total_steps, std::size_t total_dirt, Status status)
     {
         std::ostringstream stringStream;
         stringStream << kStepsNumField << total_steps \
@@ -100,7 +101,7 @@ public:
      * @brief Log a warning message.
      * @param warning_message The warning message to log.
      */
-    virtual void logWarning(const std::string warning_message)
+    void logWarning(const std::string& warning_message)
     {
         logMessage(LogLevel::Warning, LogOutput::Console, warning_message);
     }
@@ -109,7 +110,7 @@ public:
      * @brief Log an error message.
      * @param error_message The error message to log.
      */
-    virtual void logError(const std::string error_message)
+    void logError(const std::string& error_message)
     {
         logMessage(LogLevel::Error, LogOutput::Console, error_message);
     }

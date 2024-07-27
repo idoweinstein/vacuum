@@ -41,7 +41,7 @@ class Position : public std::pair<int, int>
          * @param direction The direction to move in.
          * @return The new position after moving in the given direction.
          */
-        static Position computePosition(Position position, Direction direction)
+        static Position computePosition(const Position& position, Direction direction)
         {
             std::pair<int, int> shift_direction = direction_map.at(direction);
             return Position(position.first + shift_direction.first, position.second + shift_direction.second);
@@ -79,13 +79,13 @@ namespace std
         /**
          * @brief Computes the hash value for a Position object.
          */
-        size_t operator()(Position const& p) const
+        size_t operator()(Position const& position) const
         {
             // Map each integer to a unique unsigned integer
-            unsigned int a = p.first >= 0 ? 2 * p.first : -2 * p.first - 1;
-            unsigned int b = p.second >= 0 ? 2 * p.second : -2 * p.second - 1;
+            unsigned int mapped_first = position.first >= 0 ? 2 * position.first : -2 * position.first - 1;
+            unsigned int mapped_second = position.second >= 0 ? 2 * position.second : -2 * position.second - 1;
 
-            return size_t(elegantPair(a, b));
+            return size_t(elegantPair(mapped_first, mapped_second));
         }
     };
 };

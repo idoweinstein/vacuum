@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 
+#include <cstddef>
+#include <optional>
 #include <iostream>
 
 #include "path_tree.h"
@@ -22,7 +24,7 @@ namespace
 
     TEST_F(PathTreeTest, InsertRootSanity)
     {
-        EXPECT_EQ(false, path_tree.hasParent(root_index));
+        EXPECT_FALSE(path_tree.hasParent(root_index));
 
         // Check Root Position
         Position root_position = path_tree.getPosition(root_index);
@@ -52,7 +54,7 @@ namespace
         }, std::out_of_range);
 
         EXPECT_THROW({
-            path_tree.hasParent(-1);
+            path_tree.hasParent(1);
         }, std::out_of_range);
 
         EXPECT_THROW({
@@ -66,37 +68,37 @@ namespace
 
     TEST_F(PathTreeTest, InsertChildSanity)
     {
-        int children[] = {
+        std::size_t children[] = {
             0, // Root index
-            (int)path_tree.insertChild(0, Direction::East, Position(3,7)),
-            (int)path_tree.insertChild(1, Direction::North, Position(0,0)),
-            (int)path_tree.insertChild(2, Direction::East, Position(-1,9)),
-            (int)path_tree.insertChild(3, Direction::West, Position(2,2564)),
-            (int)path_tree.insertChild(4, Direction::East, Position(0,0)),
-            (int)path_tree.insertChild(5, Direction::South, Position(1,-99))
+            path_tree.insertChild(0, Direction::East, Position(3,7)),
+            path_tree.insertChild(1, Direction::North, Position(0,0)),
+            path_tree.insertChild(2, Direction::East, Position(-1,9)),
+            path_tree.insertChild(3, Direction::West, Position(2,2564)),
+            path_tree.insertChild(4, Direction::East, Position(0,0)),
+            path_tree.insertChild(5, Direction::South, Position(1,-99))
         };
 
-        for (unsigned int i = 1; i < 7; i++)
+        for (std::size_t i = 1; i < 7; i++)
         {
-            unsigned int parent_index = path_tree.getParentIndex(children[i]);
-            EXPECT_EQ(children[i-1], parent_index);
+            EXPECT_TRUE(path_tree.hasParent(children[i]));
+            EXPECT_EQ(children[i-1], path_tree.getParentIndex(children[i]));
         }
 
         EXPECT_EQ(Direction::West, path_tree.getDirection(children[4]));
         
-        int another_branch[] = {
+        std::size_t another_branch[] = {
             children[0],
             children[1],
             children[2],
-            (int)path_tree.insertChild(children[2], Direction::North, Position(0,0)),
-            (int)path_tree.insertChild(7, Direction::South, Position(-1,9)),
-            (int)path_tree.insertChild(8, Direction::West, Position(2,2564))
+            path_tree.insertChild(children[2], Direction::North, Position(0,0)),
+            path_tree.insertChild(7, Direction::South, Position(-1,9)),
+            path_tree.insertChild(8, Direction::West, Position(2,2564))
         };
 
         for (unsigned int i = 1; i < 6; i++)
         {
-            unsigned int parent_index = path_tree.getParentIndex(another_branch[i]);
-            EXPECT_EQ(another_branch[i-1], parent_index);
+            EXPECT_TRUE(path_tree.hasParent(another_branch[i]));
+            EXPECT_EQ(another_branch[i-1], path_tree.getParentIndex(another_branch[i]));
         }
     }
 }

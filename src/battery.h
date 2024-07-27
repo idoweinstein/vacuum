@@ -27,19 +27,9 @@ public:
      *
      * @param full_amount The full amount of the battery (in steps).
      */
-    explicit Battery(std::size_t full_amount) : full_amount((float)full_amount), current_amount(full_amount) {}
+    explicit Battery(std::size_t full_amount) : full_amount(static_cast<float>(full_amount)), current_amount(full_amount) {}
 
-    /**
-     * @brief Gets the current remaining battery capacity.
-     *
-     * @return The current remaining capacity (in steps).
-     */
-    virtual std::size_t getBatteryState() const override
-    {
-        return std::floor(current_amount);
-    }
-
-    virtual bool isBatteryExhausted() const
+    bool isBatteryExhausted() const
     {
         return kEmptyBatteryLevel == std::floor(current_amount);
     }
@@ -49,7 +39,7 @@ public:
      *
      * The current amount is increased by 5% of the full amount.
      */
-    virtual void charge()
+    void charge()
     {
         float updated_amount = current_amount + full_amount / kStepsToFullAmount;
         current_amount = std::min(updated_amount, full_amount);
@@ -63,7 +53,7 @@ public:
      *
      * @throws std::range_error If the battery is empty.
      */
-    virtual void discharge()
+    void discharge()
     {
         float updated_amount = current_amount - kDischargeUnit;
 
@@ -73,6 +63,16 @@ public:
         }
 
         current_amount = updated_amount;
+    }
+
+    /**
+     * @brief Gets the current remaining battery capacity.
+     *
+     * @return The current remaining capacity (in steps).
+     */
+    std::size_t getBatteryState() const override
+    {
+        return std::floor(current_amount);
     }
 };
 

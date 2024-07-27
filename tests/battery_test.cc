@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 
+#include <cstddef>
 #include <stdexcept>
 
 #include "battery.h"
@@ -8,10 +9,11 @@ namespace
 {
     TEST(BatteryTest, DischargeAmountSanity)
     {
-        Battery battery(10);
-        float battery_level = 10.0f;
+        std::size_t full_amount = 10;
+        Battery battery(full_amount);
+        std::size_t battery_level = full_amount;
 
-        for (int i = 0; i < 10; i++)
+        for (std::size_t i = 0; i < full_amount; i++)
         {
             EXPECT_EQ(battery_level, battery.getBatteryState());
 
@@ -19,7 +21,7 @@ namespace
             battery.discharge();
         }
 
-        EXPECT_EQ(0.0f, battery.getBatteryState());
+        EXPECT_EQ(0, battery.getBatteryState());
 
         EXPECT_THROW({
             battery.discharge();
@@ -28,20 +30,27 @@ namespace
 
     TEST(BatteryTest, ChargingTimeSanity)
     {
-        float full_amount = 5.0f;
-        Battery battery((unsigned int)full_amount);
+        std::size_t full_amount = 6;
+        float battery_level = (float)full_amount;
+        Battery battery(full_amount);
 
-        for (int i = 0; i < 5; i++)
+        for (std::size_t i = 0; i < full_amount; i++)
         {
+            EXPECT_EQ(battery_level, battery.getBatteryState());
+
+            battery_level--;
             battery.discharge();
         }
 
-        EXPECT_EQ(0.0f, battery.getBatteryState());
+        EXPECT_EQ(0, battery.getBatteryState());
 
         for (int i = 0; i < 20; i++)
         {
             EXPECT_LT(battery.getBatteryState(), full_amount);
             battery.charge();
+            battery_level += 6.0f / 20.0f;
+
+            EXPECT_EQ((std::size_t)battery_level, battery.getBatteryState());
         }
 
         EXPECT_EQ(full_amount, battery.getBatteryState());
@@ -52,7 +61,8 @@ namespace
 
     TEST(BatteryTest, NonIntegralCurrentAmount)
     {
-        Battery battery(10);
+        std::size_t full_amount = 10;
+        Battery battery(full_amount);
 
         // Discharge the battery to 5
         for (int i = 0; i < 5; i++)

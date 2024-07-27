@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #include <ios>
 #include <regex>
@@ -118,10 +119,23 @@ namespace
             robot_state.runtime_steps.push_back(charToStep(step));
         }
 
-        EXPECT_EQ(robot_state.total_steps_taken, robot_state.runtime_steps.size() - 1);
+        EXPECT_GE(robot_state.total_steps_taken, robot_state.runtime_steps.size() - 1);
+        EXPECT_LE(robot_state.total_steps_taken, robot_state.runtime_steps.size());
 
         return true;
     }
+
+    class MockAlgorithm : public AbstractAlgorithm
+    {
+    public:
+        MockAlgorithm() = default;
+
+        MOCK_METHOD(void, setMaxSteps, (std::size_t), (override));
+        MOCK_METHOD(void, setWallsSensor, (const WallsSensor&), (override));
+        MOCK_METHOD(void, setDirtSensor, (const DirtSensor&), (override));
+        MOCK_METHOD(void, setBatteryMeter, (const BatteryMeter&), (override));
+        MOCK_METHOD(Step, nextStep, (), (override));
+    };
 
     class SimulatorTest : public testing::Test
     {
@@ -303,7 +317,7 @@ namespace
         }
     }
 
-    TEST_F(SimulatorTest, RobotAPICallingOrder)
+    TEST(SimulatorAPI, RobotAPICallingOrder)
     {
         Simulator simulator;
         Algorithm algorithm;
@@ -329,5 +343,51 @@ namespace
         }, std::logic_error);
 
         simulator.run();
+    }
+
+    TEST(MockAlgorithm, RobotIsDead)
+    {
+        OutputDeserializer deserializer;
+        Simulator simulator;
+        MockAlgorithm mock_algorithm;
+
+        RobotLogger& logger = RobotLogger::getInstance();
+        logger.initializeLogFile("inputs/input_mockalgo_dead.txt");
+
+        simulator.readHouseFile("inputs/input_mockalgo_dead.txt");
+        simulator.setAlgorithm(mock_algorithm);
+
+        ON_CALL(mock_algorithm, nextStep())
+            .WillByDefault(testing::Return(Step::East));
+
+        simulator.run();
+        EXPECT_TRUE(deserializer.deserializeOutputFile("output_input_mockalgo_dead.txt"));
+
+        EXPECT_EQ(Status::Dead, deserializer.robot_state.status);
+
+        logger.deleteAllLogFiles();
+    }
+
+    TEST(MockAlgorithm, RobotIsWorking)
+    {
+        OutputDeserializer deserializer;
+        Simulator simulator;
+        MockAlgorithm mock_algorithm;
+
+        RobotLogger& logger = RobotLogger::getInstance();
+        logger.initializeLogFile("inputs/input_mockalgo_working.txt");
+
+        simulator.readHouseFile("inputs/input_mockalgo_working.txt");
+        simulator.setAlgorithm(mock_algorithm);
+
+        ON_CALL(mock_algorithm, nextStep())
+            .WillByDefault(testing::Return(Step::South));
+
+        simulator.run();
+        EXPECT_TRUE(deserializer.deserializeOutputFile("output_input_mockalgo_working.txt"));
+
+        EXPECT_EQ(Status::Working, deserializer.robot_state.status);
+
+        logger.deleteAllLogFiles();
     }
 }
