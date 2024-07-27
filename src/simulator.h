@@ -37,6 +37,11 @@ class Simulator
     std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
     AbstractAlgorithm* algorithm = nullptr;             // Simulator's algorithm to suggest its next steps.
 
+    /**
+     * @brief Updates the status of the mission.
+     *
+     * @param next_step The next step to be taken.
+     */
     void updateMissionStatus(Step next_step);
 
     /**
@@ -54,8 +59,19 @@ public:
     Simulator(const Simulator& simulator) = delete;
     Simulator& operator=(const Simulator& simulator) = delete;
 
+    /**
+     * @brief Sets the algorithm to be used by the simulator.
+     *
+     * @param algorithm The algorithm to be used.
+     */
     void setAlgorithm(AbstractAlgorithm& algorithm);
 
+    /**
+     * @brief Initializes the simulator with the specified house and battery.
+     *
+     * @param house The house to be cleaned.
+     * @param battery The battery to be used.
+     */
     void readHouseFile(const std::string& house_file_path);
 
     /**

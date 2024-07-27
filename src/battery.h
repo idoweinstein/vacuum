@@ -14,7 +14,7 @@
  */
 class Battery : public BatteryMeter
 {
-    static constexpr const float kEmptyBatteryLevel = 0.0f;
+    static constexpr const float kEmptyBatteryLevel = 0.0f;  // Empty battery level (in steps).
     static constexpr const float kStepsToFullAmount = 20.0f; // Charging rate (in steps).
     static constexpr const float kDischargeUnit = 1.0f;      // Discharging rate (in steps).
 

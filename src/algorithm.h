@@ -160,10 +160,19 @@ class Algorithm : public AbstractAlgorithm
      */
     bool getPathToStation(std::deque<Direction>& path);
 
+    /**
+     * @brief Samples the wall sensor to detect the presence of a wall in positions adjacent to the current position.
+     */
     void sampleWallSensor();
 
+    /**
+     * @brief Samples the dirt sensor to detect the dirt level at the current position.
+     */
     void sampleDirtSensor();
 
+    /**
+     * Samples the battery meter to get the amount of battery left.
+     */
     void sampleBatteryMeter() { battery.amount_left = battery_meter.value()->getBatteryState(); }
 
     /**
@@ -183,32 +192,75 @@ class Algorithm : public AbstractAlgorithm
         sampleBatteryMeter();
     }
 
+    /**
+     * @brief Checks if the current position is the docking station position.
+     */
     bool isAtDockingStation() const { return kDockingStationPosition == current_tile.position; }
 
+    /**
+     * @brief Checks if the battery is full.
+     */
     bool isBatteryFull() const { return battery.amount_left == battery.full_capacity; }
 
+    /**
+     * @brief Gets the maximum reachable distance.
+     * 
+     * This method calculates the maximum reachable distance by taking the minimum of the max battery capacity and the total steps left.
+     */
     std::size_t getMaxReachableDistance() const;
 
+    /**
+     * @brief Checks if all reachable positions are cleaned.
+     */
     bool isCleanedAllReachable();
 
+    /**
+     * @brief Checks if the algorithm should finish.
+     *
+     * This method checks if the algorithm should finish based on the current state.
+     *
+     * @param is_cleaned_all_reachable True if all reachable positions are cleaned, false otherwise.
+     * @return True if the algorithm should finish, false otherwise.
+     */
     bool shouldFinish(bool is_cleaned_all_reachable) const
     {
         bool is_finished_cleaning = isAtDockingStation() && is_cleaned_all_reachable;
         return (0 == total_steps_left) || is_finished_cleaning;
     }
 
+    /**
+     * @brief Checks if there are enough steps left to clean any position.
+     */
     bool enoughStepsLeftToClean();
 
+    /**
+     * @brief Checks if the algorithm should keep charging.
+     */
     bool shouldKeepCharging() { return isAtDockingStation() && !isBatteryFull() && enoughStepsLeftToClean(); }
 
+    /**
+     * @brief Checks if the algorithm to stay in the current position and must return to station.
+     * 
+     * @param station_distance The distance to the docking station.
+     * @return True if the algorithm should return to the docking station, false otherwise.
+     */
     bool isTooLowBatteryToStay(std::size_t station_distance) const
     {
         std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left);
         return (possible_steps_left < 1 + station_distance);
     }
 
+    /**
+     * @brief Checks if the current position is dirty.
+     */
     bool isCurrentPositionDirty() const { return current_tile.dirt_level > 0; }
 
+    /**
+     * @brief Checks if the battery is too low to get one more step away from the station.
+     * 
+     * @param station_distance The distance to the docking station.
+     * @return True if the battery is too low to get further, false otherwise.
+     */
     bool isTooLowBatteryToGetFurther(std::size_t station_distance) const
     {
         std::size_t possible_steps_left = std::min(battery.amount_left, total_steps_left);

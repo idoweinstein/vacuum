@@ -24,6 +24,9 @@ class House : public WallsSensor, public DirtSensor
     Position docking_station_position;                                // The position of the docking station.
     std::size_t total_dirt_count;                                     // The total count of dirt in the environment.
 
+    /**
+     * @brief Computes the total dirt count in the house.
+     */
     void computeTotalDirtCount();
 
     /**

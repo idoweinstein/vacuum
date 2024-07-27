@@ -50,6 +50,9 @@ public:
         return robot_logger_instance;
     }
 
+    /**
+     * @brief Get the file name from a given file path.
+     */
     std::string getFileName(const std::string& file_path) const
     {
         std::string file_name = std::filesystem::path(file_path).filename().string();
