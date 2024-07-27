@@ -140,14 +140,24 @@ namespace
 
     class MockAlgorithm : public AbstractAlgorithm
     {
+        unsigned long max_steps = 0;
     public:
         MockAlgorithm() = default;
 
-        MOCK_METHOD(void, setMaxSteps, (std::size_t), (override));
         MOCK_METHOD(void, setWallsSensor, (const WallsSensor&), (override));
         MOCK_METHOD(void, setDirtSensor, (const DirtSensor&), (override));
         MOCK_METHOD(void, setBatteryMeter, (const BatteryMeter&), (override));
         MOCK_METHOD(Step, nextStep, (), (override));
+
+        void setMaxSteps(unsigned long max_steps) override
+        {
+            this->max_steps = max_steps;
+        }
+
+        unsigned long getMaxSteps() const
+        {
+            return max_steps;
+        }
     };
 
     class SimulatorTest : public testing::Test
@@ -346,6 +356,38 @@ namespace
         EXPECT_TRUE(getRobotState().in_dock);
     }
 
+    TEST_F(SimulatorTest, RobotImmediateFinish)
+    {
+        const std::size_t total_dirt = 45;
+        const std::size_t dirt_factor = 300;
+        SetUp("inputs/input_immediatefinish.txt", "output_input_immediatefinish.txt");
+
+        RobotState robot_state = getRobotState();
+
+        // Assert the expected results
+        EXPECT_EQ(Status::Finished, robot_state.status);
+        EXPECT_EQ(total_dirt, robot_state.total_dirt_left);
+        EXPECT_TRUE(robot_state.in_dock);
+        EXPECT_EQ(0, robot_state.total_steps_taken);
+        EXPECT_EQ(Step::Finish, robot_state.runtime_steps.front());
+        /* Only dirt should affect score */
+        EXPECT_EQ(total_dirt * dirt_factor, robot_state.score);
+    }
+
+    TEST_F(SimulatorTest, RobotStepsTaken)
+    {
+        SetUp("inputs/input_stepstaken.txt", "output_input_stepstaken.txt");
+
+        RobotState robot_state = getRobotState();
+
+        // Assert the expected results
+        EXPECT_EQ(Status::Finished, robot_state.status);
+        EXPECT_EQ(0, robot_state.total_dirt_left);
+        EXPECT_TRUE(robot_state.in_dock);
+        /* Only steps should affect score */
+        EXPECT_EQ(robot_state.total_steps_taken, robot_state.score);
+    }
+
     TEST(SimulatorAPI, RobotAPICallingOrder)
     {
         Simulator simulator;
@@ -376,6 +418,8 @@ namespace
 
     TEST(MockAlgorithm, RobotIsDead)
     {
+        const std::size_t dead_penalty = 2000;
+
         OutputDeserializer deserializer;
         Simulator simulator;
         MockAlgorithm mock_algorithm;
@@ -395,12 +439,17 @@ namespace
         EXPECT_EQ(Status::Dead, deserializer.robot_state.status);
 
         EXPECT_FALSE(deserializer.robot_state.in_dock);
+        // Dead penalty should be applied
+        EXPECT_EQ(dead_penalty + mock_algorithm.getMaxSteps(), deserializer.robot_state.score);
 
         logger.deleteAllLogFiles();
     }
 
     TEST(MockAlgorithm, RobotIsWorking)
     {
+        const std::size_t non_docking_penalty = 1000;
+        const std::size_t dirt_factor = 300;
+
         OutputDeserializer deserializer;
         Simulator simulator;
         MockAlgorithm mock_algorithm;
@@ -420,6 +469,41 @@ namespace
         EXPECT_FALSE(deserializer.robot_state.in_dock);
 
         EXPECT_EQ(Status::Working, deserializer.robot_state.status);
+        EXPECT_EQ(dirt_factor * deserializer.robot_state.total_dirt_left 
+                  + non_docking_penalty
+                  + deserializer.robot_state.total_steps_taken, deserializer.robot_state.score);
+
+        logger.deleteAllLogFiles();
+    }
+
+    /* TODO: this test currently doesn't pass due to an alleged contradiction in guidelines.
+       There's an open issue about it: https://moodle.tau.ac.il/mod/forum/discuss.php?d=96436 */
+    TEST(MockAlgorithm, RobotIsLying)
+    {
+        const std::size_t lying_penalty = 3000;
+
+        OutputDeserializer deserializer;
+        Simulator simulator;
+        MockAlgorithm mock_algorithm;
+
+        RobotLogger& logger = RobotLogger::getInstance();
+        logger.initializeLogFile("inputs/input_stepstaken.txt");
+
+        simulator.readHouseFile("inputs/input_stepstaken.txt");
+        simulator.setAlgorithm(mock_algorithm);
+
+        EXPECT_CALL(mock_algorithm, nextStep())
+            .WillOnce(testing::Return(Step::East))
+            .WillOnce(testing::Return(Step::Finish));
+
+        simulator.run();
+        EXPECT_TRUE(deserializer.deserializeOutputFile("output_input_stepstaken.txt"));
+
+        EXPECT_FALSE(deserializer.robot_state.in_dock);
+
+        EXPECT_EQ(Status::Finished, deserializer.robot_state.status);
+        EXPECT_EQ(lying_penalty
+                  + mock_algorithm.getMaxSteps(), deserializer.robot_state.score);
 
         logger.deleteAllLogFiles();
     }

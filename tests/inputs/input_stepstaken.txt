@@ -1,0 +1,6 @@
+Steps Taken
+MaxSteps = 100
+MaxBattery = 100
+Rows = 1
+Cols = 5
+D0000
