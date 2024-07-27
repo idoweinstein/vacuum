@@ -14,14 +14,18 @@
 #include "algorithm.h"
 #include "enums.h"
 
+using namespace std::string_literals;
+
 namespace
 {
     struct RobotState
     {
         std::vector<Step> runtime_steps;
-        unsigned int total_steps_taken;
-        unsigned int total_dirt_left;
+        std::size_t total_steps_taken;
+        std::size_t total_dirt_left;
         Status status;
+        bool in_dock;
+        std::size_t score;
     };
 
     class OutputDeserializer
@@ -45,8 +49,10 @@ namespace
             "NumSteps\\s+=\\s+([0-9]+)\r?\n"
             "DirtLeft\\s+=\\s+([0-9]+)\r?\n"
             "Status\\s+=\\s+(FINISHED|WORKING|DEAD)\r?\n"
+            "InDock\\s+=\\s+(TRUE|FALSE)\r?\n"
+            "Score\\s+=\\s+([0-9]+)\r?\n"
             "Steps:\r?\n"
-            "([NESWs]+F?)";
+            "([NESWs]*F?)";
 
         std::ifstream output_file;
 
@@ -63,6 +69,11 @@ namespace
         {
             EXPECT_TRUE(status_map.contains(status_string));
             return status_map.at(status_string);
+        }
+
+        static bool stringToBool(const std::string& bool_string)
+        {
+            return bool_string == "TRUE"s;
         }
  
     public:
@@ -112,9 +123,11 @@ namespace
         robot_state.total_steps_taken = std::stoi(matches[1]);
         robot_state.total_dirt_left = std::stoi(matches[2]);
         robot_state.status = stringToStatus(matches[3]);
+        robot_state.in_dock = stringToBool(matches[4]);
+        robot_state.score = std::stoi(matches[5]);
         robot_state.runtime_steps.clear();
-        robot_state.runtime_steps.reserve(matches[4].length());
-        for (auto step : static_cast<const std::string &>(matches[4]))
+        robot_state.runtime_steps.reserve(matches[6].length());
+        for (auto step : static_cast<const std::string &>(matches[6]))
         {
             robot_state.runtime_steps.push_back(charToStep(step));
         }
@@ -187,6 +200,8 @@ namespace
 
         // Assert the expected program results (Robot is not dead and cleaned all dirt)
         EXPECT_EQ(Status::Finished, robot_state.status);
+
+        EXPECT_TRUE(robot_state.in_dock);
     }
 
     TEST_F(SimulatorTest, RobotTrappedDirt)
@@ -198,6 +213,8 @@ namespace
         // Assert the expected program results (Robot is not dead, cleaned all ACCESSIBLE dirt, but there's more trapped dirt)
         EXPECT_EQ(Status::Finished, robot_state.status);
         EXPECT_LT(0, robot_state.total_dirt_left);
+
+        EXPECT_TRUE(robot_state.in_dock);
     }
 
     TEST_F(SimulatorTest, RobotMaze)
@@ -208,6 +225,8 @@ namespace
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);
+
+        EXPECT_TRUE(robot_state.in_dock);
     }
 
     TEST_F(SimulatorTest, RobotMinimalBatteryToComplete)
@@ -237,6 +256,8 @@ namespace
         {
             EXPECT_EQ(expected_steps[i], robot_state.runtime_steps.at(i));
         }
+
+        EXPECT_TRUE(robot_state.in_dock);
     }
 
     TEST_F(SimulatorTest, RobotTooDistantDirt)
@@ -251,6 +272,8 @@ namespace
         EXPECT_GE(50, robot_state.total_steps_taken);
 
         EXPECT_EQ(1, robot_state.total_dirt_left);
+
+        EXPECT_TRUE(robot_state.in_dock);
     }
 
     TEST_F(SimulatorTest, RobotAllCharacters)
@@ -261,6 +284,8 @@ namespace
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);
+
+        EXPECT_TRUE(robot_state.in_dock);
     }
 
     TEST_F(SimulatorTest, RobotNoHouse)
@@ -286,6 +311,7 @@ namespace
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);
         EXPECT_EQ(0, robot_state.total_dirt_left);
+        EXPECT_TRUE(robot_state.in_dock);
     }
 
     TEST_F(SimulatorTest, RobotFilledCol)
@@ -297,6 +323,7 @@ namespace
         // Assert the expected results
         EXPECT_EQ(Status::Finished, robot_state.status);
         EXPECT_EQ(0, robot_state.total_dirt_left);
+        EXPECT_TRUE(robot_state.in_dock);
     }
 
     TEST_F(SimulatorTest, RobotDeterministic)
@@ -315,6 +342,8 @@ namespace
         {
             EXPECT_EQ(first_runtime_steps.at(i), second_runtime_steps.at(i));
         }
+
+        EXPECT_TRUE(getRobotState().in_dock);
     }
 
     TEST(SimulatorAPI, RobotAPICallingOrder)
@@ -365,6 +394,8 @@ namespace
 
         EXPECT_EQ(Status::Dead, deserializer.robot_state.status);
 
+        EXPECT_FALSE(deserializer.robot_state.in_dock);
+
         logger.deleteAllLogFiles();
     }
 
@@ -385,6 +416,8 @@ namespace
 
         simulator.run();
         EXPECT_TRUE(deserializer.deserializeOutputFile("output_input_mockalgo_working.txt"));
+
+        EXPECT_FALSE(deserializer.robot_state.in_dock);
 
         EXPECT_EQ(Status::Working, deserializer.robot_state.status);
 
