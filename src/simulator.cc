@@ -11,7 +11,7 @@ void Simulator::updateMissionStatus(Step next_step)
 {
     if (Step::Finish == next_step)
     {
-        if (house->isInDockingStation())
+        if (house->isAtDockingStation())
         {
             mission_status = Status::Finished;
         }
@@ -22,7 +22,7 @@ void Simulator::updateMissionStatus(Step next_step)
         }
     }
 
-    else if (!house->isInDockingStation() && battery->isBatteryExhausted())
+    else if (!house->isAtDockingStation() && battery->isBatteryExhausted())
     {
         mission_status = Status::Dead;
     }
@@ -43,7 +43,7 @@ void Simulator::move(Step next_step)
     /* If no battery left - discharge() throws an Empty Battery exception */
     if (Step::Stay == next_step)
     {
-        if (house->isInDockingStation())
+        if (house->isAtDockingStation())
         {
             battery->charge();
         }
@@ -121,6 +121,10 @@ void Simulator::run()
     while (total_steps_taken <= max_simulator_steps)
     {
         Step next_step = algorithm->nextStep();
+        if (total_steps_taken == max_simulator_steps && Step::Finish != next_step)
+        {
+            break;
+        }
 
         move(next_step);
         if (Status::Finished == mission_status || Status::Dead == mission_status)

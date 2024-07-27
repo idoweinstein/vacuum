@@ -22,9 +22,9 @@ class House : public WallsSensor, public DirtSensor
     std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map; // The map representing the dirt levels in the environment.
     Position current_position;                                        // The current position of the vacuum cleaner.
     Position docking_station_position;                                // The position of the docking station.
-    unsigned int total_dirt_count;                                    // The total count of dirt in the environment.
+    std::size_t total_dirt_count;                                     // The total count of dirt in the environment.
 
-    virtual void setTotalDirtCount();
+    void computeTotalDirtCount();
 
     /**
      * @brief Checks if a given position is out of bounds of a given map.
@@ -43,55 +43,41 @@ public:
      * @param dirt_map The map representing the dirt levels in the environment.
      * @param docking_station_position The position of the docking station.
      */
-    explicit House(std::unique_ptr<std::vector<std::vector<bool>>> wall_map,
-                   std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map,
-                   const Position& docking_station_position);
+    House(std::unique_ptr<std::vector<std::vector<bool>>>&& wall_map,
+          std::unique_ptr<std::vector<std::vector<unsigned int>>>&& dirt_map,
+          const Position& docking_station_position);
     /**
      * @brief Gets the total count of dirt in the environment.
      *
      * @return The total count of dirt.
      */
-    virtual int getTotalDirtCount() const { return total_dirt_count; }
+    std::size_t getTotalDirtCount() const { return total_dirt_count; }
 
     /**
      * @brief Cleans the current position by reducing the dirt level (by reduction unit of 1).
      */
-    virtual void cleanCurrentPosition();
+    void cleanCurrentPosition();
 
     /**
      * @brief Moves the vacuum cleaner one step in the specified direction.
      *
      * @param step The step to move (a Direction or Stay / Finish).
      */
-    virtual void move(Step);
+    void move(Step);
 
     /**
      * @brief Checks if the vacuum cleaner is in the docking station.
      *
      * @return true if the vacuum cleaner is in the docking station, false otherwise.
      */
-    virtual bool isInDockingStation() const { return current_position == docking_station_position; }
-
-    /**
-     * @brief Checks if the house is clean (cleaning operation is finished).
-     *
-     * @return true if the house is clean, false otherwise.
-     */
-    virtual bool isClean() const { return total_dirt_count == 0; }
+    bool isAtDockingStation() const { return current_position == docking_station_position; }
 
     /**
      * @brief Gets the dirt level at the current position.
      *
      * @return The dirt level at the current position.
      */
-    virtual int dirtLevel() const override;
-
-    /**
-     * @brief Gets the current position of the vacuum cleaner.
-     *
-     * @return The current position.
-     */
-    virtual Position getCurrentPosition() const { return current_position; }
+    int dirtLevel() const override;
 
     /**
      * @brief Checks if there is a wall in the specified direction.
@@ -99,7 +85,7 @@ public:
      * @param direction The direction to check.
      * @return true if there is a wall, false otherwise.
      */
-    virtual bool isWall(Direction) const override;
+    bool isWall(Direction) const override;
 };
 
 #endif /* HOUSE_H_ */

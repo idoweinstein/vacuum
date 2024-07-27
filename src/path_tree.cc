@@ -1,9 +1,11 @@
 #include "path_tree.h"
 
-unsigned int PathTree::insertRoot(Position position)
+#include <cstddef>
+
+std::size_t PathTree::insertRoot(const Position& position)
 {
     node_pool.emplace_back(
-        kNoParent,          // PathNode.parent_index
+        std::nullopt,       // PathNode.parent_index
         Direction::North,   // PathNode.direction (doesn't matter - it's the first path node)
         position            // PathNode.position
     );
@@ -11,16 +13,16 @@ unsigned int PathTree::insertRoot(Position position)
     return 0; // Root Node Index
 }
 
-unsigned int PathTree::insertChild(unsigned int parent_index, Direction direction_to_child, Position child_position)
+std::size_t PathTree::insertChild(std::size_t parent_index, Direction direction_to_child, const Position& child_position)
 {
     validateIndex(parent_index);
 
     node_pool.emplace_back(
-        (int)parent_index,  // PathNode.parent_index
+        parent_index,       // PathNode.parent_index
         direction_to_child, // PathNode.direction
         child_position      // PathNode.position
     );
 
-    unsigned int child_index = node_pool.size() - 1;
+    std::size_t child_index = node_pool.size() - 1;
     return child_index;
 }

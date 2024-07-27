@@ -33,6 +33,8 @@ set(INPUT_FILES
     inputs/input_nodock.txt
     inputs/input_filledline.txt
     inputs/input_filledcol.txt
+    inputs/input_mockalgo_dead.txt
+    inputs/input_mockalgo_working.txt
 )
 
 file(
@@ -95,6 +97,7 @@ add_executable(
 target_link_libraries(simulator_test
     vacuum_cleaner
     GTest::gtest_main
+    GTest::gmock_main
 )
 
 # Add unit test targets

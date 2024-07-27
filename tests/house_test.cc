@@ -17,10 +17,10 @@ namespace
 
                 for (int i = 0; i < 24; i++)
                 {
-                    wall_map.push_back({});
+                    wall_map.emplace_back();
                     wall_map[i].reserve(row_num);
 
-                    dirt_map.push_back({});
+                    dirt_map.emplace_back();
                     dirt_map[i].reserve(row_num);
 
                     for (unsigned int j = 0; j < row_num; j++)
@@ -65,11 +65,11 @@ namespace
 
                 initializeMaps(*wall_map, *dirt_map);
 
-                house = std::unique_ptr<House>(new House(
+                house = std::make_unique<House>(
                     std::move(wall_map),
                     std::move(dirt_map),
                     docking_station_position
-                ));
+                );
             }
             
             static void TearDownTestCase()
@@ -85,7 +85,7 @@ namespace
 
     TEST_F(HouseTest, StartingAtDockingStation)
     {
-        EXPECT_TRUE(house->isInDockingStation());
+        EXPECT_TRUE(house->isAtDockingStation());
     }
 
     TEST_F(HouseTest, OverCleaningPosition)
@@ -110,7 +110,7 @@ namespace
 
             if (Step::Finish != next_step && Step::Stay != next_step)
             {
-                is_wall = house->isWall(static_cast<Direction>(next_step));
+                is_wall = house->isWall(static_cast<Direction>(next_step)); // Safe due to prior checks
             }
 
             if(is_wall)

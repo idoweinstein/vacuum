@@ -7,37 +7,19 @@
 #include <stdexcept>
 #include <unordered_set>
 
-void Algorithm::setMaxSteps(std::size_t max_steps)
-{
-    this->max_steps = max_steps;
-    total_steps_left = max_steps;
-}
-
-void Algorithm::setBatteryMeter(const BatteryMeter& battery_meter)
-{
-    this->battery_meter = &battery_meter;
-    battery.full_capacity = battery_meter.getBatteryState();
-}
-
-void Algorithm::setDirtSensor(const DirtSensor& dirt_sensor)
-{
-    this->dirt_sensor = &dirt_sensor;
-}
-
-void Algorithm::setWallsSensor(const WallsSensor& walls_sensor)
-{
-    this->walls_sensor = &walls_sensor;
-}
-
-int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const std::function<bool(Position)>& found_criteria) const
+std::optional<std::size_t> Algorithm::performBFS(PathTree& path_tree,
+                                                 std::size_t start_index,
+                                                 std::function<bool(const Position&)> const & found_criteria) const
 {
     std::unordered_set<Position> visited_positions;
-    std::queue<unsigned int> index_queue;
+    std::queue<std::size_t> index_queue;
+    std::optional<std::size_t> path_end_index;
 
     // If current position satisfies found_criteria - Return empty path
     if (found_criteria(path_tree.getPosition(start_index)))
     {
-        return start_index;
+        path_end_index = start_index;
+        return path_end_index;
     }
 
     index_queue.push(start_index);
@@ -45,10 +27,10 @@ int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const s
     // Perform BFS
     while (!index_queue.empty())
     {
-        unsigned int parent_index = index_queue.front();
+        std::size_t parent_index = index_queue.front();
         index_queue.pop();
 
-        for (Direction direction : directions)
+        for (Direction direction : kDirections)
         {
             Position parent_position = path_tree.getPosition(parent_index);
             Position child_position = Position::computePosition(parent_position, direction);
@@ -61,33 +43,37 @@ int Algorithm::performBFS(PathTree& path_tree, unsigned int start_index, const s
                 continue;
             }
 
-            unsigned int child_index = path_tree.insertChild(parent_index, direction, child_position);
+            std::size_t child_index = path_tree.insertChild(parent_index, direction, child_position);
             index_queue.push(child_index);
             visited_positions.insert(child_position);
 
             if (found_criteria(child_position))
             {
-                return child_index; // Index of last path node
+                path_end_index = child_index;
+                return path_end_index;
             }
         }
     }
 
-    return kNotFound;
+    return path_end_index;
 }
 
-bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direction>& path, const std::function<bool(Position)>& found_criteria)
+bool Algorithm::getPathByFoundCriteria(const Position& start_position,
+                                       std::deque<Direction>& path,
+                                       std::function<bool(const Position&)> const & found_criteria)
 {
     PathTree path_tree;
 
-    unsigned int root_index = path_tree.insertRoot(start_position);
+    std::size_t root_index = path_tree.insertRoot(start_position);
 
-    int path_end_index = performBFS(path_tree, root_index, found_criteria);
-    if (kNotFound == path_end_index)
+    auto path_end_index = performBFS(path_tree, root_index, found_criteria);
+    if (!path_end_index.has_value())
     {
         return false;
     }
 
-    unsigned int current_index = path_end_index;
+    // Reconstruct found path (backtracing)
+    std::size_t current_index = path_end_index.value();
     while (path_tree.hasParent(current_index))
     {
         path.push_front(path_tree.getDirection(current_index));
@@ -97,11 +83,11 @@ bool Algorithm::getPathByFoundCriteria(Position start_position, std::deque<Direc
     return true;
 }
 
-bool Algorithm::getPathToNearestTodo(Position start_position, std::deque<Direction>& path)
+bool Algorithm::getPathToNearestTodo(const Position& start_position, std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(start_position,
                                   path,
-                                  [this](Position position)
+                                  [this](const Position& position)
                                   { return house.todo_positions.contains(position); }
     );
 }
@@ -110,14 +96,14 @@ bool Algorithm::getPathToStation(std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(current_tile.position,
                                   path,
-                                  [](Position position)
-                                  { return position == kDockingStationPosition; }
+                                  [](const Position& position)
+                                  { return kDockingStationPosition == position; }
     );
 }
 
-void Algorithm::getWallSensorInfo()
+void Algorithm::sampleWallSensor()
 {
-    for (Direction direction : directions)
+    for (Direction direction : kDirections)
     {
         Position position = Position::computePosition(current_tile.position, direction);
 
@@ -140,7 +126,7 @@ void Algorithm::getWallSensorInfo()
     house.wall_map[current_tile.position] = false;
 }
 
-void Algorithm::getDirtSensorInfo()
+void Algorithm::sampleDirtSensor()
 {
     current_tile.dirt_level = dirt_sensor.value()->dirtLevel();
 
@@ -155,43 +141,18 @@ void Algorithm::getDirtSensorInfo()
     }
 }
 
-void Algorithm::getBatteryMeterInfo()
-{
-    battery.amount_left = battery_meter.value()->getBatteryState();
-}
-
-void Algorithm::getSensorsInfo()
-{
-    getWallSensorInfo();
-    getDirtSensorInfo();
-    getBatteryMeterInfo();
-}
-
-std::size_t Algorithm::getMaxReachableDistance() const
-{
-    std::size_t max_reachable_steps = std::min(battery.full_capacity, max_steps.value());
-
-    if (0 == max_reachable_steps)
-    {
-        return 0;
-    }
-
-    /*
-     * Number of Steps := Distance (to position) +
-     *                    1        (minimal cleaning cost) +
-     *                    Distance (back to home)
-     */
-    std::size_t max_reachable_distance = (max_reachable_steps - 1) / 2;
-    return max_reachable_distance;
-}
-
-bool Algorithm::areStepsLeftToClean()
+bool Algorithm::enoughStepsLeftToClean()
 {
     std::deque<Direction> path;
     bool is_found = getPathToNearestTodo(current_tile.position, path);
     if (is_found)
     {
-        std::size_t cleaning_cost = 2 * path.size() + 1;
+        /*
+         * Cleaning Cost := Reaching dirty position cost +
+         *                  Cleaning 1 tile cost +
+         *                  Returning back cost
+         */
+        std::size_t cleaning_cost = 2 * getPathDistance(path) + 1;
         if (cleaning_cost >= total_steps_left)
         {
             return false;
@@ -201,11 +162,27 @@ bool Algorithm::areStepsLeftToClean()
     return true;
 }
 
-bool Algorithm::cleanedAllReachable()
+std::size_t Algorithm::getMaxReachableDistance() const
+{
+    std::size_t max_possible_steps = std::min(battery.full_capacity, max_steps.value());
+    if (0 == max_possible_steps)
+    {
+        return 0;
+    }
+
+    /*
+     * Number of Steps := Distance (to position) +
+     *                    1        (minimal cleaning cost) +
+     *                    Distance (back to home)
+     */
+    std::size_t max_reachable_distance = (max_possible_steps - 1) / 2;
+    return max_reachable_distance;
+}
+
+bool Algorithm::isCleanedAllReachable()
 {
     std::deque<Direction> found_path;
     bool is_found = getPathToNearestTodo(kDockingStationPosition, found_path);
-
     if (!is_found)
     {
         return true;
@@ -223,14 +200,13 @@ Step Algorithm::decideNextStep()
 {
     std::deque<Direction> path_to_station;
     bool is_found = getPathToStation(path_to_station);
-
     if (!is_found)
     {
         throw std::runtime_error("Simulator cannot find path back to the docking station!");
     }
 
     std::size_t station_distance = getPathDistance(path_to_station);
-    bool is_cleaned_all_reachable = cleanedAllReachable();
+    bool is_cleaned_all_reachable = isCleanedAllReachable();
 
     if (shouldFinish(is_cleaned_all_reachable))
     {
@@ -242,17 +218,17 @@ Step Algorithm::decideNextStep()
         return Step::Stay;
     }
 
-    if (lowBatteryToStay(station_distance) || is_cleaned_all_reachable)
+    if (isTooLowBatteryToStay(station_distance) || is_cleaned_all_reachable)
     {
         return getPathNextStep(path_to_station);
     }
 
-    if (currentPositionDirty())
+    if (isCurrentPositionDirty())
     {
         return Step::Stay;
     }
 
-    if (lowBatteryToGetFurther(station_distance))
+    if (isTooLowBatteryToGetFurther(station_distance))
     {
         return getPathNextStep(path_to_station);
     }
@@ -269,19 +245,6 @@ Step Algorithm::decideNextStep()
     return getPathNextStep(path_to_nearest_todo);
 }
 
-Step Algorithm::nextStep()
-{
-    assertAllInitialied();
-
-    getSensorsInfo();
-
-    Step step = decideNextStep();
-
-    move(step);
-
-    return step;
-}
-
 void Algorithm::move(Step step)
 {
     if (Step::Finish == step)
@@ -296,6 +259,41 @@ void Algorithm::move(Step step)
         return;
     }
 
-    Direction direction = static_cast<Direction>(step);
+    Direction direction = static_cast<Direction>(step); // Safe due to prior checks
     current_tile.position = Position::computePosition(current_tile.position, direction);
+}
+
+void Algorithm::setMaxSteps(std::size_t max_steps)
+{
+    this->max_steps = max_steps;
+    total_steps_left = max_steps;
+}
+
+void Algorithm::setWallsSensor(const WallsSensor& walls_sensor)
+{
+    this->walls_sensor = &walls_sensor;
+}
+
+void Algorithm::setDirtSensor(const DirtSensor& dirt_sensor)
+{
+    this->dirt_sensor = &dirt_sensor;
+}
+
+void Algorithm::setBatteryMeter(const BatteryMeter& battery_meter)
+{
+    this->battery_meter = &battery_meter;
+    battery.full_capacity = battery_meter.getBatteryState();
+}
+
+Step Algorithm::nextStep()
+{
+    assertAllInitialied();
+
+    sampleSensors();
+
+    Step step = decideNextStep();
+
+    move(step);
+
+    return step;
 }

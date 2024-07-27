@@ -4,19 +4,19 @@
 
 #include "robot_logger.h"
 
-void House::setTotalDirtCount()
+void House::computeTotalDirtCount()
 {
     for (const auto& row : *dirt_map)
     {
         for (unsigned int dirt : row)
         {
-            total_dirt_count += dirt;
+            total_dirt_count += static_cast<std::size_t>(dirt);
         }
     }
 }
 
-House::House(std::unique_ptr<std::vector<std::vector<bool>>> wall_map,
-             std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map,
+House::House(std::unique_ptr<std::vector<std::vector<bool>>>&& wall_map,
+             std::unique_ptr<std::vector<std::vector<unsigned int>>>&& dirt_map,
              const Position& docking_station_position)
             : wall_map(std::move(wall_map)),
               dirt_map(std::move(dirt_map)),
@@ -24,7 +24,7 @@ House::House(std::unique_ptr<std::vector<std::vector<bool>>> wall_map,
               docking_station_position(docking_station_position),
               total_dirt_count(0)
 {
-    setTotalDirtCount();
+    computeTotalDirtCount();
 }
 
 template <typename T>
@@ -35,12 +35,12 @@ bool House::isOutOfBounds(const std::vector<std::vector<T>>& map, const Position
         return true;
     }
 
-    if ((size_t) position.first >= map.size())
+    if (static_cast<size_t>(position.first) >= map.size())
     {
         return true;
     }
 
-    if ((size_t) position.second >= map[position.first].size())
+    if (static_cast<size_t>(position.second) >= map[position.first].size())
     {
         return true;
     }
@@ -63,7 +63,7 @@ int House::dirtLevel() const
 
 void House::cleanCurrentPosition()
 {
-    if (dirtLevel() == 0) // dirtLevel() calls isOutOfBounds() already
+    if (0 == dirtLevel()) // dirtLevel() calls isOutOfBounds() already
     {
         return;
     }
@@ -91,7 +91,7 @@ void House::move(Step step)
         return;
     }
 
-    Direction direction = static_cast<Direction>(step);
+    Direction direction = static_cast<Direction>(step); // Safe due to prior checks
 
     if (isWall(direction))
     {
