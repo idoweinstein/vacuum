@@ -1,7 +1,10 @@
-NumSteps = 75
-DirtLeft = 0
-Status = FINISHED
-InDock = TRUE
-Score = 75
-Steps:
-EsESsWSssssssWsssssssssNWssNsssWssSssssWsssssssssNsWWSssssssssSsssssNNEEEEEF
+Input A
+MaxSteps = 500
+MaxBattery = 80
+Rows = 10
+Cols = 10
+WWWWWWWWWW
+W00123D10W
+W8W942001W
+W5WWWW96WW
+WWWWWWWWWW

@@ -4,7 +4,7 @@ import re
 import time
 
 
-DOCKING_STATION = '@'
+DOCKING_STATION = 'D'
 CLEAR_BLOCK = ' '
 ZERO_DIRT = '0'
 
@@ -57,15 +57,20 @@ def print_frame(map, current_position, current_battery, max_battery_steps, curre
     print_empty_line() # Empty line
 
 
-def get_next_position(line):
-    groups = re.search(r'\(([0-9]+),([0-9]+)\)', line).groups()
-    return (int(groups[0]), int(groups[1]))
+def get_next_position(current_position, step):
+    diffs = {
+        'N': (-1, 0),
+        'S': (1, 0),
+        'W': (0, -1),
+        'E': (0, 1),
+        's': (0, 0),
+        'F': (0, 0)
+    }
+
+    return (current_position[0] + diffs[step][0], current_position[1] + diffs[step][1])
 
 
-def simulate(max_robot_steps, max_battery_steps, start_position, map, output_file, fps):
-    with output_file as f:
-        lines = f.readlines()
-
+def simulate(max_robot_steps, max_battery_steps, start_position, map, steps, fps):
     docking_station_position = start_position
     current_position = start_position
     current_step = 0
@@ -76,68 +81,99 @@ def simulate(max_robot_steps, max_battery_steps, start_position, map, output_fil
     os.system('')
     print('Start')
     print_frame(map, current_position, current_battery, max_battery_steps, current_step, max_robot_steps, False)
-    for line in lines:
-        if line.startswith('[STEP]'):
-            time.sleep(1 / fps)
+    for step in steps:
+        time.sleep(1 / fps)
 
-            # Update
-            next_position = get_next_position(line)
-            is_stay = next_position == current_position
-            current_position = next_position
-            current_step += 1
-            # Update batery
-            if is_stay and current_position == docking_station_position:
-                current_battery = min(max_battery_steps, current_battery + max_battery_steps / 20)
-                # Avoid printing unnecessary decimal point if not needed
-                if current_battery == int(current_battery):
-                    current_battery = int(current_battery)
-            else:
-                current_battery -= 1
-            # Update dirt level
-            if map[current_position[0]][current_position[1]].isnumeric() and is_stay:
-                updated_dirt_level = int(map[current_position[0]][current_position[1]]) - 1
-                updated_block_representation = CLEAR_BLOCK
-                if updated_dirt_level > 0:
-                    updated_block_representation = str(updated_dirt_level)
-                map[current_position[0]][current_position[1]] = updated_block_representation
-
-            # Print
-            print_frame(map, current_position, current_battery, max_battery_steps, current_step, max_robot_steps, is_stay)
+        # Update
+        next_position = get_next_position(current_position, step)
+        is_stay = next_position == current_position
+        current_position = next_position
+        current_step += 1
+        # Update batery
+        if is_stay and current_position == docking_station_position:
+            current_battery = min(max_battery_steps, current_battery + max_battery_steps / 20)
+            # Avoid printing unnecessary decimal point if not needed
+            if current_battery == int(current_battery):
+                current_battery = int(current_battery)
         else:
-            print(line)
+            current_battery -= 1
+        # Update dirt level
+        if map[current_position[0]][current_position[1]].isnumeric() and is_stay:
+            updated_dirt_level = int(map[current_position[0]][current_position[1]]) - 1
+            updated_block_representation = CLEAR_BLOCK
+            if updated_dirt_level > 0:
+                updated_block_representation = str(updated_dirt_level)
+            map[current_position[0]][current_position[1]] = updated_block_representation
+
+        # Print
+        print_frame(map, current_position, current_battery, max_battery_steps, current_step, max_robot_steps, is_stay)
+
+
+def pase_output_file(output_file):
+    with output_file as f:
+        content = f.read()
+
+    regex = (r"""NumSteps\s*=\s*(?P<num_steps>\d+)[\r]?\n""" +
+             r"""DirtLeft\s*=\s*(?P<dirt_left>\d+)[\r]?\n""" +
+             r"""Status\s*=\s*(?P<status>\w+)[\r]?\n""" +
+             r"""Steps:[\r]?\n""" +
+             r"""(?P<steps>(?:N|E|S|W|s)+)F?[\r]?\n?""")
+
+    match = re.search(regex, content)
+
+    if not match:
+        raise ValueError('Invalid output file format')
+
+    d = match.groupdict()
+
+    return int(d['num_steps']), int(d['dirt_left']), d['status'], d['steps']
+
+
+def parse_house(house):
+    start_position = (0, 0)
+    map = []
+    is_station_found = False
+
+    lines = house.replace('\r', '').split('\n')
+
+    for line in lines:
+        if DOCKING_STATION in line:
+            if not is_station_found:
+                is_station_found = True
+                start_position = (len(map), line.index(DOCKING_STATION))
+            else:
+                raise ValueError('Multiple docking stations found')
+        map.append(list(line.replace(ZERO_DIRT, CLEAR_BLOCK)))
+
+    if not is_station_found:
+        raise ValueError('No docking station found')
+
+    return start_position, map
 
 
 def parse_input_file(input_file):
-    is_station_found = False
-    max_robot_steps = 0
-    max_battery_steps = 0
-    start_position = (0, 0)
-    map = []
     with input_file as f:
-        lines = f.readlines()
+        content = f.read()
 
-    for line in lines:
-        if line.startswith('max_robot_steps'):
-            max_robot_steps = int(line.split(' ')[1])
-        elif line.startswith('max_battery_steps'):
-            max_battery_steps = int(line.split(' ')[1])
-        elif line.startswith('house'):
-            continue
-        else:
-            if DOCKING_STATION in line:
-                if not is_station_found:
-                    is_station_found = True
-                    start_position = (len(map), line.index(DOCKING_STATION))
-                else:
-                    line = line.replace(DOCKING_STATION, CLEAR_BLOCK)
-            line = line.replace(ZERO_DIRT, CLEAR_BLOCK).strip('\r\n')
-            map.append(list(line))
+    regex = (
+        r"""(?P<name>.*)[\r]?\n""" +
+        r"""MaxSteps\s*=\s*(?P<max_robot_steps>\d+)[\r]?\n""" +
+        r"""MaxBattery\s*=\s*(?P<max_battery_steps>\d+)[\r]?\n""" +
+        r"""Rows\s*=\s*(?P<rows>\d+)[\r]?\n""" +
+        r"""Cols\s*=\s*(?P<cols>\d+)[\r]?\n""" +
+        r"""(?P<house>(?:.|\n|\r)+)$"""
+    )
 
-    if not is_station_found:
-        if 0 == len(map):
-            map.append([])
-        map[0] += '@'
-        start_position = (0, len(map[0])-1)
+    match = re.search(regex, content, re.M)
+
+    if not match:
+        raise ValueError('Invalid input file format')
+
+    d = match.groupdict()
+
+    max_robot_steps = int(d['max_robot_steps'])
+    max_battery_steps = int(d['max_battery_steps'])
+    start_position, map = parse_house(d['house'])
 
     return max_robot_steps, max_battery_steps, start_position, map
 
@@ -158,7 +194,12 @@ def parse_args():
 def main():
     args = parse_args()
     max_robot_steps, max_battery_steps, start_position, map = parse_input_file(args.input_file)
-    simulate(max_robot_steps, max_battery_steps, start_position, map, args.output_file, args.fps)
+    num_steps, dirt_left, status, steps = pase_output_file(args.output_file)
+    simulate(max_robot_steps, max_battery_steps, start_position, map, steps, args.fps)
+    print_empty_line()
+    print(f'NumSteps: {num_steps}')
+    print(f'DirtLeft: {dirt_left}')
+    print(f'Status: {status}')
     input('[ Press enter to exit ]')
 
 

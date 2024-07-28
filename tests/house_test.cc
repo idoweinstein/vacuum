@@ -136,18 +136,18 @@ namespace
 
         EXPECT_THROW({
             simple_location.move(Step::North);
-        }, std::runtime_error);
+        }, std::out_of_range);
 
         EXPECT_THROW({
             simple_location.move(Step::South);
-        }, std::runtime_error);
+        }, std::out_of_range);
  
         EXPECT_THROW({
             simple_location.move(Step::East);
-        }, std::runtime_error);
+        }, std::out_of_range);
 
         EXPECT_THROW({
             simple_location.move(Step::West);
-        }, std::runtime_error);
+        }, std::out_of_range);
     }
 }

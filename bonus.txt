@@ -1,4 +1,27 @@
-BONUS
+BONUS Ex2
+
+There are several updated to the already existing features:
+
+- Visual simulation - complies with the new input/output files format.
+
+- Automatic testing - infra and all tests were significantly refactored.
+  In addtition, the following testes were created:
+
+  - Algorithm module:
+    - TooLowBatteryToClean
+    - TooLowMaxStepsToClean
+    - StopChargingToClean
+  - Simulator module:
+    - RobotFilledLine
+    - RobotFilledCol
+    - RobotDeterministic
+    - RobotAPICallingOrder
+    - RobotIsDead
+    - RobotIsWorking
+
+---------------------------------------------------------------------------------------------
+
+BONUS Ex1
 
 This file contains brief information about:
 
