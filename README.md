@@ -29,7 +29,6 @@ The `Simulator` class is the main class of the project. It creates a `House` and
 The `House` and `Battery` together implement the `DirtSensor`, `WallsSensor`, and `BatteryMeter` interfaces, which allow getting the state of the simulation without mutating it. <br>
 The `Algorithm` implements the navgiation algorithm, and uses information from all sensors to make its decisions. <br>
 Our chosen algorithm relies heavely on finding the shortest route from the current destionation to a designated target - unvisited or dirty positions. <br>
-More information can be found in the HLD document.
 
 ## Inputs and Outputs
 ### Input File
@@ -43,7 +42,7 @@ Cols = <value>
 <map>
 ```
 
-The `name` is a string, while all `value`s are numbers.
+The `name` is a string containing internal name of input file, while all `value`s are numbers.
 
 The map is a jagged array of characters, following the legend below:
 ```
