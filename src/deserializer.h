@@ -61,6 +61,7 @@ class Deserializer
      *
      * @param parameter The parameter to check.
      * @param parameter_name The name of the parameter.
+     * @throws std::runtime_error If given parameter is not set.
      */
     static void assertParameterSet(std::optional<std::size_t>& parameter, const std::string& parameter_name)
     {
@@ -72,12 +73,13 @@ class Deserializer
     }
 
     /**
-     * @brief Converts a string value to an unsigned integer.
+     * @brief Converts a string value to an unsigned number (std::size_t).
      *
      * If a non-integer / negative string is given, returns a default value (of '0'), instead.
      *
      * @param value The string value to convert.
-     * @return The converted unsigned integer value.
+     * @throws std::runtime_error if value contains a non-integer or a negative number.
+     * @return The converted std::size_t value.
      */
     static std::size_t valueToUnsignedNumber(const std::string& value);
 
@@ -86,8 +88,8 @@ class Deserializer
      *
      * In case a required parameter is missing, a default value of '0' will be used instead.
      *
-     * @param parameters The array to store the deserialized parameters.
      * @param input_stream The input stream to read the parameters from.
+     * @param parameter_name The key of the parameter to be deserialized.
      * @return The value of the deserialized parameter.
      */
     static std::size_t deserializeParameter(std::istream& input_stream, const std::string& parameter_name);
@@ -111,7 +113,7 @@ public:
      * @brief Deserializes the maximum number of steps from an input stream.
      *
      * @param input_stream The input stream to read the maximum number of steps from.
-     * @return The maximum number of steps.
+     * @return The deserialized maximum number of steps.
      */
     static std::size_t deserializeMaxSteps(std::istream& input_stream);
 
@@ -119,17 +121,16 @@ public:
      * @brief Deserializes the maximum battery capacity from an input stream.
      *
      * @param input_stream The input stream to read the maximum battery capacity from.
-     * @return The maximum battery capacity.
+     * @return unique_ptr to the deserialized Battery object.
      */
     static std::unique_ptr<Battery> deserializeBattery(std::istream& input_stream);
 
     /**
      * @brief Deserializes the house layout from an input stream.
      *
-     * @param wall_map The 2D vector to store the wall layout.
-     * @param dirt_map The 2D vector to store the dirt level layout.
-     * @param docking_station_position The position of the docking station.
      * @param input_stream The input stream to read the house layout from.
+     * @throws std::runtime_error If there's more / less than one docking station given.
+     * @return unique_ptr to the deserialized House object.
      */
     static std::unique_ptr<House> deserializeHouse(std::istream& input_stream);
 };

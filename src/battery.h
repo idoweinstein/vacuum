@@ -15,7 +15,7 @@
 class Battery : public BatteryMeter
 {
     static constexpr const float kEmptyBatteryLevel = 0.0f;  // Empty battery level (in steps).
-    static constexpr const float kStepsToFullAmount = 20.0f; // Charging rate (in steps).
+    static constexpr const float kStepsToFullAmount = 20.0f; // Charging duration (in steps).
     static constexpr const float kDischargeUnit = 1.0f;      // Discharging rate (in steps).
 
     const float full_amount;                                 // Full capacity of the battery (in steps).
@@ -29,6 +29,11 @@ public:
      */
     explicit Battery(std::size_t full_amount) : full_amount(static_cast<float>(full_amount)), current_amount(full_amount) {}
 
+    /**
+     * @brief Determines whether the battry is empty or not.
+     * 
+     * @return True if battery is empty, false otherwise.
+     */
     bool isBatteryExhausted() const
     {
         return kEmptyBatteryLevel == std::floor(current_amount);
@@ -49,7 +54,7 @@ public:
      * @brief Discharges the battery by decreasing the current amount.
      *
      * If the resulting current amount is less than 0, a std::range_error exception is thrown.
-     * Otherwise, the current amount is decreased by 1.
+     * Otherwise, the current amount is decreased by a discharge unit (currently 1).
      *
      * @throws std::range_error If the battery is empty.
      */

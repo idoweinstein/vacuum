@@ -68,6 +68,8 @@ class Algorithm : public AbstractAlgorithm
      * @brief Checks if the algorithm is fully initialized.
      *
      * This method checks if the algorithm is fully initialized by checking if all the required components are initialized.
+     * 
+     * @throws std::runtime_error If algorithm is not fully initialized.
     */
     void assertAllInitialied() const 
     { 
@@ -81,7 +83,7 @@ class Algorithm : public AbstractAlgorithm
     }
 
     /**
-     * @brief Performs a breadth-first search (BFS) to find a path that satisfies the given criteria.
+     * @brief Performs a breadth-first search (BFS) to find a path that satisfies the given found_criteria.
      *
      * This method performs a BFS starting from the specified start_index in the path_tree.
      * It stops the search when the found_criteria function returns true for a position.
@@ -127,23 +129,25 @@ class Algorithm : public AbstractAlgorithm
     }
 
     /**
-     * @brief Finds a path that satisfies the given criteria.
+     * @brief Finds a path that satisfies the given criteria, relatively to a given start_position.
      *
      * This method finds a path that satisfies the given criteria by performing a BFS.
      *
+     * @param start_position The position to start the path search from.
      * @param path The path to store the result in.
      * @param found_criteria The criteria function to determine if a position is found.
      * @return True if a path is found, false otherwise.
     */
     bool getPathByFoundCriteria(const Position& start_position,
-                                        std::deque<Direction>& path,
-                                        std::function<bool(const Position&)> const & found_criteria);
+                                std::deque<Direction>& path,
+                                std::function<bool(const Position&)> const & found_criteria);
 
     /**
-     * @brief Finds a path to the nearest position in the todo_positions set.
+     * @brief Finds a path to the nearest position in the todo_positions set, relatively to a given start_position.
      *
      * This method finds a path to the nearest position in the todo_positions set by performing a BFS.
      *
+     * @param start_position The position to start the path search from.
      * @param path The path to store the result in.
      * @return True if a path is found, false otherwise.
     */
@@ -171,19 +175,14 @@ class Algorithm : public AbstractAlgorithm
     void sampleDirtSensor();
 
     /**
-     * Samples the battery meter to get the amount of battery left.
+     * @brief Samples the battery meter to get the amount of battery left.
      */
     void sampleBatteryMeter() { battery.amount_left = battery_meter.value()->getBatteryState(); }
 
     /**
      * @brief Gets the information from the sensors.
      *
-     * This method gets the information from the sensors and updates the provided variables.
-     *
-     * @param dirt_level The variable to store the dirt level.
-     * @param remaining_steps_until_charge The variable to store the remaining steps until charge.
-     * @param remaining_steps_total The variable to store the remaining total steps.
-     * @param battery_is_full The variable to store the battery full status.
+     * This method gets the information from the sensors and updates the relevant data members.
      */
     void sampleSensors()
     {
@@ -194,11 +193,15 @@ class Algorithm : public AbstractAlgorithm
 
     /**
      * @brief Checks if the current position is the docking station position.
+     * 
+     * @return True if currently at Docking Station, false otherwise.
      */
     bool isAtDockingStation() const { return kDockingStationPosition == current_tile.position; }
 
     /**
      * @brief Checks if the battery is full.
+     * 
+     * @return True if battry is full, false otherwise.
      */
     bool isBatteryFull() const { return battery.amount_left == battery.full_capacity; }
 
@@ -206,11 +209,15 @@ class Algorithm : public AbstractAlgorithm
      * @brief Gets the maximum reachable distance.
      * 
      * This method calculates the maximum reachable distance by taking the minimum of the max battery capacity and the total steps left.
+     * 
+     * @return Calculated maximal reachable distance.
      */
     std::size_t getMaxReachableDistance() const;
 
     /**
      * @brief Checks if all reachable positions are cleaned.
+     * 
+     * @return True if all reachable positions were cleaned, false otherwise.
      */
     bool isCleanedAllReachable();
 
@@ -230,16 +237,20 @@ class Algorithm : public AbstractAlgorithm
 
     /**
      * @brief Checks if there are enough steps left to clean any position.
+     * 
+     * @return True if there are enough steps left to clean, false otherwise.
      */
     bool enoughStepsLeftToClean();
 
     /**
      * @brief Checks if the algorithm should keep charging.
+     * 
+     * @return True if algorithm should keep charging, false otherwise.
      */
     bool shouldKeepCharging() { return isAtDockingStation() && !isBatteryFull() && enoughStepsLeftToClean(); }
 
     /**
-     * @brief Checks if the algorithm to stay in the current position and must return to station.
+     * @brief Checks if the algorithm must return to station, and cannot stay or get further.
      * 
      * @param station_distance The distance to the docking station.
      * @return True if the algorithm should return to the docking station, false otherwise.
@@ -252,6 +263,8 @@ class Algorithm : public AbstractAlgorithm
 
     /**
      * @brief Checks if the current position is dirty.
+     * 
+     * @return True if current position is dirty, false otherwise.
      */
     bool isCurrentPositionDirty() const { return current_tile.dirt_level > 0; }
 
@@ -271,15 +284,17 @@ class Algorithm : public AbstractAlgorithm
      * @brief Decides the next step based on the sensor information.
      *
      * This method decides the next step based on the dirt level, battery level, and battery full status.
-     *
-     * @param dirt_level The dirt level.
-     * @param remaining_steps_until_charge The remaining steps until charge.
-     * @param remaining_steps_total The remaining total steps.
-     * @param battery_is_full The battery full status.
-     * @return The next step to take.
+     * 
+     * @throws std::runtime_error If algorithm couldn't find a path back to the station.
+     * @return The next step which should be taken.
      */
     Step decideNextStep();
 
+    /**
+     * @brief Decreases the algorithm's internal `total_steps_left` counter, while avoiding out of range values.
+     * 
+     * @throws std::runtime_error If `total_steps_left` becomes less than 0.
+     */
     void safeDecreaseStepsLeft()
     {
         if (static_cast<int>(total_steps_left) - 1 < 0)

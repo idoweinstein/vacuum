@@ -63,14 +63,16 @@ public:
      * @brief Sets the algorithm to be used by the simulator.
      *
      * @param algorithm The algorithm to be used.
+     * @throws std::logic_error If this function was not called at the beginning of the initialization.
      */
     void setAlgorithm(AbstractAlgorithm& algorithm);
 
     /**
-     * @brief Initializes the simulator with the specified house and battery.
+     * @brief Reads the house representation of a given input file.
      *
-     * @param house The house to be cleaned.
-     * @param battery The battery to be used.
+     * @param house_file_path The file path which the house will be read from.
+     * @throws std::logic_error If the simulator is already fully initialized.
+     * @throws std::runtime_error If couldn't open given file.
      */
     void readHouseFile(const std::string& house_file_path);
 
@@ -81,6 +83,8 @@ public:
      * 1. cleaning mission is complete.
      * 2. the maximum number of steps is reached.
      * 3. vacuum cleaner mapped and cleaned all accessible positions.
+     * 
+     * @throws std::logic_error If the simulator is not properly initialized yet.
      */
     void run();
 };
