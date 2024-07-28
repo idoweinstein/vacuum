@@ -24,13 +24,18 @@ class House : public WallsSensor, public DirtSensor
     Position docking_station_position;                                // The position of the docking station.
     std::size_t total_dirt_count;                                     // The total count of dirt in the environment.
 
+    /**
+     * @brief Computes the total dirt count in the house.
+     * 
+     * Stores the computed total dirt in the `total_dirt_count` data member.
+     */
     void computeTotalDirtCount();
 
     /**
      * @brief Checks if a given position is out of bounds of a given map.
      *
-     * @param position The position to check.
      * @param map The map its bounds are to be used.
+     * @param position The position to check.
      * @return true if the position is out of bounds, false otherwise.
      */
     template <typename T> static bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position);
@@ -59,22 +64,24 @@ public:
     void cleanCurrentPosition();
 
     /**
-     * @brief Moves the vacuum cleaner one step in the specified direction.
+     * @brief Moves the vacuum cleaner one step in the specified direction (in the house representation).
      *
      * @param step The step to move (a Direction or Stay / Finish).
+     * @throws std::out_of_range If tried to move into a wall.
      */
     void move(Step);
 
     /**
-     * @brief Checks if the vacuum cleaner is in the docking station.
+     * @brief Checks if the vacuum cleaner is at the docking station.
      *
-     * @return true if the vacuum cleaner is in the docking station, false otherwise.
+     * @return true if the vacuum cleaner is at the docking station, false otherwise.
      */
     bool isAtDockingStation() const { return current_position == docking_station_position; }
 
     /**
      * @brief Gets the dirt level at the current position.
      *
+     * @throws std::out_of_range If tried to sample dirt level out of the house representation range.
      * @return The dirt level at the current position.
      */
     int dirtLevel() const override;

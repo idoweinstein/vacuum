@@ -7,6 +7,9 @@
 #include "status.h"
 #include "enums.h"
 
+/**
+ * @brief Overload of enum class operators for logging purposes.
+ */
 namespace std
 {
     std::ostream& operator<<(std::ostream& ostream, const Step& step);

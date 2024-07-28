@@ -50,6 +50,10 @@ public:
         return robot_logger_instance;
     }
 
+    /**
+     * @brief Get the file name from a given file path.
+     * @return The extracted file name.
+     */
     std::string getFileName(const std::string& file_path) const
     {
         std::string file_name = std::filesystem::path(file_path).filename().string();
@@ -70,7 +74,6 @@ public:
     /**
      * @brief Log a robot step.
      * @param step_moved The step the robot moved.
-     * @param current_position The current position of the robot.
      */
     void logRobotStep(Step step_moved)
     {
@@ -81,8 +84,7 @@ public:
      * @brief Log cleaning statistics.
      * @param total_steps The total number of steps taken by the robot.
      * @param total_dirt The total amount of dirt left.
-     * @param is_battery_exhausted Whether the vacuum cleaner's battery is exhausted.
-     * @param is_mission_complete Whether the cleaning mission is complete.
+     * @param status The final cleaning mission status.
      */
     void logCleaningStatistics(std::size_t total_steps, std::size_t total_dirt, Status status)
     {

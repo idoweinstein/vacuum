@@ -37,6 +37,11 @@ class Simulator
     std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
     AbstractAlgorithm* algorithm = nullptr;             // Simulator's algorithm to suggest its next steps.
 
+    /**
+     * @brief Updates the status of the mission.
+     *
+     * @param next_step The next step to be taken.
+     */
     void updateMissionStatus(Step next_step);
 
     /**
@@ -54,8 +59,21 @@ public:
     Simulator(const Simulator& simulator) = delete;
     Simulator& operator=(const Simulator& simulator) = delete;
 
+    /**
+     * @brief Sets the algorithm to be used by the simulator.
+     *
+     * @param algorithm The algorithm to be used.
+     * @throws std::logic_error If this function was not called at the beginning of the initialization.
+     */
     void setAlgorithm(AbstractAlgorithm& algorithm);
 
+    /**
+     * @brief Reads the house representation of a given input file.
+     *
+     * @param house_file_path The file path which the house will be read from.
+     * @throws std::logic_error If the simulator is already fully initialized.
+     * @throws std::runtime_error If couldn't open given file.
+     */
     void readHouseFile(const std::string& house_file_path);
 
     /**
@@ -65,6 +83,8 @@ public:
      * 1. cleaning mission is complete.
      * 2. the maximum number of steps is reached.
      * 3. vacuum cleaner mapped and cleaned all accessible positions.
+     * 
+     * @throws std::logic_error If the simulator is not properly initialized yet.
      */
     void run();
 };

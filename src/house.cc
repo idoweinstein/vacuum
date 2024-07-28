@@ -95,7 +95,7 @@ void House::move(Step step)
 
     if (isWall(direction))
     {
-        throw std::runtime_error("Cannot move to wall");
+        throw std::out_of_range("Cannot move into a wall!");
     }
 
     current_position = Position::computePosition(current_position, direction);
