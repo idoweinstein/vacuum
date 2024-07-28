@@ -1,5 +1,5 @@
-#ifndef VACUUM_LOGGER_H_
-#define VACUUM_LOGGER_H_
+#ifndef LOGGER_H_
+#define LOGGER_H_
 
 #include <map>
 #include <string>
@@ -13,9 +13,9 @@
  */
 enum class LogLevel
 {
-    INFO = 0,
-    WARNING,
-    ERROR
+    Info = 0,
+    Warning,
+    Error
 };
 
 /**
@@ -23,8 +23,8 @@ enum class LogLevel
  */
 enum class LogOutput
 {
-    FILE,
-    CONSOLE
+    File,
+    Console
 };
 
 /**
@@ -36,16 +36,16 @@ enum class LogOutput
 class Logger
 {
     inline static const std::map<LogLevel, const std::string> log_level_prefix = {
-        {LogLevel::INFO, ""},              // Prefix for information level logs
-        {LogLevel::WARNING, "[WARNING] "}, // Prefix for warning level logs
-        {LogLevel::ERROR, "[ERROR] "}      // Prefix for error level logs
+        {LogLevel::Info, ""},              // Prefix for information level logs
+        {LogLevel::Warning, "[WARNING] "}, // Prefix for warning level logs
+        {LogLevel::Error, "[ERROR] "}      // Prefix for error level logs
     };
 
     std::vector<std::ofstream> log_files;  // Vector of log file streams
 
 protected:
     Logger() {}
-    ~Logger();
+    virtual ~Logger();
 
 public:
     /**
@@ -79,7 +79,7 @@ public:
      * @param log_file_name The name of the log file to add.
      * @throws std::runtime_error if the log file cannot be opened.
      */
-    void addLogFile(const std::string& log_file_name)
+    virtual void addLogFile(const std::string& log_file_name)
     {
         std::ofstream& new_file = log_files.emplace_back();
         new_file.open(log_file_name);
@@ -95,7 +95,7 @@ public:
      * 
      * This method deletes all previously added log files, using `addLogFile()` calls.
      */
-    void deleteAllLogFiles()
+    virtual void deleteAllLogFiles()
     {
         for (int i = log_files.size() - 1; i >= 0; i--)
         {
@@ -116,7 +116,7 @@ public:
      * @param output The log output (file or console).
      * @param message The message to log.
      */
-    void logMessage(LogLevel log_level, LogOutput output, const std::string& message);
+    virtual void logMessage(LogLevel log_level, LogOutput output, const std::string& message);
 };
 
-#endif /* VACUUM_LOGGER_H_ */
+#endif /* LOGGER_H_ */

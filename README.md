@@ -25,26 +25,29 @@
 ## Solution Approach
 The house is a 4-connected grid, where each node contains either a wall, an empty space (with a predefined amount of dirt) or a docking station. <br>
 In the solution there are several components, each represented by a designated class. <br>
-The `Robot` class is the main class of the project. It creates a `LocationManager` and a `BatteryManager` which together represent the true state of the simulation at any given time. <br>
-The `LocationManager` and `BatteryManager` together implement the `DirtSensor`, `WallSensor`, and `BatterySensor` interfaces, which allow getting the state of the simulation without mutating it.
-The `NavigationSystem` implements the navgiation algorithm, and uses information from all sensors to make its decisions.
-More information can be found in the HLD document.
+The `Simulator` class is the main class of the project. It creates a `House` and a `Battery` which together represent the true state of the simulation at any given time. <br>
+The `House` and `Battery` together implement the `DirtSensor`, `WallsSensor`, and `BatteryMeter` interfaces, which allow getting the state of the simulation without mutating it. <br>
+The `Algorithm` implements the navgiation algorithm, and uses information from all sensors to make its decisions. <br>
+Our chosen algorithm relies heavely on finding the shortest route from the current destionation to a designated target - unvisited or dirty positions. <br>
 
 ## Inputs and Outputs
 ### Input File
 The input format is as follows:
 ```
-max_robot_steps <value>
-max_battery_steps <value>
-house
+<name>
+MaxSteps = <value>
+MaxBattery = <value>
+Rows = <value>
+Cols = <value>
 <map>
 ```
 
-The `max_robot_steps` and `max_battery_steps` values must be non-negative integers.
+The `name` is a string containing internal name of input file, while all `value`s are numbers.
+
 The map is a jagged array of characters, following the legend below:
 ```
-@	docking station
-X	wall (non-navigable position)
+D	docking station
+W	wall (non-navigable position)
 [space]	empty (navigable) position with dirt level of 0
 0	empty position with dirt level of 0, same as [space]
 ⋮
@@ -54,17 +57,12 @@ X	wall (non-navigable position)
 ### Output File
 The output file format is:
 ```
-[Step] Robot took step to <direction> - New Position <y, x>
- ⋮
-[Step] Robot took step to <direction> - New Position <y, x>
-### Program Terminated ###
-Total Steps Taken: <value>
-Total Dirt Left: <value>
-Is Battery Exhausted: <value>
-Mission Succeeded: <value>
+NumSteps = <value>
+DirtLeft = <value>
+Status = <value>
+Steps:
+<values>
 ```
 
-where the following line might also appear:
-```
-[FINISH] Robot finished cleaning all accessible places!
-```
+Where `NumSteps` and `DirtLeft` have numerical value, and `Status` can be either `WORKING`, `FINISHED` or `DEAD`. <br>
+The `Steps` attribute is a list of steps where each steps is either *N*orth, *E*ast, *S*outh, *W*est, *s*tay, or *F*inished, denoted as N, E, S, W, s, or F respectively.

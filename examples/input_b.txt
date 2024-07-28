@@ -1,8 +1,10 @@
-max_robot_steps 500
-max_battery_steps 80
-house
-XXXX2XXX1X
-000123@10X
-X9X000001X
-X500XX96XX
-XXXX2XXXXX
+Input B
+MaxSteps = 500
+MaxBattery = 80
+Rows = 5
+Cols = 10
+WWWW2WWW1W
+000123D10W
+W9W000001W
+W500WW96WW
+WWWW2WWWWW

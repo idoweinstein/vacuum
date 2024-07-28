@@ -1,7 +1,9 @@
-max_robot_steps 500
-max_battery_steps
-house
-X  12361 11XX
-X85942  1213XXX
-X5 132963  4 3X
-XX@XXXXXXXXXXXX
+Missing Value
+MaxSteps = 500
+MaxBattery=
+Rows =4
+Cols
+W  12361 11WW
+W85942  1213WWW
+W5 132963  4 3W
+WWDWWWWWWWWWWWW
