@@ -5,12 +5,13 @@
 #include <string>
 #include <memory>
 
-#include "abstract_algorithm.h"
-#include "position.h"
+#include "common/abstract_algorithm.h"
+#include "common/enums.h"
+#include "common/position.h"
+
 #include "battery.h"
 #include "status.h"
 #include "house.h"
-#include "enums.h"
 
 /**
  * @brief The Simulator class represents a vacuum cleaning robot.

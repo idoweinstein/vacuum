@@ -1,5 +1,7 @@
 #include "algorithm.h"
 
+#include "algorithm/AlgorithmRegistration.h"
+
 #include <map>
 #include <cmath>
 #include <queue>
@@ -297,3 +299,5 @@ Step Algorithm::nextStep()
 
     return step;
 }
+
+REGISTER_ALGORITHM(Algorithm);

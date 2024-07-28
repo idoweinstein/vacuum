@@ -9,13 +9,14 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include "abstract_algorithm.h"
-#include "battery_meter.h"
-#include "dirt_sensor.h"
-#include "wall_sensor.h"
-#include "path_tree.h"
-#include "position.h"
-#include "enums.h"
+#include "common/abstract_algorithm.h"
+#include "common/battery_meter.h"
+#include "common/dirt_sensor.h"
+#include "common/wall_sensor.h"
+#include "common/position.h"
+#include "common/enums.h"
+
+#include "algorithm/path_tree.h"
 
 /**
  * @class Algorithm 
