@@ -48,6 +48,7 @@ add_executable(
     path_tree_test.cc
 )
 target_link_libraries(path_tree_test
+    algorithm
     vacuum_cleaner
     GTest::gtest_main
 )

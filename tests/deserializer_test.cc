@@ -4,7 +4,7 @@
 #include <sstream>
 #include <streambuf>
 
-#include "simulator.h"
+#include "simulator/simulator.h"
 
 namespace
 {
