@@ -86,6 +86,7 @@ add_executable(
     algorithm_test.cc
 )
 target_link_libraries(algorithm_test
+    algorithm
     vacuum_cleaner
     GTest::gtest_main
     GTest::gmock_main
@@ -96,6 +97,7 @@ add_executable(
     simulator_test.cc
 )
 target_link_libraries(simulator_test
+    algorithm
     vacuum_cleaner
     GTest::gtest_main
     GTest::gmock_main
