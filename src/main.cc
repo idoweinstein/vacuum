@@ -1,3 +1,5 @@
+#include "main.h"
+
 #include <string>
 #include <cstdlib>
 #include <exception>
@@ -16,7 +18,7 @@ namespace Constants
     constexpr int kHouseFileArgument = 1;
 }
 
-void openAlgorithms(const std::string &path, std::vector<void*> &algoHandles)
+static void openAlgorithms(const std::string &path, std::vector<void*> &algoHandles)
 {
     // Open the directory
     DIR* dir = opendir(path.c_str());
@@ -50,7 +52,7 @@ void openAlgorithms(const std::string &path, std::vector<void*> &algoHandles)
     closedir(dir);
 }
 
-void closeAlgorithms(std::vector<void*> &algoHandles)
+static void closeAlgorithms(std::vector<void*> &algoHandles)
 {
     for (void* handle : algoHandles)
     {
@@ -58,7 +60,7 @@ void closeAlgorithms(std::vector<void*> &algoHandles)
     }
 }
 
-void getHouseFilenames(const std::string &path, std::vector<std::string> &houseFilenames)
+static void getHouseFilenames(const std::string &path, std::vector<std::string> &houseFilenames)
 {
     // Open the directory
     DIR* dir = opendir(path.c_str());
@@ -82,13 +84,13 @@ void getHouseFilenames(const std::string &path, std::vector<std::string> &houseF
     closedir(dir);
 }
 
-void runAll(const std::string& algo_path, const std::string& house_path)
+void Main::runAll(const Main::arguments& args)
 {
     std::vector<void*> algoHandles;
     std::vector<std::string> houseFilenames;
 
-    openAlgorithms(algo_path, algoHandles);
-    getHouseFilenames(house_path, houseFilenames);
+    openAlgorithms(args.algo_path, algoHandles);
+    getHouseFilenames(args.house_path, houseFilenames);
 
     for(const auto& algo: AlgorithmRegistrar::getAlgorithmRegistrar()) {
         for (const auto& houseFilename: houseFilenames) {
@@ -114,15 +116,21 @@ void runAll(const std::string& algo_path, const std::string& house_path)
 int main(int argc, char* argv[])
 {
     RobotLogger& logger = RobotLogger::getInstance();
+    Main::arguments args = {
+        .house_path = ".",     // Default house path - current working directory
+        .algo_path = ".",      // Default algo path - current working directory
+        .num_threads = 10,     // Default number of threads
+        .summary_only = false  // Default summary option - show all logs
+    };
 
     if (Constants::kNumberOfArguments == argc)
     {
-        const std::string house_path(argv[Constants::kHouseFileArgument]);
-        const std::string algo_path(argv[Constants::kAlgoPathArgument]);
+        args.house_path = argv[Constants::kHouseFileArgument];
+        args.algo_path = argv[Constants::kAlgoPathArgument];
 
         try
         {
-            runAll(algo_path, house_path);
+            runAll(args);
         }
         catch(const std::exception& exception)
         {
