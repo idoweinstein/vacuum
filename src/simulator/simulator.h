@@ -38,6 +38,12 @@ class Simulator
     std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
     AbstractAlgorithm* algorithm = nullptr;             // Simulator's algorithm to suggest its next steps.
 
+    /* Scoring */
+    static const std::size_t kDeadPenalty = 2000;        // The penalty for a dead robot.
+    static const std::size_t kLying = 3000;              // The penalty for a lying algorithm.
+    static const std::size_t kNotStation = 1000;         // The penalty for finishing not in station.
+    static const std::size_t kDirtFactor = 300;          // The factor for each dirt level in the score.
+
     /**
      * @brief Updates the status of the mission.
      *
@@ -49,6 +55,17 @@ class Simulator
      * @brief Moves the simulator to the next position.
      */
     void move(Step next_step);
+
+    /**
+     * @brief Calculates the score of the cleaning mission.
+     * 
+     * @param last_step The last step taken by the robot.
+     * @param dirt_count The total dirt count in the house.
+     * @param steps_taken The total steps taken by the robot.
+     * @param is_at_docking_station Whether the robot is at the docking station.
+     * @return The score of the cleaning mission.
+     */
+    std::size_t calculateScore(Step last_step, std::size_t dirt_count, std::size_t steps_taken, bool is_at_docking_station) const;
 
 public:
     Simulator() = default;

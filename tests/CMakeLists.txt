@@ -35,6 +35,8 @@ set(INPUT_FILES
     inputs/input_filledcol.txt
     inputs/input_mockalgo_dead.txt
     inputs/input_mockalgo_working.txt
+    inputs/input_immediatefinish.txt
+    inputs/input_stepstaken.txt
 )
 
 file(

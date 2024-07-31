@@ -57,12 +57,13 @@ W	wall (non-navigable position)
 ### Output File
 The output file format is:
 ```
-NumSteps = <value>
-DirtLeft = <value>
-Status = <value>
+NumSteps = <NUMBER>
+DirtLeft = <NUMBER>
+Status = <WORKING/FINISHED/DEAD>
+InDock = <TRUE/FALSE>
+Score = <NUMBER>
 Steps:
 <values>
 ```
 
-Where `NumSteps` and `DirtLeft` have numerical value, and `Status` can be either `WORKING`, `FINISHED` or `DEAD`. <br>
 The `Steps` attribute is a list of steps where each steps is either *N*orth, *E*ast, *S*outh, *W*est, *s*tay, or *F*inished, denoted as N, E, S, W, s, or F respectively.

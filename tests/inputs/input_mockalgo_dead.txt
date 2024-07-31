@@ -1,4 +1,4 @@
-Mock Algorithm - Working Robot
+Mock Algorithm - Dead Robot
 MaxSteps= 72
 MaxBattery =1
 Rows =1
