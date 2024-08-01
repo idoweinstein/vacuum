@@ -112,7 +112,7 @@ void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
 std::size_t Simulator::calculateScore(Step last_step, std::size_t dirt_count, std::size_t steps_taken, bool is_at_docking_station) const
 {
     std::size_t steps = max_simulator_steps;
-    if (mission_status == Status::Finished && is_at_docking_station) {
+    if (mission_status != Status::Dead && (is_at_docking_station || mission_status == Status::Finished)) {
         steps = steps_taken;
     }
 
@@ -120,9 +120,9 @@ std::size_t Simulator::calculateScore(Step last_step, std::size_t dirt_count, st
     if (mission_status == Status::Dead) {
         penalty = kDeadPenalty;
     } else if (last_step == Step::Finish && !is_at_docking_station) {
-        penalty = kLying;
+        penalty = kLyingPenalty;
     } else if (!is_at_docking_station) {
-        penalty = kNotStation;
+        penalty = kNotInDockPenalty;
     }
 
     return steps + dirt_count * kDirtFactor + penalty;
@@ -157,5 +157,5 @@ void Simulator::run()
     bool is_at_docking_station = house->isAtDockingStation();
     std::size_t score = calculateScore(next_step, dirt_count, total_steps_taken, is_at_docking_station);
 
-    logger.logCleaningStatistics(total_steps_taken, house->getTotalDirtCount(), mission_status, is_at_docking_station, score);
+    logger.logCleaningStatistics(total_steps_taken, dirt_count, mission_status, is_at_docking_station, score);
 }
