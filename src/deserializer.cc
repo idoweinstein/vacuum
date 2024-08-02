@@ -113,18 +113,14 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
     std::size_t house_cols_num = deserializeParameter(input_stream, kHouseColsNumParameter);
 
     // Initialize Dirt & Wall maps with their default values
-    auto wall_map = std::make_unique<std::vector<std::vector<bool>>>(
-        std::vector<std::vector<bool>>(
-            house_rows_num,
-            std::vector<bool> (house_cols_num, kDefaultIsWall)
-        )
+    std::vector<std::vector<bool>> wall_map = std::vector<std::vector<bool>>(
+        house_rows_num,
+        std::vector<bool> (house_cols_num, kDefaultIsWall)
     );
 
-    auto dirt_map = std::make_unique<std::vector<std::vector<unsigned int>>>(
-        std::vector<std::vector<unsigned int>>(
-            house_rows_num,
-            std::vector<unsigned int> (house_cols_num, kDefaultDirtLevel)
-        )
+    std::vector<std::vector<unsigned int>> dirt_map = std::vector<std::vector<unsigned int>>(
+        house_rows_num,
+        std::vector<unsigned int> (house_cols_num, kDefaultDirtLevel)
     );
 
     std::string house_block_row;
@@ -158,7 +154,7 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
                 case BlockType::DirtLevel7:
                 case BlockType::DirtLevel8:
                 case BlockType::DirtLevel9:
-                    (*dirt_map)[row_index][column_index] = static_cast<unsigned int>(block - '0');
+                    dirt_map[row_index][column_index] = static_cast<unsigned int>(block - '0');
                     break;
 
                 case BlockType::DockingStation:
@@ -170,7 +166,7 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
                     break;
 
                 case BlockType::Wall:
-                    (*wall_map)[row_index][column_index] = true;
+                    wall_map[row_index][column_index] = true;
                     break;
 
                 default:

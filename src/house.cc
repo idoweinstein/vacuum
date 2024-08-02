@@ -6,7 +6,7 @@
 
 void House::computeTotalDirtCount()
 {
-    for (const auto& row : *dirt_map)
+    for (const auto& row : dirt_map)
     {
         for (unsigned int dirt : row)
         {
@@ -15,8 +15,8 @@ void House::computeTotalDirtCount()
     }
 }
 
-House::House(std::unique_ptr<std::vector<std::vector<bool>>>&& wall_map,
-             std::unique_ptr<std::vector<std::vector<unsigned int>>>&& dirt_map,
+House::House(std::vector<std::vector<bool>>&& wall_map,
+             std::vector<std::vector<unsigned int>>&& dirt_map,
              const Position& docking_station_position)
             : wall_map(std::move(wall_map)),
               dirt_map(std::move(dirt_map)),
@@ -53,12 +53,12 @@ template bool House::isOutOfBounds<unsigned int>(const std::vector<std::vector<u
 
 int House::dirtLevel() const
 {
-    if (isOutOfBounds(*dirt_map, current_position))
+    if (isOutOfBounds(dirt_map, current_position))
     {
         throw std::out_of_range("Robot sampled dirt level outside of the house grid!");
     }
 
-    return (*dirt_map)[current_position.first][current_position.second];
+    return dirt_map[current_position.first][current_position.second];
 }
 
 void House::cleanCurrentPosition()
@@ -68,7 +68,7 @@ void House::cleanCurrentPosition()
         return;
     }
 
-    (*dirt_map)[current_position.first][current_position.second] -= kDirtCleaningUnit;
+    dirt_map[current_position.first][current_position.second] -= kDirtCleaningUnit;
     total_dirt_count -= kDirtCleaningUnit;
 }
 
@@ -76,13 +76,13 @@ bool House::isWall(Direction direction) const
 {
     Position suggested_position = Position::computePosition(current_position, direction);
 
-    if (isOutOfBounds(*wall_map, suggested_position))
+    if (isOutOfBounds(wall_map, suggested_position))
     {
         // Off-grid positions are considered a wall
         return true;
     }
 
-    return (*wall_map)[suggested_position.first][suggested_position.second];
+    return wall_map[suggested_position.first][suggested_position.second];
 }
 
 void House::move(Step step)
