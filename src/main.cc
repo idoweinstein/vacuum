@@ -18,7 +18,13 @@ namespace Constants
     constexpr int kNumberOfArguments = 3;
     constexpr int kAlgoPathArgument = 2;
     constexpr int kHouseFileArgument = 1;
+
     const std::string&& house_format = ".house"s;
+
+    const std::string&& default_algo_path = ".";
+    const std::string&& default_house_path = ".";
+    const std::size_t default_num_threads = 10;
+    const bool default_summary_only = false;
 }
 
 static void openAlgorithms(const std::string &path, std::vector<void*> &algo_handles)
@@ -162,35 +168,71 @@ void Main::runAll(const Main::arguments& args)
     createSummary(scores);
 }
 
+bool parseArgument(const std::string& arg, Main::arguments& args)
+{
+    if (arg.starts_with("-house_path"))\
+    {
+        args.house_path = arg.substr(arg.find("=") + 1);
+    }
+    else if (arg.starts_with("-algo_path"))
+    {
+        args.algo_path = arg.substr(arg.find("=") + 1);
+    }
+    else if (arg.starts_with("-num_threads"))
+    {
+        args.num_threads = std::stoi(arg.substr(arg.find("=") + 1));
+    }
+    else if (arg == "-summary_only")
+    {
+        args.summary_only = true;
+    }
+    else if (arg.starts_with("-h") || arg.starts_with("-help") || arg.starts_with("--help"))
+    {
+        std::cout << "Usage: myrobot [-house_path=<path>] [-algo_path=<path>] [-num_threads=<num>] [-summary_only]" << std::endl;
+        return false;
+    }
+    else
+    {
+        throw std::invalid_argument("Invalid argument: " + arg);
+    }
+
+    return true;
+}
+
+bool parseArguments(int argc, char* argv[], Main::arguments& args)
+{
+    for (int i = 1; i < argc; i++)
+    {
+        if (!parseArgument(argv[i], args))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 int main(int argc, char* argv[])
 {
     RobotLogger& logger = RobotLogger::getInstance();
     Main::arguments args = {
-        .house_path = ".",     // Default house path - current working directory
-        .algo_path = ".",      // Default algo path - current working directory
-        .num_threads = 10,     // Default number of threads
-        .summary_only = false  // Default summary option - show all logs
+        .house_path = Constants::default_house_path,
+        .algo_path = Constants::default_algo_path,
+        .num_threads = Constants::default_num_threads,
+        .summary_only = Constants::default_summary_only
     };
 
-    if (Constants::kNumberOfArguments == argc)
+    try
     {
-        args.house_path = argv[Constants::kHouseFileArgument];
-        args.algo_path = argv[Constants::kAlgoPathArgument];
-
-        try
+        bool run = parseArguments(argc, argv, args);
+        if (run)
         {
             runAll(args);
         }
-        catch(const std::exception& exception)
-        {
-            logger.logError(exception.what());
-            return EXIT_FAILURE;
-        }
     }
-
-    else
+    catch(const std::exception& exception)
     {
-        logger.logError("Invalid number of arguments!\nUsage: myrobot <house_path> <algo_path>");
+        logger.logError(exception.what());
         return EXIT_FAILURE;
     }
 
