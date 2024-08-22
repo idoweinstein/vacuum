@@ -155,7 +155,7 @@ std::size_t Simulator::run()
     bool is_at_docking_station = house->isAtDockingStation();
     std::size_t score = calculateScore(next_step, dirt_count, total_steps_taken, is_at_docking_station);
 
-    RobotLogger::getInstance().logCleaningStatistics(total_steps_taken, house->getTotalDirtCount(), mission_status, is_at_docking_station, score);
+    RobotLogger::getInstance().logCleaningStatistics(total_steps_taken, dirt_count, mission_status, is_at_docking_station, score);
 
     return score;
 }
