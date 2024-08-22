@@ -5,14 +5,14 @@
 
 namespace Main
 {
-    typedef struct {
+    struct Arguments {
         std::string house_path;
         std::string algo_path;
         std::size_t num_threads;
         bool summary_only;
-    } arguments;
+    } ;
 
-    void runAll(const arguments& args);
+    void runAll(const Arguments& args);
 }
 
 #endif // MAIN_H_

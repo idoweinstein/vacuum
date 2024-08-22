@@ -41,7 +41,7 @@ static void openAlgorithms(const std::string &path, std::vector<void*> &algo_han
     {
         std::string filename = entry->d_name;
 
-        // Skip directories and hidden files
+        // Skip non-regular and no `.so` suffix files
         if (entry->d_type != DT_REG || filename.length() < 3 || filename.substr(filename.length() - 3) != ".so")
             continue;
 
@@ -83,7 +83,7 @@ static void gethouse_filenames(const std::string &path, std::vector<std::string>
     {
         std::string filename = entry->d_name;
 
-        // Skip directories and hidden files
+        // Skip non-regular and no `.house` suffix files
         if (entry->d_type != DT_REG 
                 || filename.length() < Constants::house_format.size() 
                 || filename.substr(filename.length() - Constants::house_format.size()) != Constants::house_format)
@@ -136,7 +136,7 @@ static void createSummary(const std::map<std::string, std::map<std::string, std:
     summary_file.close();
 }
 
-void Main::runAll(const Main::arguments& args)
+void Main::runAll(const Main::Arguments& args)
 {
     std::vector<void*> algo_handles;
     std::vector<std::string> house_filenames;
@@ -168,9 +168,20 @@ void Main::runAll(const Main::arguments& args)
     createSummary(scores);
 }
 
-bool parseArgument(const std::string& arg, Main::arguments& args)
+void printUsage()
 {
-    if (arg.starts_with("-house_path"))\
+    std::cout << "Usage: myrobot [-house_path=<path>] [-algo_path=<path>] [-num_threads=<num>] [-summary_only]" << std::endl;
+}
+
+bool parseArgument(const std::string& arg, Main::Arguments& args)
+{
+    if (std::string::npos == arg.find("="))
+    {
+        printUsage();
+        throw std::invalid_argument("Invalid argument: " + arg);
+    }
+
+    if (arg.starts_with("-house_path"))
     {
         args.house_path = arg.substr(arg.find("=") + 1);
     }
@@ -188,18 +199,19 @@ bool parseArgument(const std::string& arg, Main::arguments& args)
     }
     else if (arg.starts_with("-h") || arg.starts_with("-help") || arg.starts_with("--help"))
     {
-        std::cout << "Usage: myrobot [-house_path=<path>] [-algo_path=<path>] [-num_threads=<num>] [-summary_only]" << std::endl;
+        printUsage();
         return false;
     }
     else
     {
+        printUsage();
         throw std::invalid_argument("Invalid argument: " + arg);
     }
 
     return true;
 }
 
-bool parseArguments(int argc, char* argv[], Main::arguments& args)
+bool parseAllArguments(int argc, char* argv[], Main::Arguments& args)
 {
     for (int i = 1; i < argc; i++)
     {
@@ -215,7 +227,7 @@ bool parseArguments(int argc, char* argv[], Main::arguments& args)
 int main(int argc, char* argv[])
 {
     RobotLogger& logger = RobotLogger::getInstance();
-    Main::arguments args = {
+    Main::Arguments args = {
         .house_path = Constants::default_house_path,
         .algo_path = Constants::default_algo_path,
         .num_threads = Constants::default_num_threads,
@@ -224,7 +236,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        bool run = parseArguments(argc, argv, args);
+        bool run = parseAllArguments(argc, argv, args);
         if (run)
         {
             runAll(args);
