@@ -9,8 +9,9 @@
 #include <optional>
 #include <stdexcept>
 
+#include "common/position.h"
+
 #include "simulator.h"
-#include "position.h"
 
 /**
  * @brief The Deserializer class is responsible for deserializing simulator data from a file.

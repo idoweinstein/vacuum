@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <stdexcept>
 
-#include "battery.h"
+#include "simulator/battery.h"
 
 namespace
 {

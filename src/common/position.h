@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <functional>
 
-#include "enums.h"
+#include "common/enums.h"
 
 /**
  * @class Position

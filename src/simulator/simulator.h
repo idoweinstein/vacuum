@@ -5,12 +5,13 @@
 #include <string>
 #include <memory>
 
-#include "abstract_algorithm.h"
-#include "position.h"
+#include "common/abstract_algorithm.h"
+#include "common/enums.h"
+#include "common/position.h"
+
 #include "battery.h"
 #include "status.h"
 #include "house.h"
-#include "enums.h"
 
 /**
  * @brief The Simulator class represents a vacuum cleaning robot.
@@ -29,7 +30,7 @@ class Simulator
         Ready
     };
 
-    std::size_t total_steps_taken = 0;
+    std::size_t total_steps_taken = 0;                  // The total steps taken by the robot.
     SimulatorState state = SimulatorState::Initial;     // Simulator's initialization current state.
     Status mission_status = Status::Working;            // Simulator's mission status.
     unsigned int max_simulator_steps = 0;               // Maximum number of steps the simulator can perform.
@@ -88,10 +89,11 @@ public:
      * @brief Reads the house representation of a given input file.
      *
      * @param house_file_path The file path which the house will be read from.
+     * @param is_logging The flag to enable/disable logging.
      * @throws std::logic_error If the simulator is already fully initialized.
      * @throws std::runtime_error If couldn't open given file.
      */
-    void readHouseFile(const std::string& house_file_path);
+    void readHouseFile(const std::string& house_file_path, bool is_logging = false);
 
     /**
      * @brief Runs the cleaning operation.
@@ -101,9 +103,11 @@ public:
      * 2. the maximum number of steps is reached.
      * 3. vacuum cleaner mapped and cleaned all accessible positions.
      * 
+     * @returns The score of the cleaning mission.
+     * 
      * @throws std::logic_error If the simulator is not properly initialized yet.
      */
-    void run();
+    std::size_t run();
 };
 
 #endif /* ROBOT_SIMULATOR_H_ */

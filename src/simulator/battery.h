@@ -5,7 +5,7 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "battery_meter.h"
+#include "common/battery_meter.h"
 
 /**
  * @brief The Battery class represents a robot battery.

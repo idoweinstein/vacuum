@@ -1,0 +1,1 @@
+ADD_LIBRARY(algorithm SHARED path_tree.cc a/algorithm.cc)

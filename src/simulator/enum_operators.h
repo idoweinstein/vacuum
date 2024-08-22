@@ -4,8 +4,9 @@
 #include <string>
 #include <ostream>
 
+#include "common/enums.h"
+
 #include "status.h"
-#include "enums.h"
 
 /**
  * @brief Overload of enum class operators for logging purposes.

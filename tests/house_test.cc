@@ -4,7 +4,7 @@
 #include <memory>
 #include <cstdlib>
 
-#include "house.h"
+#include "simulator/house.h"
 
 namespace
 {

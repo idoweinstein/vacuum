@@ -4,10 +4,10 @@
 #include <memory>
 #include <vector>
 
-#include "dirt_sensor.h"
-#include "wall_sensor.h"
-#include "position.h"
-#include "enums.h"
+#include "common/dirt_sensor.h"
+#include "common/wall_sensor.h"
+#include "common/position.h"
+#include "common/enums.h"
 
 /**
  * @brief The House class represents the house by means of cleaning operations and house state at robot's current location.
