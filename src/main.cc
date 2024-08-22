@@ -4,13 +4,17 @@
 #include <dlfcn.h>
 #include <exception>
 #include <map>
+#include <latch>
 #include <string>
 #include <vector>
+#include <thread>
 
 #include "common/AlgorithmRegistrar.h"
 
 #include "simulator/robot_logger.h"
 #include "simulator/simulator.h"
+
+#include "task.h"
 
 namespace Constants
 {
@@ -138,32 +142,76 @@ static void createSummary(const std::map<std::string, std::map<std::string, std:
 
 void Main::runAll(const Main::arguments& args)
 {
-    std::vector<void*> algo_handles;
+    std::vector<void*> algorithm_handles;
     std::vector<std::string> house_filenames;
     std::map<std::string, std::map<std::string, std::size_t>> scores;
 
-    openAlgorithms(args.algo_path, algo_handles);
+    openAlgorithms(args.algo_path, algorithm_handles);
     gethouse_filenames(args.house_path, house_filenames);
 
-    for(const auto& algo: AlgorithmRegistrar::getAlgorithmRegistrar()) {
-        std::map<std::string, std::size_t> house_scores;
-        for (const auto& house_filename: house_filenames) {
-            RobotLogger::getInstance().deleteAllLogFiles();
+    std::vector<Task> task_queue;
+    std::size_t num_of_tasks = algorithm_handles.size() * house_filenames.size();
+    task_queue.reserve(num_of_tasks);
+    std::latch tasks_left_counter = num_of_tasks;
 
-            Simulator simulator;
+    std::condition_variable running_threads_cv;
+    std::mutex running_threads_mutex;
 
-            simulator.readHouseFile(house_filename, !args.summary_only);
+    boost::asio::io_context event_context;
+    auto work_guard = boost::asio::make_work_guard(event_context);
 
-            auto algorithm = algo.create();
-            simulator.setAlgorithm(*algorithm);
+    std::jthread event_loop_thread([&event_context]() {
+        event_context.run();
+    });
 
-            house_scores.insert(std::make_pair(house_filename, simulator.run()));
+    std::size_t running_threads_num = 1;
+
+    for(const auto& algorithm: AlgorithmRegistrar::getAlgorithmRegistrar())
+    {
+        // std::map<std::string, std::size_t> house_scores;
+        for (const auto& house_filename: house_filenames)
+        {
+            task_queue.emplace_back(
+                std::move(algorithm.create()),
+                house_filename,
+                tasks_left_counter,
+                event_context,
+                !args.summary_only,
+                running_threads_num,
+                running_threads_mutex
+            );
+
+            // RobotLogger::getInstance().deleteAllLogFiles();
+
+            // Simulator simulator;
+
+            // simulator.readHouseFile(house_filename, !args.summary_only);
+
+            // auto algorithm = algorithm.create();
+            // simulator.setAlgorithm(*algorithm);
+
+            // house_scores.insert(std::make_pair(house_filename, simulator.run()));
         }
-        scores.insert(std::make_pair(algo.name(), house_scores));
+        // scores.insert(std::make_pair(algo.name(), house_scores));
     }
 
+    for (Task& task : task_queue)
+    {
+        std::unique_lock<std::mutex> cv_lock(running_threads_mutex);
+        running_threads_cv.wait(cv_lock, []() {running_threads_num < args.num_threads});
+
+        running_threads_num++;
+    }
+
+    tasks_left_counter.wait();
+
+    // TODO: Collect tasks scores
+
+    event_context.stop();
+    work_guard.reset();
+
     AlgorithmRegistrar::getAlgorithmRegistrar().clear();
-    closeAlgorithms(algo_handles);
+    closeAlgorithms(algorithm_handles);
 
     createSummary(scores);
 }
@@ -230,6 +278,7 @@ int main(int argc, char* argv[])
             runAll(args);
         }
     }
+
     catch(const std::exception& exception)
     {
         logger.logError(exception.what());

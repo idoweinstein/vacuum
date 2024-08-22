@@ -77,6 +77,8 @@ public:
     Simulator(const Simulator& simulator) = delete;
     Simulator& operator=(const Simulator& simulator) = delete;
 
+    unsigned int getMaxSteps() const { return max_simulator_steps; }
+
     /**
      * @brief Sets the algorithm to be used by the simulator.
      *

@@ -1,7 +1,10 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+#include <utility>
 #include <string>
+#include <mutex>
+#include <queue>
 
 namespace Main
 {
