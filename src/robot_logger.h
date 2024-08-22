@@ -32,6 +32,8 @@ class RobotLogger: public Logger
     inline static constexpr const char kDirtLeftField[] = "\nDirtLeft = ";
     inline static constexpr const char kStatusField[] = "\nStatus = ";
     inline static constexpr const char kStepsField[] = "\nSteps:\n";
+    inline static constexpr const char kInDockField[] = "\nInDock = ";
+    inline static constexpr const char kScoreField[] = "\nScore = ";
 
     inline static std::ostringstream steps_taken;
 
@@ -85,13 +87,17 @@ public:
      * @param total_steps The total number of steps taken by the robot.
      * @param total_dirt The total amount of dirt left.
      * @param status The final cleaning mission status.
+     * @param is_at_docking_station Whether the robot is at the docking station.
+     * @param score The score of the cleaning mission.
      */
-    void logCleaningStatistics(std::size_t total_steps, std::size_t total_dirt, Status status)
+    void logCleaningStatistics(std::size_t total_steps, std::size_t total_dirt, Status status, bool is_at_docking_station, std::size_t score)
     {
         std::ostringstream stringStream;
         stringStream << kStepsNumField << total_steps \
                      << kDirtLeftField << total_dirt \
                      << kStatusField << status \
+                     << kInDockField << (is_at_docking_station ? "TRUE" : "FALSE") \
+                     << kScoreField << score \
                      << kStepsField << steps_taken.str();
 
         logMessage(LogLevel::Info, LogOutput::File, stringStream.str());

@@ -92,7 +92,7 @@ class Algorithm : public AbstractAlgorithm
      * @param path_tree The path tree to search in.
      * @param start_index The index to start the BFS from.
      * @param found_criteria The criteria function to determine if a position is found.
-     * @return The index of the found position in the path_tree, or kNotFound if not found.
+     * @return The index of the found position in the path_tree.
      */
     std::optional<std::size_t> performBFS(PathTree& path_tree,
                                           std::size_t start_index,
