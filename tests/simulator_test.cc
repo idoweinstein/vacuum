@@ -10,11 +10,10 @@
 
 #include "common/enums.h"
 
+#include "common/AlgorithmRegistrar.h"
 #include "simulator/robot_logger.h"
 #include "simulator/deserializer.h"
 #include "simulator/simulator.h"
-
-#include "algorithm/a/algorithm.h" // TODO: change
 
 using namespace std::string_literals;
 
@@ -170,14 +169,13 @@ namespace
         void SetUp(const std::string& input_file, const std::string& output_file)
         {
             RobotLogger& logger = RobotLogger::getInstance();
-
             logger.initializeLogFile(input_file);
 
             Simulator simulator;
-            Algorithm algorithm;
+            auto algorithm = AlgorithmRegistrar::getAlgorithmRegistrar().begin()->create();
 
             simulator.readHouseFile(input_file);
-            simulator.setAlgorithm(algorithm);
+            simulator.setAlgorithm(*algorithm);
             simulator.run();
 
             EXPECT_TRUE(deserializer.deserializeOutputFile(output_file));
@@ -393,10 +391,10 @@ namespace
     TEST(SimulatorAPI, RobotAPICallingOrder)
     {
         Simulator simulator;
-        Algorithm algorithm;
+        auto algorithm = AlgorithmRegistrar::getAlgorithmRegistrar().begin()->create();
 
         EXPECT_THROW({
-            simulator.setAlgorithm(algorithm);
+            simulator.setAlgorithm(*algorithm);
         }, std::logic_error);
 
         EXPECT_THROW({
@@ -409,7 +407,7 @@ namespace
             simulator.run();
         }, std::logic_error);
 
-        simulator.setAlgorithm(algorithm);
+        simulator.setAlgorithm(*algorithm);
 
         EXPECT_THROW({
             simulator.readHouseFile("inputs/input_sanity.txt");
