@@ -1,4 +1,6 @@
+#include "task_queue.h"
 #include "simulator/simulator.h"
+#include "common/AlgorithmRegistrar.h"
 
 #include <optional>
 #include <pthread>
@@ -6,98 +8,112 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
-#include <mutex>
 
 using time_point = std::chrono::time_point<std::chrono::system_clock>;
+using namespace std::chrono_literals;
 
 /**
  * Credits to Amir's demonstration
  */
 class Task
 {
+    TaskQueue& task_queue;
+
+    std::string& algorithm_name;
+    std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
+    std::string& house_name;
     Simulator simulator;
 
-    std::atomic<bool> is_task_ended; // Indicates whether task was naturally finished or terminated by a timeout
-    std::latch& tasks_left_counter;
-
-    std::size_t& running_threads_num;
-    std::mutex& running_threads_mutex;
-
-    boost::asio::io_context& event_context;
     std::size_t max_duration;
     std::jthread executing_thread;
+    std::atomic<bool> is_task_ended; // Indicates whether task was naturally finished or terminated by a timeout
     std::optional<std::size_t> score;
 
-    static void simulationTimeoutHandler(boost::system::error_code& error_code,
+    static void timeoutHandler(boost::system::error_code& error_code,
                                          Task& task,
                                          time_point& start_time,
                                          pthread_t thread_handler)
     {
         // Make sure timer was not cancelled.
-        if (boost::asio::error::operation_aborted != error_code)
+        if (boost::asio::error::operation_aborted != error_code) // TODO: Make sure it's correct
         {
-            time_point current_time = std::chrono::system_clock::now();
-            time_point run_duration = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time);
-
             bool expected_value = false;
             bool is_simulation_timeout = task.is_task_ended.compare_exchange_strong(expected_value, true);
             if (is_simulation_timeout)
             {
                 pthread_cancel(thread_handler);
-                task.tasks_left_counter.count_down();
+                task.task_queue.todo_tasks_counter.count_down();
+                task_queue.active_threads_semaphore.release();
             }
         }
     }
 
 public:
-    Task(std::unique_ptr<AbstractAlgorithm>&& algorithm, std::string& house_filename, std::latch& tasks_left_counter, boost::asio::io_context& event_context, bool is_logging, std::size_t& running_threads_num, std::mutex& running_threads_mutex)
-        : tasks_left_counter(tasks_left_counter), event_context(event_context), max_duration(max_duration), running_threads_num(running_threads_num), running_threads_mutex(running_threads_mutex)
+    Task(TaskQueue& task_queue,
+         std::string& algorithm_name,
+         std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
+         std::string& house_file_name,
+         bool is_logging)
+        : task_queue(task_queue),
+          algorithm_name(algorithm_name),
+          algorithm_pointer(std::move(algorithm_pointer)),
+          house_file_name(house_file_name),
+          is_logging(is_logging),
+          is_task_ended(false)
     {
-        simulator.readHouseFile(house_filename, is_logging);
-        simulator.setAlgorithm(*algorithm);
+        simulator.readHouseFile(house_name, is_logging);
+        simulator.setAlgorithm(*algorithm_pointer);
 
-        max_duration = std::chrono::milliseconds(1) * simulator.getMaxSteps();
+        max_duration = 1ms * simulator.getMaxSteps();
     }
 
-    void run()
+    void setUpTask()
     {
-        auto simulatePair = [this]() {
-            // Make this thread asynchronously cancel-able from another thread
-            pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, nullptr);
-            pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, nullptr);
+        // Make this thread asynchronously cancel-able from another thread
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, nullptr);
+        pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, nullptr);
 
-            boost::asio::steady_timer runtime_timer(event_context, std::chrono:milliseconds(max_duration));
-            time_point start_time = std::chrono::system_clock::now();
-            runtime_timer.async_wait([&](const boost::system::error_code& error_code) {
-                simulationTimeoutHandler(error_code, *this, start_time, pthread_self())
-            });
-
-            // Actual task
-            // TODO: Think what to do about the logging - each thread need to log into a separate file
-            std::size_t simulation_score = simulator.run();
-
-            runtime_timer.cancel();
-
-            bool expected_value = false;
-            bool is_simulation_finished = is_task_ended.compare_exchange_strong(expected_value, true);
-            if (is_simulation_finished)
-            {
-                // Simulation finished successuly with NO timeout
-                score = simulation_score;
-                tasks_left_counter.count_down();
-            }
-
-            std::lock_guard<std::mutex> lock_guard(running_threads_mutex);
-            running_threads_num--;
-        };
-
-        executing_thread = std::jthread(simulatePair);
+        // Set-up a timeout timer for the task simulation
+        boost::asio::steady_timer runtime_timer(task_queue.timer_event_context, std::chrono:milliseconds(max_duration));
+        time_point start_time = std::chrono::system_clock::now();
+        runtime_timer.async_wait([&](const boost::system::error_code& error_code) {
+            timeoutHandler(error_code, *this, start_time, pthread_self())
+        });
     }
 
-    std::optional<std::size_t> getScore() const
+    void tearDownTask(std::size_t simulation_score)
     {
-        return score;
+        runtime_timer.cancel();
+
+        bool expected_value = false;
+        bool is_simulation_finished = is_task_ended.compare_exchange_strong(expected_value, true);
+        if (is_simulation_finished)
+        {
+            // Simulation finished successuly with NO timeout
+            score = simulation_score;
+            task_queue.todo_tasks_counter.count_down();
+            task_queue.active_threads_semaphore.release();
+        }
     }
+
+    void simulatePair()
+    {
+        setUpTask();
+    
+        // Actual Task
+        // TODO: Think what to do about the logging - each thread need to log into a separate file
+        std::size_t simulation_score = simulator.run();
+
+        tearDownTask(simulation_score);
+    }
+
+    void run() { executing_thread = std::jthread(&Task::simulatePair, this); }
+
+    std::optional<std::size_t> getScore() const { return score; }
+
+    std::string getAlgorithmName() const { return algorithm_name; }
+
+    std::string getHouseName() const { return house_name; }
 
     void join()
     {
