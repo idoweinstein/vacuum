@@ -29,6 +29,7 @@ class TaskQueue
             this->timer_event_context.run();
         });
 
+        // TODO: remove this and check in the forum that sempahore # is the number of workers
         active_threads_semaphore.acquire();
     }
 
