@@ -32,7 +32,7 @@ class Task
     std::size_t max_duration;
     std::jthread executing_thread;
     std::atomic<bool> is_task_ended; // Indicates whether task was naturally finished or terminated by a timeout
-    std::optional<std::size_t> score;
+    std::optional<std::size_t> score; // TODO: shouldn't be optional, there's always a score
 
     static void timeoutHandler(const boost::system::error_code& error_code,
                                Task& task,

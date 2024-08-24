@@ -25,12 +25,14 @@ class TaskQueue
 
     void createTimer()
     {
+        // TODO: make work_guard class member
         auto work_guard = boost::asio::make_work_guard(timer_event_context);
 
         event_loop_thread = std::jthread([this]() {
             this->timer_event_context.run();
         });
 
+        // TODO: remove this and check in the forum that sempahore # is the number of workers
         active_threads_semaphore.acquire();
     }
 

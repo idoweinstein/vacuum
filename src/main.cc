@@ -140,6 +140,7 @@ static void createSummary(const std::map<std::string, std::map<std::string, std:
 
             else
             {
+                // TODO: remove this
                 summary_file << ", TIMEOUT";
             }
         }
