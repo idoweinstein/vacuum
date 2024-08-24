@@ -12,6 +12,7 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
         bool is_simulation_timeout = task.is_task_ended.compare_exchange_strong(expected_value, true);
         if (is_simulation_timeout)
         {
+            task.score = task.simulator.getTimeoutScore();
             pthread_cancel(thread_handler);
             task.task_ended_();
         }
@@ -19,7 +20,7 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
 }
 
 Task::Task(boost::asio::io_context& timer_event_context,
-           std::function<void()> task_ended,
+           std::function<void()>&& task_ended,
            const std::string& algorithm_name,
            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
            const std::string& house_name,
@@ -36,6 +37,15 @@ Task::Task(boost::asio::io_context& timer_event_context,
 
     max_duration = simulator.getMaxSteps();
 }
+
+Task::Task(Task&& other) noexcept
+    : runtime_timer(std::move(other.runtime_timer)),
+      algorithm_name(std::move(other.algorithm_name)),
+      algorithm_pointer(std::move(other.algorithm_pointer)),
+      house_name(std::move(other.house_name)),
+      is_task_ended(false),
+      task_ended_(std::move(other.task_ended_))
+{}
 
 void Task::setUpTask()
 {

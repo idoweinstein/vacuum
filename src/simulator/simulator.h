@@ -33,15 +33,16 @@ class Simulator
     std::size_t total_steps_taken = 0;                  // The total steps taken by the robot.
     SimulatorState state = SimulatorState::Initial;     // Simulator's initialization current state.
     Status mission_status = Status::Working;            // Simulator's mission status.
-    unsigned int max_simulator_steps = 0;               // Maximum number of steps the simulator can perform.
+    std::size_t max_simulator_steps = 0;                // Maximum number of steps the simulator can perform.
     std::unique_ptr<Battery> battery = nullptr;         // Simulator's battery (for charging / discharging and getting battery level).
     std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
     AbstractAlgorithm* algorithm = nullptr;             // Simulator's algorithm to suggest its next steps.
 
     /* Scoring */
     static const std::size_t kDeadPenalty = 2000;        // The penalty for a dead robot.
-    static const std::size_t kLying = 3000;              // The penalty for a lying algorithm.
-    static const std::size_t kNotStation = 1000;         // The penalty for finishing not in station.
+    static const std::size_t kTimeoutPenalty = 2000;     // The penalty for an algorithm timeout.
+    static const std::size_t kLyingPenalty = 3000;       // The penalty for a lying algorithm.
+    static const std::size_t kNotStationPenalty = 1000;  // The penalty for finishing not in station.
     static const std::size_t kDirtFactor = 300;          // The factor for each dirt level in the score.
 
     /**
@@ -77,7 +78,9 @@ public:
     Simulator(const Simulator& simulator) = delete;
     Simulator& operator=(const Simulator& simulator) = delete;
 
-    unsigned int getMaxSteps() const { return max_simulator_steps; }
+    std::size_t getMaxSteps() const { return max_simulator_steps; }
+
+    std::size_t getTimeoutScore() const { return (2 * max_simulator_steps + house->getInitialDirtCount() * kDirtFactor + kTimeoutPenalty); }
 
     /**
      * @brief Sets the algorithm to be used by the simulator.

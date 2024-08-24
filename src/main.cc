@@ -102,7 +102,7 @@ static void gethouse_filenames(const std::string &path, std::vector<std::string>
     closedir(dir);
 }
 
-static void createSummary(const std::map<std::string, std::map<std::string, std::optional<std::size_t>>>& scores)
+static void createSummary(const std::map<std::string, std::map<std::string, std::size_t>>& scores)
 {
     std::ofstream summary_file;
     std::string summary_file_name = "summary.csv";
@@ -132,17 +132,7 @@ static void createSummary(const std::map<std::string, std::map<std::string, std:
         summary_file << outer_map.first;
         for (const auto& inner_map: outer_map.second)
         {
-            // Print score
-            if (inner_map.second.has_value())
-            {
-                summary_file << "," << inner_map.second.value();
-            }
-
-            else
-            {
-                // TODO: remove this
-                summary_file << ", TIMEOUT";
-            }
+            summary_file << "," << inner_map.second;
         }
         summary_file << std::endl;
     }
@@ -177,7 +167,7 @@ void Main::runAll(const Main::arguments& args)
 
     task_queue.run();
 
-    std::map<std::string, std::map<std::string, std::optional<std::size_t>>> scores;
+    std::map<std::string, std::map<std::string, std::size_t>> scores;
     for (const auto& task : task_queue)
     {
         scores[task.getAlgorithmName()].insert(std::make_pair(task.getHouseName(), task.getScore()));

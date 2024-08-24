@@ -36,7 +36,7 @@ class TaskQueue
 public:
     TaskQueue(size_t number_of_tasks,
               size_t number_of_threads)
-        : todo_tasks_counter(tasks.size()),
+        : todo_tasks_counter(number_of_tasks),
           active_threads_semaphore(number_of_threads),
           work_guard(boost::asio::make_work_guard(timer_event_context))
     {

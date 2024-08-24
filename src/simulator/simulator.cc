@@ -120,9 +120,9 @@ std::size_t Simulator::calculateScore(Step last_step, std::size_t dirt_count, st
     if (mission_status == Status::Dead) {
         penalty = kDeadPenalty;
     } else if (last_step == Step::Finish && !is_at_docking_station) {
-        penalty = kLying;
+        penalty = kLyingPenalty;
     } else if (!is_at_docking_station) {
-        penalty = kNotStation;
+        penalty = kNotStationPenalty;
     }
 
     return steps + dirt_count * kDirtFactor + penalty;
