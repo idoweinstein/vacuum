@@ -5,8 +5,11 @@
 #include "simulator/simulator.h"
 #include "common/AlgorithmRegistrar.h"
 
+#include <boost/system/error_code.hpp>
+
+#include <pthread.h>
+
 #include <optional>
-#include <pthread>
 #include <string>
 #include <atomic>
 #include <thread>
@@ -14,6 +17,8 @@
 
 using time_point = std::chrono::time_point<std::chrono::system_clock>;
 using namespace std::chrono_literals;
+
+class TaskQueue;
 
 /**
  * Credits to Amir's demonstration

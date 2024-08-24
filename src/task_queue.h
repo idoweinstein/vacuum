@@ -1,16 +1,23 @@
+#ifndef TASK_QUEUE_H_
+#define TASK_QUEUE_H_
+
 #include "task.h"
+
+#include <boost/asio.hpp>
 
 #include <semaphore>
 #include <vector>
 #include <latch>
 
+class Task;
+
 class TaskQueue
 {
     // Queue Metadata
     std::latch& todo_tasks_counter;
-    std::counting_semaphore& active_threads_semaphore;
+    std::counting_semaphore<>& active_threads_semaphore;
     boost::asio::io_context timer_event_context;
-    boost::asio::executor_work_guard<boost::asio::io_context> work_guard;
+
     std::jthread event_loop_thread;
 
     // Queue Contents
@@ -18,10 +25,10 @@ class TaskQueue
 
     void createTimer()
     {
-        work_guard = boost::asio::make_work_guard(timer_event_context);
+        auto work_guard = boost::asio::make_work_guard(timer_event_context);
 
-        event_loop_thread = std::jthread([&timer_event_context]() {
-            timer_event_context.run();
+        event_loop_thread = std::jthread([this]() {
+            this->timer_event_context.run();
         });
 
         active_threads_semaphore.acquire();
@@ -29,18 +36,18 @@ class TaskQueue
 
 public:
     TaskQueue(std::latch& todo_tasks_counter,
-              std::counting_semaphore& active_threads_semaphore)
+              std::counting_semaphore<>& active_threads_semaphore)
         : todo_tasks_counter(todo_tasks_counter),
-          active_threads_semaphore(active_threads_semaphore),
+          active_threads_semaphore(active_threads_semaphore)
     {
         createTimer();
     }
 
     void reserve(std::size_t reserved_size) { tasks.reserve(reserved_size); }
 
-    void insertTask(std::string& algorithm_name,
+    void insertTask(const std::string& algorithm_name,
                     std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-                    std::string& house_file_name,
+                    const std::string& house_file_name,
                     bool is_logging)
     {
         tasks.emplace_back(
@@ -60,3 +67,5 @@ public:
 
     const auto cend() const { return tasks.cend(); }
 };
+
+#endif // TASK_QUEUE_H_

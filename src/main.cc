@@ -135,7 +135,7 @@ static void createSummary(const std::map<std::string, std::map<std::string, std:
             // Print score
             if (inner_map.second.has_value())
             {
-                summary_file << "," << inner.map.second.value();
+                summary_file << "," << inner_map.second.value();
             }
 
             else
@@ -158,9 +158,9 @@ void Main::runAll(const Main::arguments& args)
     gethouse_filenames(args.house_path, house_filenames);
 
     std::size_t num_of_tasks = algorithm_handles.size() * house_filenames.size();
-    std::latch todo_tasks_counter = num_of_tasks;
+    std::latch todo_tasks_counter(num_of_tasks);
 
-    std::counting_semaphore active_threads_semaphore(args.num_threads);
+    std::counting_semaphore<> active_threads_semaphore(args.num_threads);
 
     TaskQueue task_queue(todo_tasks_counter, active_threads_semaphore);
     task_queue.reserve(num_of_tasks);
@@ -189,10 +189,10 @@ void Main::runAll(const Main::arguments& args)
     std::map<std::string, std::map<std::string, std::optional<std::size_t>>> scores;
     for (const auto& task : task_queue)
     {
-        scores[algorithm_name].insert(std::make_pair(house_name, task.getScore()));
+        scores[task.getAlgorithmName()].insert(std::make_pair(task.getHouseName(), task.getScore()));
     }
 
-    event_context.stop();
+    task_queue.timer_event_context.stop();
     work_guard.reset();
 
     AlgorithmRegistrar::getAlgorithmRegistrar().clear();
