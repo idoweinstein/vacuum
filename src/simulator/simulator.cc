@@ -64,16 +64,11 @@ void Simulator::move(Step next_step)
     updateMissionStatus(next_step);
 }
 
-void Simulator::readHouseFile(const std::string& house_file_path, bool is_logging)
+void Simulator::readHouseFile(const std::string& house_file_path)
 {
     if (SimulatorState::Ready == state)
     {
         throw std::logic_error("Called Simulator::readHouseFile() after calling Simulator::setAlgorithm()");
-    }
-
-    if (is_logging)
-    {
-        RobotLogger::getInstance().initializeLogFile(house_file_path);
     }
 
     std::ifstream house_file;

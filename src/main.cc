@@ -149,10 +149,18 @@ void Main::runAll(const Main::arguments& args)
         std::map<std::string, std::size_t> house_scores;
         for (const auto& house_filename: house_filenames) {
             RobotLogger::getInstance().deleteAllLogFiles();
+            if (!args.summary_only)
+            {
+                std::string house_name = std::filesystem::path(house_filename).filename().replace_extension().string();
+                std::string algo_name = algo.name();
+                std::cout << "Running " << algo_name << " on " << house_name << std::endl;
+                std::string output_file_name = house_name + "-" + algo_name + ".txt";
+                RobotLogger::getInstance().addLogFile(output_file_name);
+            }
 
             Simulator simulator;
 
-            simulator.readHouseFile(house_filename, !args.summary_only);
+            simulator.readHouseFile(house_filename);
 
             auto algorithm = algo.create();
             simulator.setAlgorithm(*algorithm);

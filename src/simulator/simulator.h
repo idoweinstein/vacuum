@@ -37,6 +37,7 @@ class Simulator
     std::unique_ptr<Battery> battery = nullptr;         // Simulator's battery (for charging / discharging and getting battery level).
     std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
     AbstractAlgorithm* algorithm = nullptr;             // Simulator's algorithm to suggest its next steps.
+    std::string house_name;                             // The path of the house name.
 
     /* Scoring */
     static const std::size_t kDeadPenalty = 2000;        // The penalty for a dead robot.
@@ -89,11 +90,10 @@ public:
      * @brief Reads the house representation of a given input file.
      *
      * @param house_file_path The file path which the house will be read from.
-     * @param is_logging The flag to enable/disable logging.
      * @throws std::logic_error If the simulator is already fully initialized.
      * @throws std::runtime_error If couldn't open given file.
      */
-    void readHouseFile(const std::string& house_file_path, bool is_logging = false);
+    void readHouseFile(const std::string& house_file_path);
 
     /**
      * @brief Runs the cleaning operation.
