@@ -42,6 +42,7 @@ class Logger
     };
 
     std::vector<std::ofstream> log_files;  // Vector of log file streams
+    std::vector<std::ofstream> error_files;  // Vector of error file streams
 
 protected:
     Logger() {}
@@ -91,6 +92,26 @@ public:
     }
 
     /**
+     * @brief Add an error file to the logger.
+     *
+     * This method adds an error file to the logger.
+     * The error file will be opened and used for logging error messages.
+     *
+     * @param error_file_name The name of the error file to add.
+     * @throws std::runtime_error if the error file cannot be opened.
+     */
+    virtual void addErrorFile(const std::string& error_file_name)
+    {
+        std::ofstream& new_file = error_files.emplace_back();
+        new_file.open(error_file_name);
+
+        if (!new_file.is_open())
+        {
+            throw std::runtime_error("Couldn't open error file");
+        }
+    }
+
+    /**
      * @brief Deletes all previously added log files.
      * 
      * This method deletes all previously added log files, using `addLogFile()` calls.
@@ -101,6 +122,20 @@ public:
         {
             log_files.at(i).close();
             log_files.pop_back();
+        }
+    }
+
+    /**
+     * @brief Deletes all previously added error files.
+     * 
+     * This method deletes all previously added error files, using `addErrorFile()` calls.
+     */
+    virtual void deleteAllErrorFiles()
+    {
+        for (int i = error_files.size() - 1; i >= 0; i--)
+        {
+            error_files.at(i).close();
+            error_files.pop_back();
         }
     }
 

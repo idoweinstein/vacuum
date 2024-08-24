@@ -110,6 +110,7 @@ public:
      */
     void logError(const std::string& error_message)
     {
+        logMessage(LogLevel::Error, LogOutput::File, error_message);
         logMessage(LogLevel::Error, LogOutput::Console, error_message);
     }
 };
