@@ -1,8 +1,8 @@
 #include "task.h"
 
-void Task::timeoutHandler(boost::system::error_code& error_code,
+void Task::timeoutHandler(const boost::system::error_code& error_code,
                           Task& task,
-                          time_point& start_time,
+                          [[maybe_unused]] time_point& start_time,
                           pthread_t thread_handler)
 {
     // Make sure timer was not cancelled.
@@ -13,29 +13,28 @@ void Task::timeoutHandler(boost::system::error_code& error_code,
         if (is_simulation_timeout)
         {
             pthread_cancel(thread_handler);
-            task_ended();
+            task.task_ended_();
         }
     }
 }
 
-Task::Task(const boost::asio::io_context& timer_event_context,
+Task::Task(boost::asio::io_context& timer_event_context,
            std::function<void()> task_ended,
            const std::string& algorithm_name,
            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
            const std::string& house_name,
            bool is_logging)
-            : timer_event_context(timer_event_context),
+            : runtime_timer(timer_event_context),
               algorithm_name(algorithm_name),
               algorithm_pointer(std::move(algorithm_pointer)),
               house_name(house_name),
-              task_ended(task_ended),
-              is_task_ended(false)
+              is_task_ended(false),
+              task_ended_(std::move(task_ended))
 {
     simulator.readHouseFile(house_name, is_logging);
     simulator.setAlgorithm(*algorithm_pointer);
 
     max_duration = simulator.getMaxSteps();
-    runtime_timer(timer_event_context, std::chrono::milliseconds(max_duration));
 }
 
 void Task::setUpTask()
@@ -47,8 +46,9 @@ void Task::setUpTask()
     // Set-up a timeout timer for the task simulation
     
     time_point start_time = std::chrono::system_clock::now();
+    runtime_timer.expires_after(boost::asio::chrono::milliseconds(max_duration));
     runtime_timer.async_wait([&](const boost::system::error_code& error_code) {
-        timeoutHandler(error_code, *this, start_time, pthread_self())
+        timeoutHandler(error_code, *this, start_time, pthread_self());
     });
 }
 
@@ -62,6 +62,6 @@ void Task::tearDownTask(std::size_t simulation_score)
     {
         // Simulation finished successuly with NO timeout
         score = simulation_score;
-        task_ended();
+        task_ended_();
     }
 }

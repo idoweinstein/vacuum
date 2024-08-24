@@ -24,11 +24,9 @@ using namespace std::chrono_literals;
 class Task
 {
     boost::asio::steady_timer runtime_timer;
-    const boost::asio::io_context& timer_event_context;
     const std::string& algorithm_name;
     std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
     const std::string& house_name;
-    std::function<void()> task_ended;
     Simulator simulator;
 
     std::size_t max_duration;
@@ -36,19 +34,22 @@ class Task
     std::atomic<bool> is_task_ended; // Indicates whether task was naturally finished or terminated by a timeout
     std::optional<std::size_t> score;
 
-    static void timeoutHandler(boost::system::error_code& error_code,
+    static void timeoutHandler(const boost::system::error_code& error_code,
                                Task& task,
                                time_point& start_time,
                                pthread_t thread_handler);
 
 public:
+    const std::function<void()> task_ended_;
 
-    Task(const boost::asio::io_context& timer_event_context,
+    Task(boost::asio::io_context& timer_event_context,
          std::function<void()> task_ended,
          const std::string& algorithm_name,
          std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
          const std::string& house_name,
          bool is_logging);
+
+    Task(Task&&) = default;
 
     void setUpTask();
 
