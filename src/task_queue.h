@@ -17,7 +17,7 @@ class TaskQueue
     std::latch todo_tasks_counter;
     std::counting_semaphore<> active_threads_semaphore;
     boost::asio::io_context timer_event_context;
-
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard;
     std::jthread event_loop_thread;
 
     // Queue Contents
@@ -25,8 +25,6 @@ class TaskQueue
 
     void createTimer()
     {
-        auto work_guard = boost::asio::make_work_guard(timer_event_context);
-
         event_loop_thread = std::jthread([this]() {
             this->timer_event_context.run();
         });
@@ -38,7 +36,8 @@ public:
     TaskQueue(size_t number_of_tasks,
               size_t number_of_threads)
         : todo_tasks_counter(tasks.size()),
-          active_threads_semaphore(number_of_threads)
+          active_threads_semaphore(number_of_threads),
+          work_guard(boost::asio::make_work_guard(timer_event_context))
     {
         createTimer();
         tasks.reserve(number_of_tasks);
