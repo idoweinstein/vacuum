@@ -13,28 +13,29 @@ void Task::timeoutHandler(boost::system::error_code& error_code,
         if (is_simulation_timeout)
         {
             pthread_cancel(thread_handler);
-            task.task_queue.todo_tasks_counter.count_down();
-            task_queue.active_threads_semaphore.release();
+            task_ended();
         }
     }
 }
 
-Task::Task(TaskQueue& task_queue,
-           std::string& algorithm_name,
+Task::Task(const boost::asio::io_context& timer_event_context,
+           std::function<void()> task_ended,
+           const std::string& algorithm_name,
            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-           std::string& house_file_name,
+           const std::string& house_name,
            bool is_logging)
-            : task_queue(task_queue),
+            : timer_event_context(timer_event_context),
               algorithm_name(algorithm_name),
               algorithm_pointer(std::move(algorithm_pointer)),
-              house_file_name(house_file_name),
-              is_logging(is_logging),
+              house_name(house_name),
+              task_ended(task_ended),
               is_task_ended(false)
 {
     simulator.readHouseFile(house_name, is_logging);
     simulator.setAlgorithm(*algorithm_pointer);
 
-    max_duration = 1ms * simulator.getMaxSteps();
+    max_duration = simulator.getMaxSteps();
+    runtime_timer(timer_event_context, std::chrono::milliseconds(max_duration));
 }
 
 void Task::setUpTask()
@@ -44,7 +45,7 @@ void Task::setUpTask()
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, nullptr);
 
     // Set-up a timeout timer for the task simulation
-    boost::asio::steady_timer runtime_timer(task_queue.timer_event_context, std::chrono:milliseconds(max_duration));
+    
     time_point start_time = std::chrono::system_clock::now();
     runtime_timer.async_wait([&](const boost::system::error_code& error_code) {
         timeoutHandler(error_code, *this, start_time, pthread_self())
@@ -61,7 +62,6 @@ void Task::tearDownTask(std::size_t simulation_score)
     {
         // Simulation finished successuly with NO timeout
         score = simulation_score;
-        task_queue.todo_tasks_counter.count_down();
-        task_queue.active_threads_semaphore.release();
+        task_ended();
     }
 }

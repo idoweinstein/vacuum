@@ -1,10 +1,10 @@
 #ifndef TASK_H_
 #define TASK_H_
 
-#include "task_queue.h"
 #include "simulator/simulator.h"
 #include "common/AlgorithmRegistrar.h"
 
+#include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 
 #include <pthread.h>
@@ -18,18 +18,17 @@
 using time_point = std::chrono::time_point<std::chrono::system_clock>;
 using namespace std::chrono_literals;
 
-class TaskQueue;
-
 /**
  * Credits to Amir's demonstration
  */
 class Task
 {
-    TaskQueue& task_queue;
-
-    std::string& algorithm_name;
+    boost::asio::steady_timer runtime_timer;
+    const boost::asio::io_context& timer_event_context;
+    const std::string& algorithm_name;
     std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
-    std::string& house_name;
+    const std::string& house_name;
+    std::function<void()> task_ended;
     Simulator simulator;
 
     std::size_t max_duration;
@@ -43,10 +42,12 @@ class Task
                                pthread_t thread_handler);
 
 public:
-    Task(TaskQueue& task_queue,
-         std::string& algorithm_name,
+
+    Task(const boost::asio::io_context& timer_event_context,
+         std::function<void()> task_ended,
+         const std::string& algorithm_name,
          std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-         std::string& house_file_name,
+         const std::string& house_name,
          bool is_logging);
 
     void setUpTask();

@@ -14,8 +14,8 @@
 #include "simulator/robot_logger.h"
 #include "simulator/simulator.h"
 
-#include "task_queue.h"
 #include "task.h"
+#include "task_queue.h"
 
 namespace Constants
 {
@@ -158,12 +158,8 @@ void Main::runAll(const Main::arguments& args)
     gethouse_filenames(args.house_path, house_filenames);
 
     std::size_t num_of_tasks = algorithm_handles.size() * house_filenames.size();
-    std::latch todo_tasks_counter(num_of_tasks);
 
-    std::counting_semaphore<> active_threads_semaphore(args.num_threads);
-
-    TaskQueue task_queue(todo_tasks_counter, active_threads_semaphore);
-    task_queue.reserve(num_of_tasks);
+    TaskQueue task_queue(num_of_tasks, args.num_threads);
 
     for(const auto& algorithm: AlgorithmRegistrar::getAlgorithmRegistrar())
     {
@@ -178,22 +174,13 @@ void Main::runAll(const Main::arguments& args)
         }
     }
 
-    for (auto& task : task_queue)
-    {
-        active_threads_semaphore.acquire();
-        task.run();
-    }
-
-    todo_tasks_counter.wait();
+    task_queue.run();
 
     std::map<std::string, std::map<std::string, std::optional<std::size_t>>> scores;
     for (const auto& task : task_queue)
     {
         scores[task.getAlgorithmName()].insert(std::make_pair(task.getHouseName(), task.getScore()));
     }
-
-    task_queue.timer_event_context.stop();
-    work_guard.reset();
 
     AlgorithmRegistrar::getAlgorithmRegistrar().clear();
     closeAlgorithms(algorithm_handles);

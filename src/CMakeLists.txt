@@ -10,6 +10,7 @@ add_library(vacuum_cleaner
     simulator/deserializer.cc
     simulator/enum_operators.cc
     simulator/AlgorithmRegistrar.cpp
+    task.cc
 )
 
 target_include_directories(vacuum_cleaner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
