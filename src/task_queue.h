@@ -29,8 +29,11 @@ class TaskQueue
             this->timer_event_context.run();
         });
 
-        // TODO: remove this and check in the forum that sempahore # is the number of workers
-        active_threads_semaphore.acquire();
+        /**
+         * NOTE: The event loop thread is not part of the thread pool.
+         * Therefore, it is not counted in the number of active threads.
+         * See: https://moodle.tau.ac.il/mod/forum/discuss.php?d=106205
+         */
     }
 
 public:
