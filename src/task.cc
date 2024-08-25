@@ -2,11 +2,10 @@
 
 void Task::timeoutHandler(const boost::system::error_code& error_code,
                           Task& task,
-                          [[maybe_unused]] time_point& start_time,
                           pthread_t thread_handler)
 {
     // Make sure timer was not cancelled.
-    if (boost::asio::error::operation_aborted != error_code) // TODO: Make sure it's correct
+    if (boost::asio::error::operation_aborted != error_code)
     {
         bool expected_value = false;
         bool is_simulation_timeout = task.is_task_ended.compare_exchange_strong(expected_value, true);
@@ -14,38 +13,29 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
         {
             task.score = task.simulator.getTimeoutScore();
             pthread_cancel(thread_handler);
-            task.task_ended_();
+            task.on_teardown();
         }
     }
 }
 
-Task::Task(boost::asio::io_context& timer_event_context,
-           std::function<void()>&& task_ended,
-           const std::string& algorithm_name,
+Task::Task(const std::string& algorithm_name,
            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
            const std::string& house_name,
-           bool is_logging)
-            : runtime_timer(timer_event_context),
-              algorithm_name(algorithm_name),
+           bool is_logging,
+           boost::asio::io_context& timer_event_context,
+           std::function<void()>&& on_teardown)
+            : algorithm_name(algorithm_name),
               algorithm_pointer(std::move(algorithm_pointer)),
               house_name(house_name),
               is_task_ended(false),
-              task_ended_(std::move(task_ended))
+              runtime_timer(timer_event_context),
+              on_teardown(std::move(on_teardown))
 {
     simulator.readHouseFile(house_name, is_logging);
     simulator.setAlgorithm(*algorithm_pointer);
 
     max_duration = simulator.getMaxSteps();
 }
-
-Task::Task(Task&& other) noexcept
-    : runtime_timer(std::move(other.runtime_timer)),
-      algorithm_name(std::move(other.algorithm_name)),
-      algorithm_pointer(std::move(other.algorithm_pointer)),
-      house_name(std::move(other.house_name)),
-      is_task_ended(false),
-      task_ended_(std::move(other.task_ended_))
-{}
 
 void Task::setUpTask()
 {
@@ -55,10 +45,9 @@ void Task::setUpTask()
 
     // Set-up a timeout timer for the task simulation
     
-    time_point start_time = std::chrono::system_clock::now();
     runtime_timer.expires_after(boost::asio::chrono::milliseconds(max_duration));
     runtime_timer.async_wait([&](const boost::system::error_code& error_code) {
-        timeoutHandler(error_code, *this, start_time, pthread_self());
+        timeoutHandler(error_code, *this, pthread_self());
     });
 }
 
@@ -67,11 +56,11 @@ void Task::tearDownTask(std::size_t simulation_score)
     runtime_timer.cancel();
 
     bool expected_value = false;
-    bool is_simulation_finished = is_task_ended.compare_exchange_strong(expected_value, true);
-    if (is_simulation_finished)
+    bool is_finished_gracefully = is_task_ended.compare_exchange_strong(expected_value, true);
+    if (is_finished_gracefully)
     {
         // Simulation finished successuly with NO timeout
         score = simulation_score;
-        task_ended_();
+        on_teardown();
     }
 }

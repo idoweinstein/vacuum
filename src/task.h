@@ -15,7 +15,6 @@
 #include <thread>
 #include <chrono>
 
-using time_point = std::chrono::time_point<std::chrono::system_clock>;
 using namespace std::chrono_literals;
 
 /**
@@ -23,33 +22,31 @@ using namespace std::chrono_literals;
  */
 class Task
 {
-    boost::asio::steady_timer runtime_timer;
     const std::string& algorithm_name;
-    std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
+    const std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
     const std::string& house_name;
     Simulator simulator;
+    std::size_t score;
 
     std::size_t max_duration;
     std::jthread executing_thread;
     std::atomic<bool> is_task_ended;
-    std::size_t score;
+    boost::asio::steady_timer runtime_timer;
+
+    const std::function<void()> on_teardown;
 
     static void timeoutHandler(const boost::system::error_code& error_code,
                                Task& task,
-                               time_point& start_time,
                                pthread_t thread_handler);
 
 public:
-    const std::function<void()> task_ended_;
 
-    Task(boost::asio::io_context& timer_event_context,
-         std::function<void()>&& task_ended,
-         const std::string& algorithm_name,
+    Task(const std::string& algorithm_name,
          std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
          const std::string& house_name,
-         bool is_logging);
-
-    Task(Task&&) noexcept;
+         bool is_logging,
+         boost::asio::io_context& timer_event_context,
+         std::function<void()>&& on_teardown);
 
     void setUpTask();
 

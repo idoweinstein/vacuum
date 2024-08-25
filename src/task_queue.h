@@ -6,94 +6,40 @@
 
 #include <boost/asio.hpp>
 
-#include <thread>
 #include <semaphore>
-#include <vector>
+#include <thread>
 #include <latch>
+#include <list>
 
 class TaskQueue
 {
     // Queue Metadata
-    std::latch todo_tasks_counter;
-    std::counting_semaphore<> active_threads_semaphore;
-    boost::asio::io_context timer_event_context;
-    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard;
-    std::jthread event_loop_thread;
+    std::size_t number_of_tasks;
+    std::latch todo_tasks_counter;                      // An up-to-date counter of the number of tasks left to run.
+    std::counting_semaphore<> active_threads_semaphore; // An up-to-date counter of the number of active WORKER (task) threads.
+
+    std::jthread event_loop_thread;                     // A thread running the event loop (for task timeouts).
+    boost::asio::io_context timer_event_context;        // Represents the event loop object.
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard;    // Prevents event loop from stopping with no active events.
 
     // Queue Contents
-    std::vector<Task> tasks;
+    std::list<Task> tasks;                            // The tasks in the queue to be executed.
 
-    void createTimer()
-    {
-        event_loop_thread = std::jthread([this]() {
-            this->timer_event_context.run();
-        });
-
-        /**
-         * NOTE: The event loop thread is not part of the thread pool.
-         * Therefore, it is not counted in the number of active threads.
-         * See: https://moodle.tau.ac.il/mod/forum/discuss.php?d=106205
-         */
-    }
+    void createTimer();
 
 public:
-    TaskQueue(size_t number_of_tasks,
-              size_t number_of_threads)
-        : todo_tasks_counter(number_of_tasks),
-          active_threads_semaphore(number_of_threads),
-          work_guard(boost::asio::make_work_guard(timer_event_context))
-    {
-        createTimer();
-        tasks.reserve(number_of_tasks);
-    }
+    TaskQueue(size_t number_of_tasks, size_t number_of_threads);
 
     void insertTask(const std::string& algorithm_name,
                     std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
                     const std::string& house_file_name,
-                    bool is_logging)
-    {
-        if (tasks.size() >= tasks.capacity())
-        {
-            throw std::logic_error("TaskQueue::insertTask() called after all tasks were inserted");
-        }
+                    bool is_logging);
 
-        tasks.emplace_back(
-            timer_event_context,
-            [this]()
-            {
-                this->todo_tasks_counter.count_down();
-                this->active_threads_semaphore.release();
-            },
-            algorithm_name,
-            std::move(algorithm_pointer),
-            house_file_name,
-            is_logging
-        );
-    }
+    void run();
 
-    void run()
-    {
-        if (tasks.size() <= tasks.capacity())
-        {
-            throw std::logic_error("TaskQueue::run() called before all tasks were inserted");
-        }
+    auto begin() { return tasks.begin(); }
 
-        for (auto& task : tasks)
-        {
-            active_threads_semaphore.acquire();
-            task.run();
-        }
-
-        todo_tasks_counter.wait();
-    }
-
-    auto begin() const { return tasks.begin(); }
-
-    const auto cbegin() const { return tasks.cbegin(); }
-
-    auto end() const { return tasks.end(); }
-
-    const auto cend() const { return tasks.cend(); }
+    auto end() { return tasks.end(); }
 };
 
 #endif // TASK_QUEUE_H_

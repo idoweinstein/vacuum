@@ -167,10 +167,13 @@ void Main::runAll(const Main::arguments& args)
 
     task_queue.run();
 
+    // Extract Tasks Scores
     std::map<std::string, std::map<std::string, std::size_t>> scores;
-    for (const auto& task : task_queue)
+    for (auto& task : task_queue)
     {
         scores[task.getAlgorithmName()].insert(std::make_pair(task.getHouseName(), task.getScore()));
+        // Detaching tasks after reading their score as an extra measure for stuck thread (although they should be already cancelled).
+        task.detach();
     }
 
     AlgorithmRegistrar::getAlgorithmRegistrar().clear();
