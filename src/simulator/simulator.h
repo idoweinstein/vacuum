@@ -42,7 +42,7 @@ class Simulator
     static const std::size_t kDeadPenalty = 2000;        // The penalty for a dead robot.
     static const std::size_t kTimeoutPenalty = 2000;     // The penalty for an algorithm timeout.
     static const std::size_t kLyingPenalty = 3000;       // The penalty for a lying algorithm.
-    static const std::size_t kNotStationPenalty = 1000;  // The penalty for finishing not in station.
+    static const std::size_t kNotInDockPenalty = 1000;   // The penalty for finishing not in docking station.
     static const std::size_t kDirtFactor = 300;          // The factor for each dirt level in the score.
 
     /**
