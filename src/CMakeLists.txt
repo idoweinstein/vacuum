@@ -4,12 +4,13 @@ add_subdirectory(algorithm)
 
 # Create a library to from source files
 add_library(vacuum_cleaner
-    simulator/logger.cc
     simulator/simulator.cc
     simulator/house.cc
     simulator/deserializer.cc
     simulator/enum_operators.cc
     simulator/AlgorithmRegistrar.cpp
+    input_handler.cc
+    output_handler.cc
     task.cc
     task_queue.cc
 )
