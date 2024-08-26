@@ -140,6 +140,20 @@ static void createSummary(const std::map<std::string, std::map<std::string, std:
     summary_file.close();
 }
 
+void summarizeScores(TaskQueue& task_queue)
+{
+    // Extract Tasks Scores
+    std::map<std::string, std::map<std::string, std::size_t>> scores;
+    for (auto& task : task_queue)
+    {
+        scores[task.getAlgorithmName()].insert(std::make_pair(task.getHouseName(), task.getScore()));
+        // Detaching tasks after reading their score as an extra measure for stuck thread (although they should be already cancelled).
+        task.detach();
+    }
+
+    createSummary(scores);
+}
+
 void Main::runAll(const Main::arguments& args)
 {
     std::vector<void*> algorithm_handles;
@@ -167,19 +181,15 @@ void Main::runAll(const Main::arguments& args)
 
     task_queue.run();
 
-    // Extract Tasks Scores
-    std::map<std::string, std::map<std::string, std::size_t>> scores;
-    for (auto& task : task_queue)
+    if (!args.summary_only)
     {
-        scores[task.getAlgorithmName()].insert(std::make_pair(task.getHouseName(), task.getScore()));
-        // Detaching tasks after reading their score as an extra measure for stuck thread (although they should be already cancelled).
-        task.detach();
+        _EXPORT_STD
     }
+
+    summarizeScores(task_queue);
 
     AlgorithmRegistrar::getAlgorithmRegistrar().clear();
     closeAlgorithms(algorithm_handles);
-
-    createSummary(scores);
 }
 
 bool parseArgument(const std::string& arg, Main::arguments& args)

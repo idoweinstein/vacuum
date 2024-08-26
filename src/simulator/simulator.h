@@ -13,6 +13,16 @@
 #include "status.h"
 #include "house.h"
 
+struct SimulationStatistics
+{
+    std::size_t total_steps_taken = 0;          // The total steps taken by the robot.
+    std::ostringstream steps_taken;             // The steps taken by the robot.
+    std::size_t dirt_left;                      // The dirt amount left at simulation end (computed on demand).
+    bool is_at_docking_station;                 // Whether or not the robot is at docking station at simulation end (computed on demand).
+    Status mission_status = Status::Working;    // Simulation's final mission status (Finished / Working / Dead).
+    std::size_t score;                          // Simulation's final score (computed on graceful finish only).
+}
+
 /**
  * @brief The Simulator class represents a vacuum cleaning robot.
  *
@@ -30,9 +40,8 @@ class Simulator
         Ready
     };
 
-    std::size_t total_steps_taken = 0;                  // The total steps taken by the robot.
+    SimulationStatistics statistics;                    // Simulation Statistics (some fields are computed on demand)
     SimulatorState state = SimulatorState::Initial;     // Simulator's initialization current state.
-    Status mission_status = Status::Working;            // Simulator's mission status.
     std::size_t max_simulator_steps = 0;                // Maximum number of steps the simulator can perform.
     std::unique_ptr<Battery> battery = nullptr;         // Simulator's battery (for charging / discharging and getting battery level).
     std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
@@ -46,7 +55,7 @@ class Simulator
     static const std::size_t kDirtFactor = 300;          // The factor for each dirt level in the score.
 
     /**
-     * @brief Updates the status of the mission.
+     * @brief Updates the status of the mission (stores result into SimulationStatistics).
      *
      * @param next_step The next step to be taken.
      */
@@ -58,15 +67,14 @@ class Simulator
     void move(Step next_step);
 
     /**
-     * @brief Calculates the score of the cleaning mission.
+     * @brief Calculates the score of the cleaning mission (stores result into SimulationStatistics).
      * 
      * @param last_step The last step taken by the robot.
      * @param dirt_count The total dirt count in the house.
      * @param steps_taken The total steps taken by the robot.
      * @param is_at_docking_station Whether the robot is at the docking station.
-     * @return The score of the cleaning mission.
      */
-    std::size_t calculateScore(Step last_step, std::size_t dirt_count, std::size_t steps_taken, bool is_at_docking_station) const;
+    void calculateScore(Step last_step) const;
 
 public:
     Simulator() = default;
@@ -82,6 +90,13 @@ public:
 
     std::size_t getTimeoutScore() const { return (2 * max_simulator_steps + house->getInitialDirtCount() * kDirtFactor + kTimeoutPenalty); }
 
+    SimulationStatistics getSimulationStatistics() const
+    {
+        statistics.dirt_left = house->getTotalDirtCount();
+        statistics.is_at_docking_station = house->isAtDockingStation();
+        return statistics;
+    }
+
     /**
      * @brief Sets the algorithm to be used by the simulator.
      *
@@ -94,11 +109,10 @@ public:
      * @brief Reads the house representation of a given input file.
      *
      * @param house_file_path The file path which the house will be read from.
-     * @param is_logging The flag to enable/disable logging.
      * @throws std::logic_error If the simulator is already fully initialized.
      * @throws std::runtime_error If couldn't open given file.
      */
-    void readHouseFile(const std::string& house_file_path, bool is_logging = false);
+    void readHouseFile(const std::string& house_file_path);
 
     /**
      * @brief Runs the cleaning operation.
@@ -108,7 +122,7 @@ public:
      * 2. the maximum number of steps is reached.
      * 3. vacuum cleaner mapped and cleaned all accessible positions.
      * 
-     * @returns The score of the cleaning mission.
+     * @returns The simulation result of the cleaning mission.
      * 
      * @throws std::logic_error If the simulator is not properly initialized yet.
      */

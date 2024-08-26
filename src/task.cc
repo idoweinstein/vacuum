@@ -21,7 +21,6 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
 Task::Task(const std::string& algorithm_name,
            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
            const std::string& house_name,
-           bool is_logging,
            boost::asio::io_context& timer_event_context,
            std::function<void()>&& on_teardown)
             : algorithm_name(algorithm_name),
@@ -31,7 +30,7 @@ Task::Task(const std::string& algorithm_name,
               runtime_timer(timer_event_context),
               on_teardown(std::move(on_teardown))
 {
-    simulator.readHouseFile(house_name, is_logging);
+    simulator.readHouseFile(house_name);
     simulator.setAlgorithm(*algorithm_pointer);
 
     max_duration = simulator.getMaxSteps();

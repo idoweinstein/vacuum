@@ -44,7 +44,6 @@ public:
     Task(const std::string& algorithm_name,
          std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
          const std::string& house_name,
-         bool is_logging,
          boost::asio::io_context& timer_event_context,
          std::function<void()>&& on_teardown);
 
