@@ -1,5 +1,7 @@
 #include "task.h"
 
+#include "output_handler.h"
+
 void Task::timeoutHandler(const boost::system::error_code& error_code,
                           Task& task,
                           pthread_t thread_handler)
@@ -30,7 +32,16 @@ Task::Task(const std::string& algorithm_name,
               runtime_timer(timer_event_context),
               on_teardown(std::move(on_teardown))
 {
-    simulator.readHouseFile(house_name);
+    try
+    {
+        simulator.readHouseFile(house_name);
+    }
+
+    catch(const std::exception& exception)
+    {
+        OutputHandler::exportError(house_name, execption.what());
+    }
+
     simulator.setAlgorithm(*algorithm_pointer);
 
     max_duration = simulator.getMaxSteps();

@@ -56,8 +56,14 @@ public:
         setUpTask();
     
         // Actual Task
-        // TODO: Think what to do about the logging - each thread need to log into a separate file
-        std::size_t simulation_score = simulator.run();
+        try
+        {
+            std::size_t simulation_score = simulator.run();
+        }
+        catch(const std::exception& exception)
+        {
+            OutputHandler::exportError(algorithm_name, "[House=" + house_name + "]" + exception.what());
+        }
 
         tearDownTask(simulation_score);
     }
