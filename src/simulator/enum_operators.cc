@@ -3,8 +3,9 @@
 #include <string>
 #include <ostream>
 
+#include "common/enums.h"
+
 #include "status.h"
-#include "enums.h"
 
 // Adapting Step and Direction enum classes to be streamable, for logging purposes:
 namespace std

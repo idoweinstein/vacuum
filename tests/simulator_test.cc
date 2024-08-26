@@ -8,11 +8,13 @@
 #include <sstream>
 #include <fstream>
 
-#include "robot_logger.h"
-#include "deserializer.h"
-#include "simulator.h"
-#include "algorithm.h"
-#include "enums.h"
+#include "common/enums.h"
+
+#include "simulator/robot_logger.h"
+#include "simulator/deserializer.h"
+#include "simulator/simulator.h"
+
+#include "algorithm/a/algorithm.h" // TODO: change
 
 using namespace std::string_literals;
 

@@ -6,8 +6,8 @@
 #include <optional>
 #include <stdexcept>
 
-#include "position.h"
-#include "enums.h"
+#include "common/position.h"
+#include "common/enums.h"
 
 /**
  * @brief Represents a path tree data structure.

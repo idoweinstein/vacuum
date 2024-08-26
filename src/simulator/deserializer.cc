@@ -10,8 +10,9 @@
 #include <optional>
 #include <stdexcept>
 
+#include "common/position.h"
+
 #include "robot_logger.h"
-#include "position.h"
 #include "battery.h"
 #include "house.h"
 

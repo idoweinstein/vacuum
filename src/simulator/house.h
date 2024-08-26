@@ -4,10 +4,10 @@
 #include <memory>
 #include <vector>
 
-#include "dirt_sensor.h"
-#include "wall_sensor.h"
-#include "position.h"
-#include "enums.h"
+#include "common/dirt_sensor.h"
+#include "common/wall_sensor.h"
+#include "common/position.h"
+#include "common/enums.h"
 
 /**
  * @brief The House class represents the house by means of cleaning operations and house state at robot's current location.
@@ -23,6 +23,7 @@ class House : public WallsSensor, public DirtSensor
     Position current_position;                                        // The current position of the vacuum cleaner.
     Position docking_station_position;                                // The position of the docking station.
     std::size_t total_dirt_count;                                     // The total count of dirt in the environment.
+    std::size_t initial_dirt_count;                                   // The initial total count of dirt (used for scoring)
 
     /**
      * @brief Computes the total dirt count in the house.
@@ -93,6 +94,9 @@ public:
      * @return true if there is a wall, false otherwise.
      */
     bool isWall(Direction) const override;
+
+
+    std::size_t getInitialDirtCount() const { return initial_dirt_count; }
 };
 
 #endif /* HOUSE_H_ */

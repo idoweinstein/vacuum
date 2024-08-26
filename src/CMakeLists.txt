@@ -1,17 +1,17 @@
-cmake_minimum_required(VERSION 3.0.0)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
+add_subdirectory(algorithm)
 
 # Create a library to from source files
 add_library(vacuum_cleaner
-    logger.cc
-    simulator.cc
-    path_tree.cc
-    house.cc
-    algorithm.cc
-    deserializer.cc
-    enum_operators.cc
+    simulator/logger.cc
+    simulator/simulator.cc
+    simulator/house.cc
+    simulator/deserializer.cc
+    simulator/enum_operators.cc
+    simulator/AlgorithmRegistrar.cpp
+    task.cc
+    task_queue.cc
 )
 
 target_include_directories(vacuum_cleaner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

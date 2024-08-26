@@ -6,11 +6,13 @@
 #include <sstream>
 #include <filesystem>
 
+#include "common/enums.h"
+#include "common/position.h"
+
 #include "enum_operators.h"
-#include "position.h"
 #include "logger.h"
 #include "status.h"
-#include "enums.h"
+
 
 /**
  * @class RobotLogger

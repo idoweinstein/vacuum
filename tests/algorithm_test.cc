@@ -3,10 +3,12 @@
 
 #include <iostream>
 
-#include "enum_operators.h"
-#include "algorithm.h"
-#include "position.h"
-#include "enums.h"
+#include "common/position.h"
+#include "common/enums.h"
+
+#include "simulator/enum_operators.h"
+
+#include "algorithm/a/algorithm.h"
 
 namespace
 {

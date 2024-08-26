@@ -5,12 +5,13 @@
 #include <string>
 #include <memory>
 
-#include "abstract_algorithm.h"
-#include "position.h"
+#include "common/abstract_algorithm.h"
+#include "common/enums.h"
+#include "common/position.h"
+
 #include "battery.h"
 #include "status.h"
 #include "house.h"
-#include "enums.h"
 
 /**
  * @brief The Simulator class represents a vacuum cleaning robot.
@@ -29,18 +30,19 @@ class Simulator
         Ready
     };
 
-    std::size_t total_steps_taken = 0;
+    std::size_t total_steps_taken = 0;                  // The total steps taken by the robot.
     SimulatorState state = SimulatorState::Initial;     // Simulator's initialization current state.
     Status mission_status = Status::Working;            // Simulator's mission status.
-    unsigned int max_simulator_steps = 0;               // Maximum number of steps the simulator can perform.
+    std::size_t max_simulator_steps = 0;                // Maximum number of steps the simulator can perform.
     std::unique_ptr<Battery> battery = nullptr;         // Simulator's battery (for charging / discharging and getting battery level).
     std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
     AbstractAlgorithm* algorithm = nullptr;             // Simulator's algorithm to suggest its next steps.
 
     /* Scoring */
     static const std::size_t kDeadPenalty = 2000;        // The penalty for a dead robot.
+    static const std::size_t kTimeoutPenalty = 2000;     // The penalty for an algorithm timeout.
     static const std::size_t kLyingPenalty = 3000;       // The penalty for a lying algorithm.
-    static const std::size_t kNotInDockPenalty = 1000;   // The penalty for finishing not in docking station.
+    static const std::size_t kNotStationPenalty = 1000;  // The penalty for finishing not in station.
     static const std::size_t kDirtFactor = 300;          // The factor for each dirt level in the score.
 
     /**
@@ -76,6 +78,10 @@ public:
     Simulator(const Simulator& simulator) = delete;
     Simulator& operator=(const Simulator& simulator) = delete;
 
+    std::size_t getMaxSteps() const { return max_simulator_steps; }
+
+    std::size_t getTimeoutScore() const { return (2 * max_simulator_steps + house->getInitialDirtCount() * kDirtFactor + kTimeoutPenalty); }
+
     /**
      * @brief Sets the algorithm to be used by the simulator.
      *
@@ -88,10 +94,11 @@ public:
      * @brief Reads the house representation of a given input file.
      *
      * @param house_file_path The file path which the house will be read from.
+     * @param is_logging The flag to enable/disable logging.
      * @throws std::logic_error If the simulator is already fully initialized.
      * @throws std::runtime_error If couldn't open given file.
      */
-    void readHouseFile(const std::string& house_file_path);
+    void readHouseFile(const std::string& house_file_path, bool is_logging = false);
 
     /**
      * @brief Runs the cleaning operation.
@@ -101,9 +108,11 @@ public:
      * 2. the maximum number of steps is reached.
      * 3. vacuum cleaner mapped and cleaned all accessible positions.
      * 
+     * @returns The score of the cleaning mission.
+     * 
      * @throws std::logic_error If the simulator is not properly initialized yet.
      */
-    void run();
+    std::size_t run();
 };
 
 #endif /* ROBOT_SIMULATOR_H_ */

@@ -30,9 +30,7 @@ void Simulator::updateMissionStatus(Step next_step)
 
 void Simulator::move(Step next_step)
 {
-    RobotLogger& logger = RobotLogger::getInstance();
-
-    logger.logRobotStep(next_step);
+    RobotLogger::getInstance().logRobotStep(next_step);
 
     if (Step::Finish == next_step)
     {
@@ -66,15 +64,17 @@ void Simulator::move(Step next_step)
     updateMissionStatus(next_step);
 }
 
-void Simulator::readHouseFile(const std::string& house_file_path)
+void Simulator::readHouseFile(const std::string& house_file_path, bool is_logging)
 {
     if (SimulatorState::Ready == state)
     {
         throw std::logic_error("Called Simulator::readHouseFile() after calling Simulator::setAlgorithm()");
     }
 
-    RobotLogger& logger = RobotLogger::getInstance();
-    logger.initializeLogFile(house_file_path);
+    if (is_logging)
+    {
+        RobotLogger::getInstance().initializeLogFile(house_file_path);
+    }
 
     std::ifstream house_file;
     house_file.open(house_file_path);
@@ -112,7 +112,7 @@ void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
 std::size_t Simulator::calculateScore(Step last_step, std::size_t dirt_count, std::size_t steps_taken, bool is_at_docking_station) const
 {
     std::size_t steps = max_simulator_steps;
-    if (mission_status != Status::Dead && (is_at_docking_station || mission_status == Status::Finished)) {
+    if (mission_status == Status::Finished && is_at_docking_station) {
         steps = steps_taken;
     }
 
@@ -122,20 +122,18 @@ std::size_t Simulator::calculateScore(Step last_step, std::size_t dirt_count, st
     } else if (last_step == Step::Finish && !is_at_docking_station) {
         penalty = kLyingPenalty;
     } else if (!is_at_docking_station) {
-        penalty = kNotInDockPenalty;
+        penalty = kNotStationPenalty;
     }
 
     return steps + dirt_count * kDirtFactor + penalty;
 }
 
-void Simulator::run()
+std::size_t Simulator::run()
 {
     if (SimulatorState::Ready != state)
     {
         throw std::logic_error("Called Simulator::run() before calling Simulator::readHouseFile() or Simulator::setAlgorithm()");
     }
-
-    RobotLogger& logger = RobotLogger::getInstance();
 
     Step next_step;
     while (total_steps_taken <= max_simulator_steps)
@@ -157,5 +155,7 @@ void Simulator::run()
     bool is_at_docking_station = house->isAtDockingStation();
     std::size_t score = calculateScore(next_step, dirt_count, total_steps_taken, is_at_docking_station);
 
-    logger.logCleaningStatistics(total_steps_taken, dirt_count, mission_status, is_at_docking_station, score);
+    RobotLogger::getInstance().logCleaningStatistics(total_steps_taken, house->getTotalDirtCount(), mission_status, is_at_docking_station, score);
+
+    return score;
 }
