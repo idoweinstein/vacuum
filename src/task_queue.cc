@@ -2,8 +2,8 @@
 
 void TaskQueue::createTimer()
 {
-    event_loop_thread = std::jthread([this]() {
-        this->timer_event_context.run();
+    timer_thread = std::jthread([this]() {
+        this->timer_context.run();
     });
 
     /**
@@ -14,46 +14,53 @@ void TaskQueue::createTimer()
 }
 
 TaskQueue::TaskQueue(std::size_t number_of_tasks, std::size_t number_of_threads)
-    : number_of_tasks(number_of_tasks),
+    : num_runnable_tasks(number_of_tasks),
       todo_tasks_counter(number_of_tasks),
       active_threads_semaphore(number_of_threads),
-      work_guard(boost::asio::make_work_guard(timer_event_context))
+      work_guard(boost::asio::make_work_guard(timer_context))
 {
     createTimer();
+}
+
+void TaskQueue::checkTaskInsertion()
+{
+    if (!tasks.back().isRunnable())
+    {
+        tasks.pop_back();
+        num_runnable_tasks--;
+        todo_tasks_counter.count_down();
+    }
 }
 
 void TaskQueue::insertTask(const std::string& algorithm_name,
                            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
                            const std::filesystem::path& house_path)
 {
-    if (tasks.size() >= number_of_tasks)
+    if (tasks.size() >= num_runnable_tasks)
     {
         throw std::out_of_range("TaskQueue::insertTask() was called after all tasks were inserted.");
     }
+
+    static auto taskTearDown = [this]()
+    {
+        this->todo_tasks_counter.count_down();
+        this->active_threads_semaphore.release();
+    };
 
     tasks.emplace_back(
         algorithm_name,
         std::move(algorithm_pointer),
         house_path,
-        timer_event_context,
-        [this]()
-        {
-            this->todo_tasks_counter.count_down();
-            this->active_threads_semaphore.release();
-        }
+        taskTearDown,
+        timer_context
     );
 
-    if (!tasks.back().isRunnable())
-    {
-        tasks.pop_back();
-        number_of_tasks--;
-        todo_tasks_counter.count_down();
-    }
+    checkTaskInsertion();
 }
 
 void TaskQueue::run()
 {
-    if (tasks.size() < number_of_tasks)
+    if (tasks.size() < num_runnable_tasks)
     {
         throw std::logic_error("TaskQueue::run() was called before all tasks were inserted.");
     }
@@ -68,5 +75,5 @@ void TaskQueue::run()
     // Wait for all tasks to finish running (gracefully or due to a timeout).
     todo_tasks_counter.wait();
 
-    timer_event_context.stop();
+    timer_context.stop();
 }

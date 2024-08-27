@@ -13,19 +13,22 @@
 
 class TaskQueue
 {
-    // Queue Metadata
-    std::size_t number_of_tasks;
+    // Queue Synchronization Metadata
+    std::size_t num_runnable_tasks;
     std::latch todo_tasks_counter;
     std::counting_semaphore<> active_threads_semaphore; // An up-to-date counter of the number of active WORKER (task) threads.
 
-    std::jthread event_loop_thread;                     // A thread running the event loop (for task timeouts).
-    boost::asio::io_context timer_event_context;        // Represents the event loop object.
+    // Queue Timing Utilities
+    std::jthread timer_thread;                          // A thread running the event loop (for task timeouts).
+    boost::asio::io_context timer_context;              // Represents the event loop object.
     boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard;    // Prevents event loop from stopping with no active events.
 
     // Queue Contents
     std::list<Task> tasks;                            // The tasks in the queue to be executed.
 
     void createTimer();
+
+    void checkTaskInsertion();
 
 public:
     TaskQueue(std::size_t number_of_tasks, std::size_t number_of_threads);

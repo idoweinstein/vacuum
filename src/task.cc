@@ -15,7 +15,7 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
         {
             task.score = task.simulator.getTimeoutScore();
             pthread_cancel(thread_handler);
-            task.on_teardown();
+            task.onTeardown();
         }
     }
 }
@@ -23,15 +23,15 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
 Task::Task(const std::string& algorithm_name,
            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
            const std::filesystem::path& house_path,
-           boost::asio::io_context& timer_event_context,
-           std::function<void()> on_teardown)
-            : is_runnable(true),
-              algorithm_name(algorithm_name),
-              algorithm_pointer(std::move(algorithm_pointer)),
-              house_name(house_path.stem().string()),
-              is_task_ended(false),
-              runtime_timer(timer_event_context),
-              on_teardown(on_teardown)
+           std::function<void()> onTeardown,
+           boost::asio::io_context& timer_context)
+    : is_runnable(true),
+      algorithm_name(algorithm_name),
+      algorithm_pointer(std::move(algorithm_pointer)),
+      house_name(house_path.stem().string()),
+      is_task_ended(false),
+      onTeardown(onTeardown),
+      runtime_timer(timer_context)
 {
     try
     {
@@ -39,6 +39,7 @@ Task::Task(const std::string& algorithm_name,
         simulator.setAlgorithm(*(this->algorithm_pointer));
         max_duration = simulator.getMaxSteps();
     }
+
     catch(const std::exception& exception)
     {
         is_runnable = false;
@@ -70,16 +71,35 @@ void Task::tearDownTask(std::optional<std::size_t> simulation_score)
     {
         if (simulation_score.has_value())
         {
-            // Simulation finished successuly with NO timeout
+            // Simulation finished successfully (with NO timeout)
             score = simulation_score.value();
         }
 
         else
         {
-            // Simulation failed with NO timeout
+            // Simulation threw an exception (with NO timeout)
             score = simulator.getTimeoutScore();
         }
 
-        on_teardown();
+        onTeardown();
     }
+}
+
+void Task::simulatePair()
+{
+    setUpTask();
+
+    std::optional<std::size_t> simulation_score;
+
+    try
+    {
+        simulation_score = simulator.run();
+    }
+
+    catch(const std::exception& exception)
+    {
+        setAlgorithmError(exception.what());
+    }
+
+    tearDownTask(simulation_score);
 }

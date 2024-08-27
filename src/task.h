@@ -24,56 +24,53 @@ using namespace std::chrono_literals;
  */
 class Task
 {
-    bool is_runnable;
+    // Task Constants
+    inline static const char kSimulationError1[] = "[house=";
+    inline static const char kSimulationError2 = ']';
 
+    bool is_runnable; // Whether or not Task is runnable
+
+    // Task Simulation Data
     const std::string& algorithm_name;
     const std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
     const std::string house_name;
     Simulator simulator;
-    std::size_t score;
 
-    std::size_t max_duration;
+    // Task Execution Data
     std::jthread executing_thread;
     std::atomic<bool> is_task_ended;
+    const std::function<void()> onTeardown;
+
+    // Task Timing Utilities
+    std::size_t max_duration;
     boost::asio::steady_timer runtime_timer;
 
-    const std::function<void()> on_teardown;
-
+    // Task Results
     std::ostringstream algorithm_error_buffer;
+    std::size_t score;
 
     static void timeoutHandler(const boost::system::error_code& error_code,
                                Task& task,
                                pthread_t thread_handler);
+
+    void setAlgorithmError(const std::string& error_message)
+    {
+        algorithm_error_buffer << kSimulationError1 << house_name << kSimulationError2 << error_message << std::endl;
+    }
+
+    void setUpTask();
+
+    void tearDownTask(std::optional<std::size_t> simulation_score);
+
+    void simulatePair();
 
 public:
 
     Task(const std::string& algorithm_name,
          std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
          const std::filesystem::path& house_path,
-         boost::asio::io_context& timer_event_context,
-         std::function<void()> on_teardown);
-
-    void setUpTask();
-
-    void tearDownTask(std::optional<std::size_t> simulation_score);
-
-    void simulatePair()
-    {
-        setUpTask();
-
-        std::optional<std::size_t> simulation_score;
-        // Actual Task
-        try
-        {
-            simulation_score = simulator.run();
-        }
-        catch(const std::exception& exception)
-        {
-            algorithm_error_buffer << "[House=" << house_name << "]" << exception.what() << std::endl;
-        }
-
-        tearDownTask(simulation_score);
-    }
+         std::function<void()> onTeardown,
+         boost::asio::io_context& timer_context);
 
     bool isRunnable() { return is_runnable; }
 
@@ -88,14 +85,6 @@ public:
     std::string getHouseName() const { return house_name; }
 
     std::string getAlgorithmError() const { return algorithm_error_buffer.str(); }
-
-    void join()
-    {
-        if (executing_thread.joinable())
-        {
-            executing_thread.join();
-        }
-    }
 
     void detach()
     {
