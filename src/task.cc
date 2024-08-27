@@ -35,16 +35,14 @@ Task::Task(const std::string& algorithm_name,
     try
     {
         simulator.readHouseFile(house_name);
+        simulator.setAlgorithm(*(this->algorithm_pointer));
+        max_duration = simulator.getMaxSteps();
     }
 
     catch(const std::exception& exception)
     {
         OutputHandler::exportError(house_name, exception.what());
     }
-
-    simulator.setAlgorithm(*algorithm_pointer);
-
-    max_duration = simulator.getMaxSteps();
 }
 
 void Task::setUpTask()

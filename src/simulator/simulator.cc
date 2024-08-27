@@ -2,6 +2,7 @@
 
 #include <string>
 #include <fstream>
+#include <iostream>
 
 #include "enum_operators.h"
 #include "deserializer.h"

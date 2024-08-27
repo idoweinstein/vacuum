@@ -29,20 +29,6 @@ namespace Constants
     const bool default_summary_only = false;
 }
 
-void summarizeScores(TaskQueue& task_queue)
-{
-    // Extract Tasks Scores
-    std::map<std::string, std::map<std::string, std::size_t>> scores;
-    for (auto& task : task_queue)
-    {
-        scores[task.getAlgorithmName()].insert(std::make_pair(task.getHouseName(), task.getScore()));
-        // Detaching tasks after reading their score as an extra measure for stuck thread (although they should be already cancelled).
-        task.detach();
-    }
-
-    OutputHandler::exportSummary(scores);
-}
-
 void handleResults(TaskQueue& task_queue)
 {
     std::map<std::string, std::map<std::string, std::size_t>> task_scores;
@@ -73,23 +59,33 @@ void Main::runAll(const Arguments& arguments)
     InputHandler::openAlgorithms(arguments.algorithm_path, algorithm_handles);
     InputHandler::openHouses(arguments.house_path, house_filenames);
 
+    std::cout << "Finished opening algorithms and houses successfuly!!!" << std::endl;
+    std::cout << "Number of algorithms=" << algorithm_handles.size() << std::endl;
+    std::cout << "Number of houses=" << house_filenames.size() << std::endl;
+
     std::size_t num_of_tasks = algorithm_handles.size() * house_filenames.size();
 
     TaskQueue task_queue(num_of_tasks, arguments.num_threads);
 
     for(const auto& algorithm: AlgorithmRegistrar::getAlgorithmRegistrar())
     {
-        for (const auto& house_name: house_filenames)
+        for (auto house_name: house_filenames)
         {
             task_queue.insertTask(
                 algorithm.name(),
-                std::move(algorithm.create()),
+                algorithm.create(),
                 house_name
             );
         }
     }
 
+    std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "Finished occupying the Tasks Queue!!!" << std::endl;
+
     task_queue.run();
+
+    std::cout << "-------------------------------------------" << std::endl;
+    std::cout << "Finished running Tasks Queue!!!" << std::endl;
 
     handleResults(task_queue);
 
