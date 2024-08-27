@@ -10,7 +10,6 @@
 
 #include "common/enums.h"
 
-#include "simulator/robot_logger.h"
 #include "simulator/deserializer.h"
 #include "simulator/simulator.h"
 
@@ -169,10 +168,6 @@ namespace
 
         void SetUp(const std::string& input_file, const std::string& output_file)
         {
-            RobotLogger& logger = RobotLogger::getInstance();
-
-            logger.initializeLogFile(input_file);
-
             Simulator simulator;
             Algorithm algorithm;
 
@@ -181,13 +176,6 @@ namespace
             simulator.run();
 
             EXPECT_TRUE(deserializer.deserializeOutputFile(output_file));
-        }
-
-        void TearDown() override
-        {
-            RobotLogger& logger = RobotLogger::getInstance();
-
-            logger.deleteAllLogFiles();
         }
 
         RobotState& getRobotState()
@@ -426,9 +414,6 @@ namespace
         Simulator simulator;
         MockAlgorithm mock_algorithm;
 
-        RobotLogger& logger = RobotLogger::getInstance();
-        logger.initializeLogFile("inputs/input_mockalgo_dead.txt");
-
         simulator.readHouseFile("inputs/input_mockalgo_dead.txt");
         simulator.setAlgorithm(mock_algorithm);
 
@@ -443,8 +428,6 @@ namespace
         EXPECT_FALSE(deserializer.robot_state.in_dock);
         // Dead penalty should be applied
         EXPECT_EQ(dead_penalty + mock_algorithm.getMaxSteps(), deserializer.robot_state.score);
-
-        logger.deleteAllLogFiles();
     }
 
     TEST(MockAlgorithm, RobotIsWorking)
@@ -455,9 +438,6 @@ namespace
         OutputDeserializer deserializer;
         Simulator simulator;
         MockAlgorithm mock_algorithm;
-
-        RobotLogger& logger = RobotLogger::getInstance();
-        logger.initializeLogFile("inputs/input_mockalgo_working.txt");
 
         simulator.readHouseFile("inputs/input_mockalgo_working.txt");
         simulator.setAlgorithm(mock_algorithm);
@@ -474,8 +454,6 @@ namespace
         EXPECT_EQ(dirt_factor * deserializer.robot_state.total_dirt_left 
                   + non_docking_penalty
                   + deserializer.robot_state.total_steps_taken, deserializer.robot_state.score);
-
-        logger.deleteAllLogFiles();
     }
 
     /* TODO: this test currently doesn't pass due to an alleged contradiction in guidelines.
@@ -488,8 +466,6 @@ namespace
         Simulator simulator;
         MockAlgorithm mock_algorithm;
 
-        RobotLogger& logger = RobotLogger::getInstance();
-        logger.initializeLogFile("inputs/input_stepstaken.txt");
 
         simulator.readHouseFile("inputs/input_stepstaken.txt");
         simulator.setAlgorithm(mock_algorithm);
@@ -506,7 +482,5 @@ namespace
         EXPECT_EQ(Status::Finished, deserializer.robot_state.status);
         EXPECT_EQ(lying_penalty
                   + mock_algorithm.getMaxSteps(), deserializer.robot_state.score);
-
-        logger.deleteAllLogFiles();
     }
 }
