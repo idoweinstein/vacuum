@@ -22,14 +22,16 @@ struct Arguments
 
 class InputHandler
 {
-    inline static const std::string algorithm_format = ".so"s;
-    inline static const std::string house_format = ".house"s;
+    inline static const std::string kAlgorithmExtension = ".so"s;
+    inline static const std::string kHouseExtension = ".house"s;
 
     static bool parseArgument(const std::string& raw_argument, Arguments& arguments);
 
     static void searchDirectory(const std::string& directory_path_string,
-                                const std::function<bool(const std::filesystem::directory_entry&)>& entry_filter,
-                                const std::function<void(const std::filesystem::path&)>& found_operation);
+                                const std::function<bool(const std::filesystem::directory_entry&)>& foundCriteria,
+                                const std::function<void(const std::filesystem::path&)>& onFound);
+
+    static bool safeDlOpen(void*& handle, const std::filesystem::path& entry_path);
 
 public:
     InputHandler() = delete;
