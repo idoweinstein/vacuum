@@ -11,7 +11,7 @@ void OutputHandler::exportToFile(const std::string& file_name, const std::string
     output_file.open(file_name, std::ios_base::app);
     if (!output_file.is_open())
     {
-        throw std::runtime_error("OutputHandler couldn't open output file \"" + file_name + "\"");
+        throw std::runtime_error("Couldn't open output file \"" + file_name + "\"");
     }
 
     output_file << message << std::endl;
@@ -39,13 +39,14 @@ void OutputHandler::exportSummary(const std::map<std::string, std::map<std::stri
     std::ostringstream summary;
 
     // Insert header
-    summary << "algorithm";
+    summary << "Algorithm";
+
     for (const auto& algorithm_map : scores)
     {
-        for (const auto& house_map : algorithm_map.second)
-        {   
+        for (const auto& house_score : algorithm_map.second)
+        {
             // Insert house name
-            summary << "," << house_map.first;
+            summary << "," << house_score.first;
         }
     }
     summary << std::endl;
@@ -56,9 +57,9 @@ void OutputHandler::exportSummary(const std::map<std::string, std::map<std::stri
         // Insert algorithm name
         summary << algorithm_map.first;
 
-        for (const auto& house_map : algorithm_map.second)
+        for (const auto& house_score : algorithm_map.second)
         {
-            summary << "," << house_map.second;
+            summary << "," << house_score.second;
         }
         summary << std::endl;
     }
