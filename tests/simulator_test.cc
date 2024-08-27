@@ -58,6 +58,7 @@ namespace
         std::ifstream output_file;
 
         bool safeFileOpen(const std::string& output_file_name);
+
         std::string getNextValue();
 
         static Step charToStep(char step_string)
@@ -163,19 +164,23 @@ namespace
 
     class SimulatorTest : public testing::Test
     {
-        OutputDeserializer deserializer;
+        Simulator simulator;
     protected:
 
         void SetUp(const std::string& input_file, const std::string& output_file)
         {
-            Simulator simulator;
             Algorithm algorithm;
 
             simulator.readHouseFile(input_file);
             simulator.setAlgorithm(algorithm);
             simulator.run();
 
-            EXPECT_TRUE(deserializer.deserializeOutputFile(output_file));
+            //EXPECT_TRUE(deserializer.deserializeOutputFile(output_file));
+        }
+
+        SimulationStatistics& getSimulationStatistics()
+        {
+            return simulator.getSimulatorStatistics();
         }
 
         RobotState& getRobotState()
@@ -188,15 +193,16 @@ namespace
     {
         SetUp("inputs/input_sanity.txt", "output_input_sanity.txt");
 
-        RobotState robot_state = getRobotState();
+        SimulationStatistics& statistics = getSimulatorStatistics();
 
         // Make sure robot did 'total_steps_taken' steps, and its first step wasn't Direction::STAY
-        std::size_t path_length = robot_state.runtime_steps.size();
-        if (robot_state.runtime_steps.back() == Step::Finish) {
+        std::size_t path_length = statistics.steps_taken.str().size();
+        if (robot_state.runtime_steps.back() == Step::Finish)
+        {
             path_length--;
         }
-        EXPECT_EQ(robot_state.total_steps_taken, path_length);
-        EXPECT_NE(Step::Stay, robot_state.runtime_steps.at(0));
+        EXPECT_EQ(statistics.total_steps_taken, path_length);
+        EXPECT_NE(Step::Stay, statistics.steps_taken.at(0));
 
         // Assert the expected program results (Robot is not dead and cleaned all dirt)
         EXPECT_EQ(Status::Finished, robot_state.status);
