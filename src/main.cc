@@ -52,6 +52,9 @@ void handleResults(TaskQueue& task_queue)
         // Handle tasks outputs
         OutputHandler::exportStatistics(task.getAlgorithmName(), task.getHouseName(), task.getStatistics());
 
+        // Handle tasks errors
+        OutputHandler::exportError(task.getAlgorithmName(), task.getAlgorithmError());
+
         // Occupy tasks scores
         task_scores[task.getAlgorithmName()].insert(std::make_pair(task.getHouseName(), task.getScore()));
 

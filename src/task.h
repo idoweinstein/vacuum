@@ -37,6 +37,8 @@ class Task
 
     const std::function<void()> on_teardown;
 
+    std::ostringstream algorithm_error_buffer;
+
     static void timeoutHandler(const boost::system::error_code& error_code,
                                Task& task,
                                pthread_t thread_handler);
@@ -65,7 +67,7 @@ public:
         }
         catch(const std::exception& exception)
         {
-            OutputHandler::exportError(algorithm_name, "[House=" + house_name + "]" + exception.what());
+            algorithm_error_buffer << "[House=" << house_name << "]" << exception.what() << std::endl;
         }        
     }
 
@@ -78,6 +80,8 @@ public:
     std::string getAlgorithmName() const { return algorithm_name; }
 
     std::string getHouseName() const { return house_name; }
+
+    std::string getAlgorithmError() const { return algorithm_error_buffer.str(); }
 
     void join()
     {
