@@ -29,7 +29,12 @@ void OutputHandler::exportStatistics(const std::string& algorithm_name,
                     << kStatusField << statistics.mission_status \
                     << kInDockField << (statistics.is_at_docking_station ? "TRUE" : "FALSE") \
                     << kScoreField << statistics.score \
-                    << kStepsField << statistics.steps_taken.str();
+                    << kStepsField;
+
+    for (const auto& step : statistics.steps_taken)
+    {
+        string_stream << step;
+    }
 
     exportToFile(getStatisticsFileName(algorithm_name, house_name), string_stream.str());
 }
