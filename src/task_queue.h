@@ -15,7 +15,7 @@ class TaskQueue
 {
     // Queue Metadata
     std::size_t number_of_tasks;
-    std::latch todo_tasks_counter;                      // An up-to-date counter of the number of tasks left to run.
+    std::latch todo_tasks_counter;
     std::counting_semaphore<> active_threads_semaphore; // An up-to-date counter of the number of active WORKER (task) threads.
 
     std::jthread event_loop_thread;                     // A thread running the event loop (for task timeouts).
@@ -28,11 +28,11 @@ class TaskQueue
     void createTimer();
 
 public:
-    TaskQueue(size_t number_of_tasks, size_t number_of_threads);
+    TaskQueue(std::size_t number_of_tasks, std::size_t number_of_threads);
 
     void insertTask(const std::string& algorithm_name,
                     std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-                    const std::string& house_name);
+                    const std::filesystem::path& house_path);
 
     void run();
 

@@ -1,6 +1,8 @@
 #ifndef INPUT_HANDLER_H_
 #define INPUT_HANDLER_H_
 
+#include "simulator/simulator.h"
+
 #include <filesystem>
 #include <functional>
 #include <cstddef>
@@ -32,7 +34,7 @@ class InputHandler
 public:
     InputHandler() = delete;
 
-    static void openHouses(const std::string& house_directory_path, std::vector<std::string>& house_filenames);
+    static void openHouses(const std::string& house_directory_path, std::vector<std::filesystem::path>& house_paths);
 
     static void openAlgorithms(const std::string& algorithm_directory_path, std::vector<void*>& algorithm_handles);
 

@@ -4,6 +4,8 @@
 
 #include "output_handler.h"
 
+#include <exception>
+
 void InputHandler::searchDirectory(const std::string& directory_path_string,
                                    const std::function<bool(const std::filesystem::directory_entry&)>& entry_filter,
                                    const std::function<void(const std::filesystem::path&)>& found_operation)
@@ -29,7 +31,7 @@ void InputHandler::searchDirectory(const std::string& directory_path_string,
     }
 }
 
-void InputHandler::openHouses(const std::string& house_directory_path, std::vector<std::string>& house_filenames)
+void InputHandler::openHouses(const std::string& house_directory_path, std::vector<std::filesystem::path>& house_paths)
 {
     auto entry_filter = [](const std::filesystem::directory_entry& entry)
         {
@@ -44,9 +46,9 @@ void InputHandler::openHouses(const std::string& house_directory_path, std::vect
             return false;
         };
 
-    auto found_operation = [&house_filenames](const std::filesystem::path& entry_path)
+    auto found_operation = [&house_paths](const std::filesystem::path& house_path)
         {
-            house_filenames.emplace_back(entry_path);
+            house_paths.emplace_back(house_path);
         };
 
     searchDirectory(house_directory_path,

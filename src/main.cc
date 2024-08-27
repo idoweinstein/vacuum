@@ -54,38 +54,28 @@ void handleResults(TaskQueue& task_queue)
 void Main::runAll(const Arguments& arguments)
 {
     std::vector<void*> algorithm_handles;
-    std::vector<std::string> house_filenames;
+    std::vector<std::filesystem::path> house_paths;
 
     InputHandler::openAlgorithms(arguments.algorithm_path, algorithm_handles);
-    InputHandler::openHouses(arguments.house_path, house_filenames);
+    InputHandler::openHouses(arguments.house_path, house_paths);
 
-    std::cout << "Finished opening algorithms and houses successfuly!!!" << std::endl;
-    std::cout << "Number of algorithms=" << algorithm_handles.size() << std::endl;
-    std::cout << "Number of houses=" << house_filenames.size() << std::endl;
-
-    std::size_t num_of_tasks = algorithm_handles.size() * house_filenames.size();
+    std::size_t num_of_tasks = algorithm_handles.size() * house_paths.size();
 
     TaskQueue task_queue(num_of_tasks, arguments.num_threads);
 
-    for(const auto& algorithm: AlgorithmRegistrar::getAlgorithmRegistrar())
+    for(const auto& algorithm : AlgorithmRegistrar::getAlgorithmRegistrar())
     {
-        for (auto house_name: house_filenames)
+        for (const auto& house_path : house_paths)
         {
             task_queue.insertTask(
                 algorithm.name(),
                 algorithm.create(),
-                house_name
+                house_path
             );
         }
     }
 
-    std::cout << "-------------------------------------------" << std::endl;
-    std::cout << "Finished occupying the Tasks Queue!!!" << std::endl;
-
     task_queue.run();
-
-    std::cout << "-------------------------------------------" << std::endl;
-    std::cout << "Finished running Tasks Queue!!!" << std::endl;
 
     handleResults(task_queue);
 

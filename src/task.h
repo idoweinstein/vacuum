@@ -24,9 +24,11 @@ using namespace std::chrono_literals;
  */
 class Task
 {
+    bool is_runnable;
+
     const std::string& algorithm_name;
     const std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
-    const std::string& house_name;
+    const std::string house_name;
     Simulator simulator;
     std::size_t score;
 
@@ -47,29 +49,33 @@ public:
 
     Task(const std::string& algorithm_name,
          std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-         const std::string& house_name,
+         const std::filesystem::path& house_path,
          boost::asio::io_context& timer_event_context,
-         std::function<void()>&& on_teardown);
+         std::function<void()> on_teardown);
 
     void setUpTask();
 
-    void tearDownTask(std::size_t simulation_score);
+    void tearDownTask(std::optional<std::size_t> simulation_score);
 
     void simulatePair()
     {
         setUpTask();
 
+        std::optional<std::size_t> simulation_score;
         // Actual Task
         try
         {
-            std::size_t simulation_score = simulator.run();
-            tearDownTask(simulation_score);
+            simulation_score = simulator.run();
         }
         catch(const std::exception& exception)
         {
             algorithm_error_buffer << "[House=" << house_name << "]" << exception.what() << std::endl;
-        }        
+        }
+
+        tearDownTask(simulation_score);
     }
+
+    bool isRunnable() { return is_runnable; }
 
     void run() { executing_thread = std::jthread(&Task::simulatePair, this); }
 

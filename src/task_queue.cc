@@ -13,7 +13,7 @@ void TaskQueue::createTimer()
      */
 }
 
-TaskQueue::TaskQueue(size_t number_of_tasks, size_t number_of_threads)
+TaskQueue::TaskQueue(std::size_t number_of_tasks, std::size_t number_of_threads)
     : number_of_tasks(number_of_tasks),
       todo_tasks_counter(number_of_tasks),
       active_threads_semaphore(number_of_threads),
@@ -24,7 +24,7 @@ TaskQueue::TaskQueue(size_t number_of_tasks, size_t number_of_threads)
 
 void TaskQueue::insertTask(const std::string& algorithm_name,
                            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-                           const std::string& house_name)
+                           const std::filesystem::path& house_path)
 {
     if (tasks.size() >= number_of_tasks)
     {
@@ -34,7 +34,7 @@ void TaskQueue::insertTask(const std::string& algorithm_name,
     tasks.emplace_back(
         algorithm_name,
         std::move(algorithm_pointer),
-        house_name,
+        house_path,
         timer_event_context,
         [this]()
         {
@@ -42,6 +42,13 @@ void TaskQueue::insertTask(const std::string& algorithm_name,
             this->active_threads_semaphore.release();
         }
     );
+
+    if (!tasks.back().isRunnable())
+    {
+        tasks.pop_back();
+        number_of_tasks--;
+        todo_tasks_counter.count_down();
+    }
 }
 
 void TaskQueue::run()
