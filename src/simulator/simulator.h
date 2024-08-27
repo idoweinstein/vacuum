@@ -69,13 +69,8 @@ class Simulator
 
     /**
      * @brief Calculates the score of the cleaning mission (stores result into SimulationStatistics).
-     * 
-     * @param last_step The last step taken by the robot.
-     * @param dirt_count The total dirt count in the house.
-     * @param steps_taken The total steps taken by the robot.
-     * @param is_at_docking_station Whether the robot is at the docking station.
-     */
-    void calculateScore(Step last_step);
+    */
+    void calculateScore();
 
 public:
     Simulator() = default;

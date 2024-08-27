@@ -105,7 +105,7 @@ void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
     state = SimulatorState::Ready;
 }
 
-void Simulator::calculateScore(Step last_step)
+void Simulator::calculateScore()
 {
     std::size_t steps = max_simulator_steps;
     if (statistics.mission_status == Status::Finished && house->isAtDockingStation())
@@ -119,7 +119,7 @@ void Simulator::calculateScore(Step last_step)
         penalty = kDeadPenalty;
     }
 
-    else if (last_step == Step::Finish && !house->isAtDockingStation())
+    else if (statistics.mission_status == Status::Finished && !house->isAtDockingStation())
     {
         penalty = kLyingPenalty;
     }
@@ -155,6 +155,6 @@ std::size_t Simulator::run()
         }
     }
 
-    calculateScore(next_step);
+    calculateScore();
     return statistics.score;
 }
