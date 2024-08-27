@@ -1,12 +1,11 @@
 #include "main.h"
 
-#include <cstdlib>
-#include <exception>
 #include <map>
-#include <latch>
 #include <string>
 #include <vector>
 #include <thread>
+#include <cstdlib>
+#include <exception>
 
 #include "common/AlgorithmRegistrar.h"
 
@@ -23,10 +22,10 @@ namespace Constants
     constexpr int kAlgoPathArgument = 2;
     constexpr int kHouseFileArgument = 1;
 
-    const std::string default_algorithm_path = ".";
-    const std::string default_house_path = ".";
-    const std::size_t default_num_threads = 10;
-    const bool default_summary_only = false;
+    const std::string kDefaultAlgorithmPath = ".";
+    const std::string kDefaultHousePath = ".";
+    const std::size_t kDefaultNumThreads = 10;
+    const bool kDefaultSummaryOnly = false;
 }
 
 void handleResults(TaskQueue& task_queue)
@@ -86,16 +85,16 @@ void Main::runAll(const Arguments& arguments)
 int main(int argc, char* argv[])
 {
     Arguments arguments = {
-        .house_path = Constants::default_house_path,
-        .algorithm_path = Constants::default_algorithm_path,
-        .num_threads = Constants::default_num_threads,
-        .summary_only = Constants::default_summary_only
+        .house_path = Constants::kDefaultHousePath,
+        .algorithm_path = Constants::kDefaultAlgorithmPath,
+        .num_threads = Constants::kDefaultNumThreads,
+        .summary_only = Constants::kDefaultSummaryOnly
     };
 
     try
     {
-        bool run = InputHandler::parseCmdArguments(argc, argv, arguments);
-        if (run)
+        bool is_success = InputHandler::parseCmdArguments(argc, argv, arguments);
+        if (is_success)
         {
             Main::runAll(arguments);
         }
