@@ -1,6 +1,8 @@
 #ifndef TASK_H_
 #define TASK_H_
 
+#include "output_handler.h"
+
 #include "simulator/simulator.h"
 #include "common/AlgorithmRegistrar.h"
 
@@ -54,25 +56,24 @@ public:
     void simulatePair()
     {
         setUpTask();
-    
+
         // Actual Task
         try
         {
             std::size_t simulation_score = simulator.run();
+            tearDownTask(simulation_score);
         }
         catch(const std::exception& exception)
         {
             OutputHandler::exportError(algorithm_name, "[House=" + house_name + "]" + exception.what());
-        }
-
-        tearDownTask(simulation_score);
+        }        
     }
 
     void run() { executing_thread = std::jthread(&Task::simulatePair, this); }
 
     std::size_t getScore() const { return score; }
 
-    SimulationStatistics getStatistics() const { return simulator.getSimulationStatistics; }
+    SimulationStatistics& getStatistics() { return simulator.getSimulationStatistics(); }
 
     std::string getAlgorithmName() const { return algorithm_name; }
 

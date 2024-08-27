@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-#include "robot_logger.h"
-
 void House::computeTotalDirtCount()
 {
     for (const auto& row : *dirt_map)

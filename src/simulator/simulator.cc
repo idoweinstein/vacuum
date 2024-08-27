@@ -3,8 +3,8 @@
 #include <string>
 #include <fstream>
 
+#include "enum_operators.h"
 #include "deserializer.h"
-#include "robot_logger.h"
 #include "status.h"
 
 void Simulator::updateMissionStatus(Step next_step)
@@ -104,7 +104,7 @@ void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
     state = SimulatorState::Ready;
 }
 
-void Simulator::calculateScore(Step last_step) const
+void Simulator::calculateScore(Step last_step)
 {
     std::size_t steps = max_simulator_steps;
     if (statistics.mission_status == Status::Finished && house->isAtDockingStation())
@@ -154,9 +154,6 @@ std::size_t Simulator::run()
         }
     }
 
-    // std::size_t dirt_count = house->getTotalDirtCount();
-    // bool is_at_docking_station = house->isAtDockingStation();
     calculateScore(next_step);
     return statistics.score;
-    // RobotLogger::getInstance().logCleaningStatistics(total_steps_taken, house->getTotalDirtCount(), mission_status, is_at_docking_station, score);
 }

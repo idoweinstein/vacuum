@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <sstream>
 
 #include "common/abstract_algorithm.h"
 #include "common/enums.h"
@@ -21,7 +22,7 @@ struct SimulationStatistics
     bool is_at_docking_station;                 // Whether or not the robot is at docking station at simulation end (computed on demand).
     Status mission_status = Status::Working;    // Simulation's final mission status (Finished / Working / Dead).
     std::size_t score;                          // Simulation's final score (computed on graceful finish only).
-}
+};
 
 /**
  * @brief The Simulator class represents a vacuum cleaning robot.
@@ -74,7 +75,7 @@ class Simulator
      * @param steps_taken The total steps taken by the robot.
      * @param is_at_docking_station Whether the robot is at the docking station.
      */
-    void calculateScore(Step last_step) const;
+    void calculateScore(Step last_step);
 
 public:
     Simulator() = default;
@@ -90,7 +91,7 @@ public:
 
     std::size_t getTimeoutScore() const { return (2 * max_simulator_steps + house->getInitialDirtCount() * kDirtFactor + kTimeoutPenalty); }
 
-    SimulationStatistics getSimulationStatistics() const
+    SimulationStatistics& getSimulationStatistics()
     {
         statistics.dirt_left = house->getTotalDirtCount();
         statistics.is_at_docking_station = house->isAtDockingStation();

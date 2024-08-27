@@ -1,5 +1,9 @@
 #include "input_handler.h"
 
+#include "algorithm/AlgorithmRegistration.h"
+
+#include "output_handler.h"
+
 void InputHandler::searchDirectory(const std::string& directory_path_string,
                                    const std::function<bool(const std::filesystem::directory_entry&)>& entry_filter,
                                    const std::function<void(const std::filesystem::path&)>& found_operation)
@@ -29,11 +33,11 @@ void InputHandler::openHouses(const std::string& house_directory_path, std::vect
 {
     auto entry_filter = [](const std::filesystem::directory_entry& entry)
         {
-            std::string& entry_name = entry.path().filename().string();
+            std::string entry_name = entry.path().filename().string();
 
             if (!entry.is_regular_file() ||
-                entry_name.length() < Constants::house_format.size() ||
-                entry_name.substr(entry_name.length() - Constants::house_format.size()) != Constants::house_format)
+                entry_name.length() < house_format.size() ||
+                entry_name.substr(entry_name.length() - house_format.size()) != house_format)
             {
                 return true;
             }
@@ -54,11 +58,11 @@ void InputHandler::openAlgorithms(const std::string& algorithm_directory_path, s
 {
     auto entry_filter = [](const std::filesystem::directory_entry& entry)
         {
-            std::string& entry_name = entry.path().filename().string();
+            std::string entry_name = entry.path().filename().string();
 
             if (!entry.is_regular_file() ||
-                entry_name.length() < Constants::algorithm_format.size() ||
-                entry_name.substr(entry_name.length() - Constants::algorithm_format.size()) != Constants::algorithm_format)
+                entry_name.length() < algorithm_format.size() ||
+                entry_name.substr(entry_name.length() - algorithm_format.size()) != algorithm_format)
             {
                 return true;
             }
@@ -72,16 +76,16 @@ void InputHandler::openAlgorithms(const std::string& algorithm_directory_path, s
             void* handle = dlopen(entry_path.c_str(), RTLD_NOW);
             std::size_t post_open_count = AlgorithmRegistrar::getAlgorithmRegistrar().count();
 
-            std::string& algorithm_name = entry_path.stem().string(); 
+            std::string algorithm_name = entry_path.stem().string(); 
 
             if (nullptr == handle)
             {
-                OutputHandler::exportError(algorithm_name), "dlopen() failed!");
+                OutputHandler::exportError(algorithm_name, "dlopen() failed!");
             }
 
             else if (post_open_count != pre_open_count + 1)
             {
-                OutputHandler::exportError(algorithm_name), "dlopen() didn't increase registrar count!")
+                OutputHandler::exportError(algorithm_name, "dlopen() didn't increase registrar count!");
             }
 
             else
@@ -103,32 +107,32 @@ void InputHandler::closeAlgorithms(std::vector<void*>& algorithm_handles)
     }
 }
 
-bool InputHandler::parseArgument(const std::string& raw_argument, Main::arguments& arguments)
+bool InputHandler::parseArgument(const std::string& raw_argument, Arguments& arguments)
 {
-    if (arg.starts_with("-house_path"))\
+    if (raw_argument.starts_with("-house_path"))\
     {
-        args.house_path = arg.substr(arg.find("=") + 1);
+        arguments.house_path = raw_argument.substr(raw_argument.find("=") + 1);
     }
-    else if (arg.starts_with("-algo_path"))
+    else if (raw_argument.starts_with("-algo_path"))
     {
-        args.algo_path = arg.substr(arg.find("=") + 1);
+        arguments.algorithm_path = raw_argument.substr(raw_argument.find("=") + 1);
     }
-    else if (arg.starts_with("-num_threads"))
+    else if (raw_argument.starts_with("-num_threads"))
     {
-        args.num_threads = std::stoi(arg.substr(arg.find("=") + 1));
+        arguments.num_threads = std::stoi(raw_argument.substr(raw_argument.find("=") + 1));
     }
-    else if (arg == "-summary_only")
+    else if (raw_argument == "-summary_only")
     {
-        args.summary_only = true;
+        arguments.summary_only = true;
     }
-    else if (arg.starts_with("-h") || arg.starts_with("-help") || arg.starts_with("--help"))
+    else if (raw_argument.starts_with("-h") || raw_argument.starts_with("-help") || raw_argument.starts_with("--help"))
     {
         OutputHandler::printMessage("Usage: myrobot [-house_path=<path>] [-algo_path=<path>] [-num_threads=<num>] [-summary_only]");
         return false;
     }
     else
     {
-        throw std::invalid_argument("Invalid argument: " + arg);
+        throw std::invalid_argument("Invalid argument: " + raw_argument);
     }
 
     return true;

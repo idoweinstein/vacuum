@@ -24,8 +24,7 @@ TaskQueue::TaskQueue(size_t number_of_tasks, size_t number_of_threads)
 
 void TaskQueue::insertTask(const std::string& algorithm_name,
                            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-                           const std::string& house_file_name,
-                           bool is_logging)
+                           const std::string& house_file_name)
 {
     if (tasks.size() >= number_of_tasks)
     {
@@ -36,7 +35,6 @@ void TaskQueue::insertTask(const std::string& algorithm_name,
         algorithm_name,
         std::move(algorithm_pointer),
         house_file_name,
-        is_logging,
         timer_event_context,
         [this]()
         {

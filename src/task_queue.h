@@ -32,8 +32,7 @@ public:
 
     void insertTask(const std::string& algorithm_name,
                     std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-                    const std::string& house_file_name,
-                    bool is_logging);
+                    const std::string& house_file_name);
 
     void run();
 

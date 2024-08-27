@@ -1,18 +1,19 @@
 #ifndef OUTPUT_HANDLER_H_
 #define OUTPUT_HANDLER_H_
 
+#include <map>
 #include <vector>
 #include <cstddef>
 #include <sstream>
+#include <iostream>
 #include <filesystem>
+
+#include "simulator/enum_operators.h"
+#include "simulator/simulator.h"
+#include "simulator/status.h"
 
 #include "common/enums.h"
 #include "common/position.h"
-
-#include "enum_operators.h"
-#include "simulator.h"
-#include "status.h"
-
 
 /**
  * @class OutputHandler
@@ -20,13 +21,6 @@
  */
 class OutputHandler
 {
-    struct OutputType
-    {
-        STATISTICS,
-        SUMMARY,
-        ERROR
-    };
-
     // Constant OutputHandler strings
     inline static constexpr const char kStepsNumField[] = "NumSteps = ";
     inline static constexpr const char kDirtLeftField[] = "\nDirtLeft = ";
@@ -41,7 +35,7 @@ class OutputHandler
                                              const std::string& house_name)
     { return house_name + "-" + algorithm_name + ".txt"; }
 
-    static void exportToFile(OutputType type, const std::string& file_name, const std::ostringstream& string_stream);
+    static void exportToFile(const std::string& file_name, const std::string& message);
 
     static bool isError(const std::ostringstream& error_buffer) { return !error_buffer.view().empty(); }
 
@@ -54,7 +48,7 @@ public:
 
     static void exportError(const std::string& module_name,
                             const std::string& error_message)
-    { exportToFile(OutputType::ERROR, getErrorFileName(module_name), error_message); }
+    { exportToFile(getErrorFileName(module_name), error_message); }
 
     static void exportStatistics(const std::string& algorithm_name,
                                  const std::string& house_name,

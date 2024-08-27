@@ -39,7 +39,7 @@ Task::Task(const std::string& algorithm_name,
 
     catch(const std::exception& exception)
     {
-        OutputHandler::exportError(house_name, execption.what());
+        OutputHandler::exportError(house_name, exception.what());
     }
 
     simulator.setAlgorithm(*algorithm_pointer);

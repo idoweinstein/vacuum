@@ -1,6 +1,15 @@
 #ifndef INPUT_HANDLER_H_
 #define INPUT_HANDLER_H_
 
+#include <filesystem>
+#include <functional>
+#include <cstddef>
+#include <dlfcn.h>
+#include <vector>
+#include <string>
+
+using namespace std::string_literals;
+
 struct Arguments
 {
     std::string house_path;
@@ -11,7 +20,10 @@ struct Arguments
 
 class InputHandler
 {
-    static bool parseArgument(const std::string& raw_argument, Main::arguments& arguments);
+    inline static const std::string algorithm_format = ".so"s;
+    inline static const std::string house_format = ".house"s;
+
+    static bool parseArgument(const std::string& raw_argument, Arguments& arguments);
 
     static void searchDirectory(const std::string& directory_path_string,
                                 const std::function<bool(const std::filesystem::directory_entry&)>& entry_filter,

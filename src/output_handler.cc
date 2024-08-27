@@ -1,16 +1,20 @@
 #include "output_handler.h"
 
-void OutputHandler::exportToFile(OutputType type, const std::string& file_name, const std::ostringstream& string_stream)
+#include <fstream>
+#include <sstream>
+#include <string>
+
+void OutputHandler::exportToFile(const std::string& file_name, const std::string& message)
 {
     std::ofstream output_file;
 
     output_file.open(file_name, std::ios_base::app);
     if (!output_file.is_open())
     {
-        throw std::runtime_error("OutputHandler couldn't open output file \"" << file_name << "\"");
+        throw std::runtime_error("OutputHandler couldn't open output file \"" + file_name + "\"");
     }
 
-    output_file << string_stream << std::endl;
+    output_file << message << std::endl;
 
     output_file.close();
 }
@@ -24,10 +28,10 @@ void OutputHandler::exportStatistics(const std::string& algorithm_name,
                     << kDirtLeftField << statistics.dirt_left \
                     << kStatusField << statistics.mission_status \
                     << kInDockField << (statistics.is_at_docking_station ? "TRUE" : "FALSE") \
-                    << kScoreField << statistics.scorescore \
+                    << kScoreField << statistics.score \
                     << kStepsField << statistics.steps_taken.str();
 
-    exportToFile(OutputType::STATISTICS, getStatisticsFileName(algorithm_name, house_name), string_stream);
+    exportToFile(getStatisticsFileName(algorithm_name, house_name), string_stream.str());
 }
 
 void OutputHandler::exportSummary(const std::map<std::string, std::map<std::string, std::size_t>>& scores)
@@ -38,7 +42,7 @@ void OutputHandler::exportSummary(const std::map<std::string, std::map<std::stri
     summary << "algorithm";
     for (const auto& algorithm_map : scores)
     {
-        for (const auto& house_map : alogrithm_map.second)
+        for (const auto& house_map : algorithm_map.second)
         {   
             // Insert house name
             summary << "," << house_map.first;
@@ -59,5 +63,5 @@ void OutputHandler::exportSummary(const std::map<std::string, std::map<std::stri
         summary << std::endl;
     }
 
-    exportToFile(OutputType::SUMMARY, "summary.csv", summary);
+    exportToFile("summary.csv", summary.str());
 }
