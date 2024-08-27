@@ -17,7 +17,7 @@
 struct SimulationStatistics
 {
     std::size_t total_steps_taken = 0;          // The total steps taken by the robot.
-    std::ostringstream steps_taken;             // The steps taken by the robot.
+    std::vector<Step> steps_taken;              // The steps taken by the robot.
     std::size_t dirt_left;                      // The dirt amount left at simulation end (computed on demand).
     bool is_at_docking_station;                 // Whether or not the robot is at docking station at simulation end (computed on demand).
     Status mission_status = Status::Working;    // Simulation's final mission status (Finished / Working / Dead).

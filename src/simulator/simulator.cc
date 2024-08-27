@@ -31,7 +31,7 @@ void Simulator::updateMissionStatus(Step next_step)
 
 void Simulator::move(Step next_step)
 {
-    statistics.steps_taken << next_step;
+    statistics.steps_taken.emplace_back(next_step);
 
     if (Step::Finish == next_step)
     {

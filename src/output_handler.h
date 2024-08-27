@@ -24,7 +24,7 @@ class OutputHandler
     // Constant OutputHandler strings
     inline static constexpr const char kStatisticsExtension[] = ".txt";
     inline static constexpr const char kErrorExtension[] = ".error";
-    static constexpr const char kStatisticsSeparator = '-';
+    inline static constexpr const char kStatisticsSeparator = '-';
 
     inline static constexpr const char kStepsNumField[] = "NumSteps = ";
     inline static constexpr const char kDirtLeftField[] = "\nDirtLeft = ";
