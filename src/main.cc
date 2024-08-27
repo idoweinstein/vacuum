@@ -23,8 +23,8 @@ namespace Constants
     constexpr int kAlgoPathArgument = 2;
     constexpr int kHouseFileArgument = 1;
 
-    const std::string& default_algorithm_path = ".";
-    const std::string& default_house_path = ".";
+    const std::string default_algorithm_path = ".";
+    const std::string default_house_path = ".";
     const std::size_t default_num_threads = 10;
     const bool default_summary_only = false;
 }
