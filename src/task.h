@@ -86,6 +86,14 @@ public:
 
     std::string getAlgorithmError() const { return algorithm_error_buffer.str(); }
 
+    void join()
+    {
+        if (executing_thread.joinable())
+        {
+            executing_thread.join();
+        }
+    }
+
     void detach()
     {
         if (executing_thread.joinable())

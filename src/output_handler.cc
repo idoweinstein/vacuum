@@ -44,27 +44,28 @@ void OutputHandler::exportSummary(const std::map<std::string, std::map<std::stri
     std::ostringstream summary;
 
     // Insert header
-    summary << "Algorithm";
+    summary << "Algo \\ House";
 
-    for (const auto& algorithm_map : scores)
+    if (!scores.empty())
     {
-        for (const auto& house_score : algorithm_map.second)
+        auto first_row = scores.begin();
+        for (const auto& house_column : first_row->second)
         {
             // Insert house name
-            summary << "," << house_score.first;
+            summary << "," << house_column.first;
         }
+        summary << std::endl;
     }
-    summary << std::endl;
 
     // Insert scores
-    for (const auto& algorithm_map : scores)
+    for (const auto& algorithm_row : scores)
     {
         // Insert algorithm name
-        summary << algorithm_map.first;
+        summary << algorithm_row.first;
 
-        for (const auto& house_score : algorithm_map.second)
+        for (const auto& house_column : algorithm_row.second)
         {
-            summary << "," << house_score.second;
+            summary << "," << house_column.second;
         }
         summary << std::endl;
     }
