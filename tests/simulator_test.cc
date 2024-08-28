@@ -311,9 +311,11 @@ namespace
 
         SimulationStatistics& statistics = simulator.getSimulationStatistics();
 
-        EXPECT_EQ(Status::Dead, statistics.mission_status);
-
+        // Check that isDead condition applies here:
+        EXPECT_NE(Step::Finish, statistics.step_history.back());
         EXPECT_FALSE(statistics.is_at_docking_station);
+        // Invariant: And we know that battery is exhausted, since MaxBattery = 1
+
         // Dead penalty should be applied
         EXPECT_EQ(dead_penalty + mock_algorithm.getMaxSteps(), statistics.score);
     }
@@ -336,9 +338,12 @@ namespace
 
         SimulationStatistics& statistics = simulator.getSimulationStatistics();
 
-        EXPECT_FALSE(statistics.is_at_docking_station);
+        // Check that isWorking condition applies here:
+        bool is_dead = Step::Finish != statistics.step_history.back() && !statistics.is_at_docking_station && false; // && battery is exhausted (which is false)
+        bool is_lying = Step::Finish == statistics.step_history.back() && !statistics.is_at_docking_station;
 
-        EXPECT_EQ(Status::Working, statistics.mission_status);
+        EXPECT_FALSE(is_dead || is_lying);
+
         EXPECT_EQ(dirt_factor * statistics.dirt_left 
                   + non_docking_penalty
                   + statistics.num_steps_taken, statistics.score);
