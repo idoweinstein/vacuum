@@ -22,14 +22,9 @@
 
 namespace
 {
-    std::array<std::unique_ptr<AbstractAlgorithm>, 2> unique_algo = {
-        std::make_unique<GreedyAlgorithm>(),
-        std::make_unique<DFSAlgorithm>()
-    };
-
-    std::array<AbstractAlgorithm*, 2> raw_algo = {
-        unique_algo.at(0).get(),
-        unique_algo.at(1).get()
+    std::array<AlgorithmFactory, 2> algo_factories = {
+        []() { return std::make_unique<GreedyAlgorithm>(); },
+        []() { return std::make_unique<DFSAlgorithm>(); }
     };
 
     class MockAlgorithm : public AbstractAlgorithm
@@ -54,15 +49,15 @@ namespace
         }
     };
 
-    class SimulatorTest : public testing::TestWithParam<AbstractAlgorithm*>
+    class SimulatorTest : public testing::TestWithParam<AlgorithmFactory>
     {
-        AbstractAlgorithm* algorithm;
+        std::unique_ptr<AbstractAlgorithm> algorithm;
         Simulator simulator;
     protected:
 
         void SetUp(const std::string& input_file)
         {
-            algorithm = GetParam();
+            algorithm = GetParam()();
 
             simulator.readHouseFile(input_file);
             simulator.setAlgorithm(algorithm);
@@ -220,19 +215,21 @@ namespace
 
     TEST_P(SimulatorTest, RobotDeterministic)
     {
-        AbstractAlgorithm* algorithm = GetParam();
+        auto algo_factory = GetParam();
+        std::unique_ptr<AbstractAlgorithm> first_algorithm = algo_factory();
         Simulator first_simulator;
         first_simulator.readHouseFile("inputs/input_sanity.txt");
-        first_simulator.setAlgorithm(*algorithm);
+        first_simulator.setAlgorithm(*first_algorithm);
         first_simulator.run();
 
         SimulationStatistics& first_statistics = first_simulator.getSimulationStatistics();
 
         std::vector<Step> first_runtime_steps(first_statistics.step_history);
 
+        std::unique_ptr<AbstractAlgorithm> second_algorithm = algo_factory();
         Simulator second_simulator;
         second_simulator.readHouseFile("inputs/input_sanity.txt");
-        second_simulator.setAlgorithm(*algorithm);
+        second_simulator.setAlgorithm(*second_algorithm);
         second_simulator.run();
 
         SimulationStatistics& second_statistics = second_simulator.getSimulationStatistics();
@@ -285,13 +282,13 @@ namespace
     INSTANTIATE_TEST_SUITE_P(
         SimulatorTests,                     // Name of the test suite
         SimulatorTest,                      // Name of the test fixture
-        testing::ValuesIn(raw_algo)    // Parameters to pass to the tests
+        testing::ValuesIn(algo_factories)   // Parameters to pass to the tests
     );
 
     TEST(SimulatorAPI, RobotAPICallingOrder)
     {
         Simulator simulator;
-        AbstractAlgorithm* algorithm = raw_algo.at(0);
+        std::unique_ptr<AbstractAlgorithm> algorithm = algo_factories.at(0)();
 
         EXPECT_THROW({
             simulator.setAlgorithm(algorithm);
