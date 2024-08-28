@@ -320,7 +320,7 @@ namespace
         EXPECT_EQ(dead_penalty + mock_algorithm.getMaxSteps(), statistics.score);
     }
 
-    TEST(MockAlgorithm, RobotIsWorking)
+    TEST(MockAlgorithm, RobotIsWorkingNotInDock)
     {
         const std::size_t non_docking_penalty = 1000;
         const std::size_t dirt_factor = 300;
@@ -346,6 +346,33 @@ namespace
 
         EXPECT_EQ(dirt_factor * statistics.dirt_left 
                   + non_docking_penalty
+                  + statistics.num_steps_taken, statistics.score);
+    }
+
+    TEST(MockAlgorithm, RobotIsWorkingInDock)
+    {
+        const std::size_t dirt_factor = 300;
+
+        Simulator simulator;
+        MockAlgorithm mock_algorithm;
+
+        simulator.readHouseFile("inputs/input_mockalgo_working.txt");
+        simulator.setAlgorithm(mock_algorithm);
+
+        ON_CALL(mock_algorithm, nextStep())
+            .WillByDefault(testing::Return(Step::Finish));
+
+        simulator.run();
+
+        SimulationStatistics& statistics = simulator.getSimulationStatistics();
+
+        // Check that isWorking condition applies here:
+        bool is_dead = Step::Finish != statistics.step_history.back() && !statistics.is_at_docking_station && false; // && battery is exhausted (which is false)
+        bool is_lying = Step::Finish == statistics.step_history.back() && !statistics.is_at_docking_station;
+
+        EXPECT_FALSE(is_dead || is_lying);
+
+        EXPECT_EQ(dirt_factor * statistics.dirt_left 
                   + statistics.num_steps_taken, statistics.score);
     }
 
