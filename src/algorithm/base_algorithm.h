@@ -1,5 +1,5 @@
-#ifndef ALGORITHM_H_
-#define ALGORITHM_H_
+#ifndef BASE_ALGORITHM_H_
+#define BASE_ALGORITHM_H_
 
 #include <deque>
 #include <utility>
@@ -19,22 +19,19 @@
 #include "algorithm/path_tree.h"
 
 /**
- * @class Algorithm 
- * @brief The Algorithm class represents an implementation of the navigation algorithm of a vacuum cleaner.
+ * @class BaseAlgorithm 
+ * @brief The BaseAlgorithm class represents an implementation of the navigation algorithm of a vacuum cleaner.
  *
- * The Algorithm class is responsible for managing the movement and navigation of the vacuum cleaner.
+ * The BaseAlgorithm class is responsible for managing the movement and navigation of the vacuum cleaner.
  * It uses various sensors such as BatteryMeter, DirtSensor, and WallsSensor to make decisions about the next step.
  * The navigation system keeps track of the current position, wall map, and a set of positions to visit.
  * It uses a path tree to store the paths explored during navigation.
  *
  * The class provides methods for suggesting the next step and moving the vacuum cleaner in a specific direction.
  */
-class Algorithm : public AbstractAlgorithm
+class BaseAlgorithm : public AbstractAlgorithm
 {
     inline static const Position kDockingStationPosition = {0,0};       // Docking Station (relative) position.
-    inline static const Direction kDirections[] = {                     // Directions of movement.
-        Direction::North, Direction::East, Direction::South, Direction::West
-    };
 
     struct HouseModel
     {
@@ -142,18 +139,6 @@ class Algorithm : public AbstractAlgorithm
     bool getPathByFoundCriteria(const Position& start_position,
                                 std::deque<Direction>& path,
                                 std::function<bool(const Position&)> const & found_criteria);
-
-    /**
-     * @brief Finds a path to the nearest position in the todo_positions set, relatively to a given start_position.
-     *
-     * This method finds a path to the nearest position in the todo_positions set by performing a BFS.
-     *
-     * @param start_position The position to start the path search from.
-     * @param path The path to store the result in.
-     * @return True if a path is found, false otherwise.
-    */
-    bool getPathToNearestTodo(const Position& start_position,
-                              std::deque<Direction>& path);
 
     /**
      * @brief Finds a path to the station position.
@@ -315,15 +300,41 @@ class Algorithm : public AbstractAlgorithm
      */
     void move(Step);
 
+protected:
+    inline static const Direction kDirections[] = {                     // Directions of movement.
+        Direction::North, Direction::East, Direction::South, Direction::West
+    };
+
+    bool isToDoPosition(const Position& position) const { return house.todo_positions.contains(position); }
+
+    /**
+     * @brief Finds a path to the nearest position in the todo_positions set, relatively to a given start_position.
+     *
+     * This method finds a path to the nearest position in the todo_positions set by performing a BFS.
+     *
+     * @param start_position The position to start the path search from.
+     * @param path The path to store the result in.
+     * @return True if a path is found, false otherwise.
+    */
+    bool getPathToNearestTodo(const Position& start_position,
+                              std::deque<Direction>& path);
+
+    bool getPathToPosition(const Position& start_position,
+                           const Position& target_position,
+                           std::deque<Direction>& path);
+
+    virtual bool getPathToNextTarget(const Position& start_position,
+                                     std::deque<Direction>& path) = 0;
+
 public:
-    Algorithm() = default;
+    BaseAlgorithm() = default;
     /**
      * @brief Deleted copy constructor and assignment operator.
      *
      * The copy constructor and assignment operator are deleted to prevent using the 'shallow' raw pointers address copying made by `std::optional`.
      */
-    Algorithm(const Algorithm& algorithm) = delete;
-    Algorithm& operator=(const Algorithm& algorithm) = delete;
+    BaseAlgorithm(const BaseAlgorithm& algorithm) = delete;
+    BaseAlgorithm& operator=(const BaseAlgorithm& algorithm) = delete;
 
     /**
      * @brief Set the maximum number of steps the algorithm can take.
@@ -361,4 +372,4 @@ public:
     Step nextStep() override;
 };
 
-#endif /* ALGORITHM_H_ */
+#endif /* BASE_ALGORITHM_H_ */

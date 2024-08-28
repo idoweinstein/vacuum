@@ -49,7 +49,7 @@ namespace
             Algorithm algorithm;
 
             simulator.readHouseFile(input_file);
-            simulator.setAlgorithm(algorithm);
+            simulator.setAlgorithm(*algorithm);
             simulator.run();
         }
 
@@ -269,10 +269,10 @@ namespace
     TEST(SimulatorAPI, RobotAPICallingOrder)
     {
         Simulator simulator;
-        Algorithm algorithm;
+        auto algorithm = AlgorithmRegistrar::getAlgorithmRegistrar().begin()->create();
 
         EXPECT_THROW({
-            simulator.setAlgorithm(algorithm);
+            simulator.setAlgorithm(*algorithm);
         }, std::logic_error);
 
         EXPECT_THROW({
@@ -285,7 +285,7 @@ namespace
             simulator.run();
         }, std::logic_error);
 
-        simulator.setAlgorithm(algorithm);
+        simulator.setAlgorithm(*algorithm);
 
         EXPECT_THROW({
             simulator.readHouseFile("inputs/input_sanity.txt");

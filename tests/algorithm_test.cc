@@ -8,7 +8,7 @@
 
 #include "simulator/enum_operators.h"
 
-#include "algorithm/a/algorithm.h"
+#include "algorithm/a/greedy_algorithm.h"
 
 namespace
 {
@@ -47,7 +47,7 @@ namespace
         MockDirtSensor dirt_sensor;
         MockWallsSensor wall_sensor;
 
-        Algorithm algorithm;
+        GreedyAlgorithm algorithm;
 
         AlgorithmTest() : battery_meter(), dirt_sensor(), wall_sensor(), algorithm()
         {

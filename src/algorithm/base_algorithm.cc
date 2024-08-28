@@ -1,4 +1,4 @@
-#include "algorithm.h"
+#include "base_algorithm.h"
 
 #include "algorithm/AlgorithmRegistration.h"
 
@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <unordered_set>
 
-std::optional<std::size_t> Algorithm::performBFS(PathTree& path_tree,
+std::optional<std::size_t> BaseAlgorithm::performBFS(PathTree& path_tree,
                                                  std::size_t start_index,
                                                  std::function<bool(const Position&)> const & found_criteria) const
 {
@@ -60,7 +60,7 @@ std::optional<std::size_t> Algorithm::performBFS(PathTree& path_tree,
     return path_end_index;
 }
 
-bool Algorithm::getPathByFoundCriteria(const Position& start_position,
+bool BaseAlgorithm::getPathByFoundCriteria(const Position& start_position,
                                        std::deque<Direction>& path,
                                        std::function<bool(const Position&)> const & found_criteria)
 {
@@ -85,25 +85,32 @@ bool Algorithm::getPathByFoundCriteria(const Position& start_position,
     return true;
 }
 
-bool Algorithm::getPathToNearestTodo(const Position& start_position, std::deque<Direction>& path)
+bool BaseAlgorithm::getPathToNearestTodo(const Position& start_position, std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(start_position,
                                   path,
                                   [this](const Position& position)
-                                  { return house.todo_positions.contains(position); }
+                                  { return isToDoPosition(position); }
     );
 }
 
-bool Algorithm::getPathToStation(std::deque<Direction>& path)
+bool BaseAlgorithm::getPathToPosition(const Position& start_position,
+                                  const Position& target_position,
+                                  std::deque<Direction>& path)
 {
-    return getPathByFoundCriteria(current_tile.position,
+    return getPathByFoundCriteria(start_position,
                                   path,
-                                  [](const Position& position)
-                                  { return kDockingStationPosition == position; }
+                                  [target_position](const Position& position)
+                                  { return target_position == position; }
     );
 }
 
-void Algorithm::sampleWallSensor()
+bool BaseAlgorithm::getPathToStation(std::deque<Direction>& path)
+{
+    return getPathToPosition(current_tile.position, kDockingStationPosition, path);
+}
+
+void BaseAlgorithm::sampleWallSensor()
 {
     for (Direction direction : kDirections)
     {
@@ -128,7 +135,7 @@ void Algorithm::sampleWallSensor()
     house.wall_map[current_tile.position] = false;
 }
 
-void Algorithm::sampleDirtSensor()
+void BaseAlgorithm::sampleDirtSensor()
 {
     current_tile.dirt_level = dirt_sensor.value()->dirtLevel();
 
@@ -143,7 +150,7 @@ void Algorithm::sampleDirtSensor()
     }
 }
 
-bool Algorithm::enoughStepsLeftToClean()
+bool BaseAlgorithm::enoughStepsLeftToClean()
 {
     std::deque<Direction> path;
     bool is_found = getPathToNearestTodo(current_tile.position, path);
@@ -164,7 +171,7 @@ bool Algorithm::enoughStepsLeftToClean()
     return true;
 }
 
-std::size_t Algorithm::getMaxReachableDistance() const
+std::size_t BaseAlgorithm::getMaxReachableDistance() const
 {
     std::size_t max_possible_steps = std::min(battery.full_capacity, max_steps.value());
     if (0 == max_possible_steps)
@@ -181,7 +188,7 @@ std::size_t Algorithm::getMaxReachableDistance() const
     return max_reachable_distance;
 }
 
-bool Algorithm::isCleanedAllReachable()
+bool BaseAlgorithm::isCleanedAllReachable()
 {
     std::deque<Direction> found_path;
     bool is_found = getPathToNearestTodo(kDockingStationPosition, found_path);
@@ -198,7 +205,7 @@ bool Algorithm::isCleanedAllReachable()
     return false;
 }
 
-Step Algorithm::decideNextStep()
+Step BaseAlgorithm::decideNextStep()
 {
     std::deque<Direction> path_to_station;
     bool is_found = getPathToStation(path_to_station);
@@ -235,8 +242,8 @@ Step Algorithm::decideNextStep()
         return getPathNextStep(path_to_station);
     }
 
-    std::deque<Direction> path_to_nearest_todo;
-    is_found = getPathToNearestTodo(current_tile.position, path_to_nearest_todo);
+    std::deque<Direction> path_to_next_target;
+    is_found = getPathToNextTarget(current_tile.position, path_to_next_target);
 
     // If there's no path to a TODO position - go to station
     if (!is_found)
@@ -244,10 +251,10 @@ Step Algorithm::decideNextStep()
         return getPathNextStep(path_to_station);
     }
 
-    return getPathNextStep(path_to_nearest_todo);
+    return getPathNextStep(path_to_next_target);
 }
 
-void Algorithm::move(Step step)
+void BaseAlgorithm::move(Step step)
 {
     if (Step::Finish == step)
     {
@@ -265,29 +272,29 @@ void Algorithm::move(Step step)
     current_tile.position = Position::computePosition(current_tile.position, direction);
 }
 
-void Algorithm::setMaxSteps(std::size_t max_steps)
+void BaseAlgorithm::setMaxSteps(std::size_t max_steps)
 {
     this->max_steps = max_steps;
     total_steps_left = max_steps;
 }
 
-void Algorithm::setWallsSensor(const WallsSensor& walls_sensor)
+void BaseAlgorithm::setWallsSensor(const WallsSensor& walls_sensor)
 {
     this->walls_sensor = &walls_sensor;
 }
 
-void Algorithm::setDirtSensor(const DirtSensor& dirt_sensor)
+void BaseAlgorithm::setDirtSensor(const DirtSensor& dirt_sensor)
 {
     this->dirt_sensor = &dirt_sensor;
 }
 
-void Algorithm::setBatteryMeter(const BatteryMeter& battery_meter)
+void BaseAlgorithm::setBatteryMeter(const BatteryMeter& battery_meter)
 {
     this->battery_meter = &battery_meter;
     battery.full_capacity = battery_meter.getBatteryState();
 }
 
-Step Algorithm::nextStep()
+Step BaseAlgorithm::nextStep()
 {
     assertAllInitialied();
 
@@ -299,5 +306,3 @@ Step Algorithm::nextStep()
 
     return step;
 }
-
-REGISTER_ALGORITHM(Algorithm);

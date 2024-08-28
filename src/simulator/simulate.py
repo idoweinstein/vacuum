@@ -109,13 +109,15 @@ def simulate(max_robot_steps, max_battery_steps, start_position, map, steps, fps
         print_frame(map, current_position, current_battery, max_battery_steps, current_step, max_robot_steps, is_stay)
 
 
-def pase_output_file(output_file):
+def parse_output_file(output_file):
     with output_file as f:
         content = f.read()
 
     regex = (r"""NumSteps\s*=\s*(?P<num_steps>\d+)[\r]?\n""" +
              r"""DirtLeft\s*=\s*(?P<dirt_left>\d+)[\r]?\n""" +
              r"""Status\s*=\s*(?P<status>\w+)[\r]?\n""" +
+             r"""InDock\s*=\s*(?P<in_dock>\w+)[\r]?\n""" +
+             r"""Score\s*=\s*(?P<score>\d+)[\r]?\n""" +
              r"""Steps:[\r]?\n""" +
              r"""(?P<steps>(?:N|E|S|W|s)+)F?[\r]?\n?""")
 
@@ -126,7 +128,7 @@ def pase_output_file(output_file):
 
     d = match.groupdict()
 
-    return int(d['num_steps']), int(d['dirt_left']), d['status'], d['steps']
+    return int(d['num_steps']), int(d['dirt_left']), d['status'], d['in_dock'] == 'TRUE', int(d['score']), d['steps']
 
 
 def parse_house(house):
@@ -194,12 +196,14 @@ def parse_args():
 def main():
     args = parse_args()
     max_robot_steps, max_battery_steps, start_position, map = parse_input_file(args.input_file)
-    num_steps, dirt_left, status, steps = pase_output_file(args.output_file)
+    num_steps, dirt_left, status, in_dock, score, steps = parse_output_file(args.output_file)
     simulate(max_robot_steps, max_battery_steps, start_position, map, steps, args.fps)
     print_empty_line()
     print(f'NumSteps: {num_steps}')
     print(f'DirtLeft: {dirt_left}')
     print(f'Status: {status}')
+    print(f'InDock: {in_dock}')
+    print(f'Score: {score}')
     input('[ Press enter to exit ]')
 
 

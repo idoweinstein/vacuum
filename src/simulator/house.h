@@ -18,8 +18,8 @@ class House : public WallsSensor, public DirtSensor
 {
     static constexpr const unsigned int kDirtCleaningUnit = 1;        // Units of dirt to clean when cleaning a position
 
-    std::unique_ptr<std::vector<std::vector<bool>>> wall_map;         // The map representing the walls in the environment.
-    std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map; // The map representing the dirt levels in the environment.
+    std::vector<std::vector<bool>> wall_map;                          // The map representing the walls in the environment.
+    std::vector<std::vector<unsigned int>> dirt_map;                  // The map representing the dirt levels in the environment.
     Position current_position;                                        // The current position of the vacuum cleaner.
     Position docking_station_position;                                // The position of the docking station.
     std::size_t total_dirt_count;                                     // The total count of dirt in the environment.
@@ -49,8 +49,8 @@ public:
      * @param dirt_map The map representing the dirt levels in the environment.
      * @param docking_station_position The position of the docking station.
      */
-    House(std::unique_ptr<std::vector<std::vector<bool>>>&& wall_map,
-          std::unique_ptr<std::vector<std::vector<unsigned int>>>&& dirt_map,
+    House(std::vector<std::vector<bool>>&& wall_map,
+          std::vector<std::vector<unsigned int>>&& dirt_map,
           const Position& docking_station_position);
     /**
      * @brief Gets the total count of dirt in the environment.
