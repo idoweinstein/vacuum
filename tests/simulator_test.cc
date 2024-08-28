@@ -14,6 +14,7 @@
 #include "common/AlgorithmRegistrar.h"
 #include "common/enums.h"
 
+#include "simulator/enum_operators.h"
 #include "simulator/deserializer.h"
 #include "simulator/simulator.h"
 
@@ -199,6 +200,13 @@ namespace
         SetUp("inputs/input_filledline.txt");
 
         SimulationStatistics& statistics = getSimulationStatistics();
+
+        std::cout << "########### Steps Taken ###########" << std::endl;
+        for (const auto& step : statistics.step_history)
+        {
+            std::cout << step;
+        }
+        std::cout << "###################################" << std::endl;
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
