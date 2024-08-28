@@ -3,20 +3,35 @@
 
 #include <ios>
 #include <regex>
+#include <array>
 #include <string>
 #include <vector>
+#include <memory>
 #include <sstream>
 #include <fstream>
+#include <iostream>
 
+#include "common/AlgorithmRegistrar.h"
 #include "common/enums.h"
 
 #include "simulator/deserializer.h"
 #include "simulator/simulator.h"
 
-#include "algorithm/a/algorithm.h" // TODO: change
+#include "algorithm/a/greedy_algorithm.h" // TODO: change
+#include "algorithm/b/dfs_algorithm.h"
 
 namespace
 {
+    std::array<std::unique_ptr<AbstractAlgorithm>, 2> unique_algo = {
+        std::make_unique<GreedyAlgorithm>(),
+        std::make_unique<DFSAlgorithm>()
+    };
+
+    std::array<AbstractAlgorithm*, 2> raw_algo = {
+        unique_algo.at(0).get(),
+        unique_algo.at(1).get()
+    };
+
     class MockAlgorithm : public AbstractAlgorithm
     {
         unsigned long max_steps = 0;
@@ -39,14 +54,15 @@ namespace
         }
     };
 
-    class SimulatorTest : public testing::Test
+    class SimulatorTest : public testing::TestWithParam<AbstractAlgorithm*>
     {
+        AbstractAlgorithm* algorithm;
         Simulator simulator;
     protected:
 
         void SetUp(const std::string& input_file)
         {
-            Algorithm algorithm;
+            algorithm = GetParam();
 
             simulator.readHouseFile(input_file);
             simulator.setAlgorithm(algorithm);
@@ -59,7 +75,7 @@ namespace
         }
     };
 
-    TEST_F(SimulatorTest, RobotSanity)
+    TEST_P(SimulatorTest, RobotSanity)
     {
         SetUp("inputs/input_sanity.txt");
 
@@ -80,7 +96,7 @@ namespace
         EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotTrappedDirt)
+    TEST_P(SimulatorTest, RobotTrappedDirt)
     {
         SetUp("inputs/input_trappeddirt.txt");
 
@@ -93,7 +109,7 @@ namespace
         EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotMaze)
+    TEST_P(SimulatorTest, RobotMaze)
     {
         SetUp("inputs/input_maze.txt");
 
@@ -105,7 +121,7 @@ namespace
         EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotMinimalBatteryToComplete)
+    TEST_P(SimulatorTest, RobotMinimalBatteryToComplete)
     {
         SetUp("inputs/input_minbattery.txt");
 
@@ -136,7 +152,7 @@ namespace
         EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotTooDistantDirt)
+    TEST_P(SimulatorTest, RobotTooDistantDirt)
     {
         SetUp("inputs/input_distantdirt.txt");
 
@@ -152,7 +168,7 @@ namespace
         EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotAllCharacters)
+    TEST_P(SimulatorTest, RobotAllCharacters)
     {
         SetUp("inputs/input_allchars.txt");
 
@@ -164,21 +180,21 @@ namespace
         EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotNoHouse)
+    TEST_P(SimulatorTest, RobotNoHouse)
     {
         EXPECT_THROW({
             SetUp("inputs/input_nohouse.txt");
         }, std::runtime_error);
     }
 
-    TEST_F(SimulatorTest, RobotNoDockingStation)
+    TEST_P(SimulatorTest, RobotNoDockingStation)
     {
         EXPECT_THROW({
             SetUp("inputs/input_nodock.txt");
         }, std::runtime_error);
     }
 
-    TEST_F(SimulatorTest, RobotFilledLine)
+    TEST_P(SimulatorTest, RobotFilledLine)
     {
         SetUp("inputs/input_filledline.txt");
 
@@ -190,7 +206,7 @@ namespace
         EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotFilledCol)
+    TEST_P(SimulatorTest, RobotFilledCol)
     {
         SetUp("inputs/input_filledcol.txt");
 
@@ -202,22 +218,21 @@ namespace
         EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotDeterministic)
+    TEST_P(SimulatorTest, RobotDeterministic)
     {
-        Algorithm algorithm;
+        AbstractAlgorithm* algorithm = GetParam();
         Simulator first_simulator;
         first_simulator.readHouseFile("inputs/input_sanity.txt");
-        first_simulator.setAlgorithm(algorithm);
+        first_simulator.setAlgorithm(*algorithm);
         first_simulator.run();
 
         SimulationStatistics& first_statistics = first_simulator.getSimulationStatistics();
 
         std::vector<Step> first_runtime_steps(first_statistics.step_history);
 
-        Algorithm sec_algo;
         Simulator second_simulator;
         second_simulator.readHouseFile("inputs/input_sanity.txt");
-        second_simulator.setAlgorithm(sec_algo);
+        second_simulator.setAlgorithm(*algorithm);
         second_simulator.run();
 
         SimulationStatistics& second_statistics = second_simulator.getSimulationStatistics();
@@ -234,7 +249,7 @@ namespace
         EXPECT_TRUE(second_statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotImmediateFinish)
+    TEST_P(SimulatorTest, RobotImmediateFinish)
     {
         const std::size_t total_dirt = 45;
         const std::size_t dirt_factor = 300;
@@ -252,7 +267,7 @@ namespace
         EXPECT_EQ(total_dirt * dirt_factor, statistics.score);
     }
 
-    TEST_F(SimulatorTest, RobotStepsTaken)
+    TEST_P(SimulatorTest, RobotStepsTaken)
     {
         SetUp("inputs/input_stepstaken.txt");
 
@@ -266,10 +281,17 @@ namespace
         EXPECT_EQ(statistics.num_steps_taken, statistics.score);
     }
 
+    // Instantiate the test suite with the object pointers
+    INSTANTIATE_TEST_SUITE_P(
+        SimulatorTests,                     // Name of the test suite
+        SimulatorTest,                      // Name of the test fixture
+        testing::ValuesIn(raw_algo)    // Parameters to pass to the tests
+    );
+
     TEST(SimulatorAPI, RobotAPICallingOrder)
     {
         Simulator simulator;
-        Algorithm algorithm;
+        AbstractAlgorithm* algorithm = raw_algo.at(0);
 
         EXPECT_THROW({
             simulator.setAlgorithm(algorithm);
