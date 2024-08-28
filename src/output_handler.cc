@@ -24,14 +24,14 @@ void OutputHandler::exportStatistics(const std::string& algorithm_name,
                                      const SimulationStatistics& statistics)
 {
     std::ostringstream string_stream;
-    string_stream << kStepsNumField << statistics.total_steps_taken \
+    string_stream << kStepsNumField << statistics.num_steps_taken \
                     << kDirtLeftField << statistics.dirt_left \
                     << kStatusField << statistics.mission_status \
                     << kInDockField << (statistics.is_at_docking_station ? "TRUE" : "FALSE") \
                     << kScoreField << statistics.score \
                     << kStepsField;
 
-    for (const auto& step : statistics.steps_taken)
+    for (const auto& step : statistics.step_history)
     {
         string_stream << step;
     }

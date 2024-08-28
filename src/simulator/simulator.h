@@ -16,8 +16,8 @@
 
 struct SimulationStatistics
 {
-    std::size_t total_steps_taken = 0;          // The total steps taken by the robot.
-    std::vector<Step> steps_taken;              // The steps taken by the robot.
+    std::size_t num_steps_taken = 0;            // The total number of steps taken by the robot.
+    std::vector<Step> step_history;             // The steps taken by the robot.
     std::size_t dirt_left;                      // The dirt amount left at simulation end (computed on demand).
     bool is_at_docking_station;                 // Whether or not the robot is at docking station at simulation end (computed on demand).
     Status mission_status = Status::Working;    // Simulation's final mission status (Finished / Working / Dead).
@@ -67,10 +67,24 @@ class Simulator
      */
     void move(Step next_step);
 
+    // Scoring helper functions
+    bool isDeadScoring(Step last_step)
+    {
+        return (Step::Finish != last_step && battery->isBatteryExhausted() && !house->isAtDockingStation());
+    }
+
+    bool isLyingScoring(Step last_step)
+    {
+        return (Step::Finish == last_step && !house->isAtDockingStation());
+    }
+
     /**
      * @brief Calculates the score of the cleaning mission (stores result into SimulationStatistics).
+     * 
+     * A link to a further explanation about the scoring method:
+     * https://moodle.tau.ac.il/mod/forum/discuss.php?d=109220
     */
-    void calculateScore();
+    void calculateScore(Step last_step);
 
 public:
     Simulator() = default;

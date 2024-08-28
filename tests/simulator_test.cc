@@ -66,13 +66,13 @@ namespace
         SimulationStatistics& statistics = getSimulationStatistics();
 
         // Make sure robot did 'total_steps_taken' steps, and its first step wasn't Direction::STAY
-        std::size_t path_length = statistics.steps_taken.size();
-        if (statistics.steps_taken.back() == Step::Finish)
+        std::size_t path_length = statistics.step_history.size();
+        if (statistics.step_history.back() == Step::Finish)
         {
             path_length--;
         }
-        EXPECT_EQ(statistics.total_steps_taken, path_length);
-        EXPECT_NE(Step::Stay, statistics.steps_taken.at(0));
+        EXPECT_EQ(statistics.num_steps_taken, path_length);
+        EXPECT_NE(Step::Stay, statistics.step_history.at(0));
 
         // Assert the expected program results (Robot is not dead and cleaned all dirt)
         EXPECT_EQ(Status::Finished, statistics.mission_status);
@@ -122,7 +122,7 @@ namespace
         };
         size_t expected_steps_num = 4;
 
-        if (expected_steps_num != statistics.steps_taken.size())
+        if (expected_steps_num != statistics.step_history.size())
         {
             FAIL();
             return;
@@ -130,7 +130,7 @@ namespace
 
         for (unsigned int i = 0; i < expected_steps_num; i++)
         {
-            EXPECT_EQ(expected_steps[i], statistics.steps_taken.at(i));
+            EXPECT_EQ(expected_steps[i], statistics.step_history.at(i));
         }
 
         EXPECT_TRUE(statistics.is_at_docking_station);
@@ -145,7 +145,7 @@ namespace
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
 
-        EXPECT_GE(50, statistics.total_steps_taken);
+        EXPECT_GE(50, statistics.num_steps_taken);
 
         EXPECT_EQ(1, statistics.dirt_left);
 
@@ -212,7 +212,7 @@ namespace
 
         SimulationStatistics& first_statistics = first_simulator.getSimulationStatistics();
 
-        std::vector<Step> first_runtime_steps(first_statistics.steps_taken);
+        std::vector<Step> first_runtime_steps(first_statistics.step_history);
 
         Algorithm sec_algo;
         Simulator second_simulator;
@@ -222,7 +222,7 @@ namespace
 
         SimulationStatistics& second_statistics = second_simulator.getSimulationStatistics();
 
-        std::vector<Step> second_runtime_steps(second_statistics.steps_taken);
+        std::vector<Step> second_runtime_steps(second_statistics.step_history);
 
         EXPECT_EQ(first_runtime_steps.size(), second_runtime_steps.size());
 
@@ -246,8 +246,8 @@ namespace
         EXPECT_EQ(Status::Finished, statistics.mission_status);
         EXPECT_EQ(total_dirt, statistics.dirt_left);
         EXPECT_TRUE(statistics.is_at_docking_station);
-        EXPECT_EQ(0, statistics.total_steps_taken);
-        EXPECT_EQ(Step::Finish, statistics.steps_taken.front());
+        EXPECT_EQ(0, statistics.num_steps_taken);
+        EXPECT_EQ(Step::Finish, statistics.step_history.front());
         /* Only dirt should affect score */
         EXPECT_EQ(total_dirt * dirt_factor, statistics.score);
     }
@@ -263,7 +263,7 @@ namespace
         EXPECT_EQ(0, statistics.dirt_left);
         EXPECT_TRUE(statistics.is_at_docking_station);
         /* Only steps should affect score */
-        EXPECT_EQ(statistics.total_steps_taken, statistics.score);
+        EXPECT_EQ(statistics.num_steps_taken, statistics.score);
     }
 
     TEST(SimulatorAPI, RobotAPICallingOrder)
@@ -341,11 +341,13 @@ namespace
         EXPECT_EQ(Status::Working, statistics.mission_status);
         EXPECT_EQ(dirt_factor * statistics.dirt_left 
                   + non_docking_penalty
-                  + statistics.total_steps_taken, statistics.score);
+                  + statistics.num_steps_taken, statistics.score);
     }
 
     /* TODO: this test currently doesn't pass due to an alleged contradiction in guidelines.
-       There's an open issue about it: https://moodle.tau.ac.il/mod/forum/discuss.php?d=96436 */
+       There's an open issue about it: https://moodle.tau.ac.il/mod/forum/discuss.php?d=96436
+       
+       DONE: https://moodle.tau.ac.il/mod/forum/discuss.php?d=109220 */
     TEST(MockAlgorithm, RobotIsLying)
     {
         const std::size_t lying_penalty = 3000;
@@ -365,9 +367,10 @@ namespace
 
         SimulationStatistics& statistics = simulator.getSimulationStatistics();
 
+        // Check that isLying condition applies here:
         EXPECT_FALSE(statistics.is_at_docking_station);
+        EXPECT_EQ(Step::Finish, statistics.step_history.back());
 
-        EXPECT_EQ(Status::Finished, statistics.mission_status);
         EXPECT_EQ(lying_penalty
                   + mock_algorithm.getMaxSteps(), statistics.score);
     }

@@ -31,7 +31,7 @@ void Simulator::updateMissionStatus(Step next_step)
 
 void Simulator::move(Step next_step)
 {
-    statistics.steps_taken.emplace_back(next_step);
+    statistics.step_history.emplace_back(next_step);
 
     if (Step::Finish == next_step)
     {
@@ -60,7 +60,7 @@ void Simulator::move(Step next_step)
     }
  
     house->move(next_step);
-    statistics.total_steps_taken++;
+    statistics.num_steps_taken++;
 
     updateMissionStatus(next_step);
 }
@@ -105,22 +105,20 @@ void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
     state = SimulatorState::Ready;
 }
 
-void Simulator::calculateScore()
+void Simulator::calculateScore(Step last_step)
 {
-    std::size_t steps = max_simulator_steps;
-    if (statistics.mission_status == Status::Finished && house->isAtDockingStation())
-    {
-        steps = statistics.total_steps_taken;
-    }
+    std::size_t steps = statistics.num_steps_taken;
 
     std::size_t penalty = 0;
-    if (statistics.mission_status == Status::Dead)
+    if (isDeadScoring(last_step))
     {
+        steps = max_simulator_steps;
         penalty = kDeadPenalty;
     }
 
-    else if (statistics.mission_status == Status::Finished && !house->isAtDockingStation())
+    else if (isLyingScoring(last_step))
     {
+        steps = max_simulator_steps;
         penalty = kLyingPenalty;
     }
 
@@ -140,10 +138,10 @@ std::size_t Simulator::run()
     }
 
     Step next_step;
-    while (statistics.total_steps_taken <= max_simulator_steps)
+    while (statistics.num_steps_taken <= max_simulator_steps)
     {
         next_step = algorithm->nextStep();
-        if (statistics.total_steps_taken == max_simulator_steps && Step::Finish != next_step)
+        if (statistics.num_steps_taken == max_simulator_steps && Step::Finish != next_step)
         {
             break;
         }
@@ -155,6 +153,6 @@ std::size_t Simulator::run()
         }
     }
 
-    calculateScore();
+    calculateScore(next_step);
     return statistics.score;
 }
