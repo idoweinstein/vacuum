@@ -5,6 +5,7 @@
 #include <vector>
 #include <thread>
 #include <cstdlib>
+#include <iostream>
 #include <exception>
 
 #include "common/AlgorithmRegistrar.h"
@@ -50,17 +51,9 @@ void handleResults(TaskQueue& task_queue)
     OutputHandler::exportSummary(task_scores);
 }
 
-void Main::runAll(const Arguments& arguments)
+void runTaskQueue(std::vector<std::filesystem::path>& house_paths, std::size_t num_tasks, std::size_t num_threads)
 {
-    std::vector<void*> algorithm_handles;
-    std::vector<std::filesystem::path> house_paths;
-
-    InputHandler::openAlgorithms(arguments.algorithm_path, algorithm_handles);
-    InputHandler::openHouses(arguments.house_path, house_paths);
-
-    std::size_t num_of_tasks = algorithm_handles.size() * house_paths.size();
-
-    TaskQueue task_queue(num_of_tasks, arguments.num_threads);
+    TaskQueue task_queue(num_tasks, num_threads);
 
     for(const auto& algorithm : AlgorithmRegistrar::getAlgorithmRegistrar())
     {
@@ -77,6 +70,19 @@ void Main::runAll(const Arguments& arguments)
     task_queue.run();
 
     handleResults(task_queue);
+}
+
+void Main::runAll(const Arguments& arguments)
+{
+    std::vector<void*> algorithm_handles;
+    std::vector<std::filesystem::path> house_paths;
+
+    InputHandler::openAlgorithms(arguments.algorithm_path, algorithm_handles);
+    InputHandler::openHouses(arguments.house_path, house_paths);
+
+    std::size_t num_tasks = algorithm_handles.size() * house_paths.size();
+
+    runTaskQueue(house_paths, num_tasks, arguments.num_threads);
 
     AlgorithmRegistrar::getAlgorithmRegistrar().clear();
     InputHandler::closeAlgorithms(algorithm_handles);
