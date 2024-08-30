@@ -37,7 +37,6 @@ class Simulator
     std::unique_ptr<Battery> battery = nullptr;         // Simulator's battery (for charging / discharging and getting battery level).
     std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
     AbstractAlgorithm* algorithm = nullptr;             // Simulator's algorithm to suggest its next steps.
-    std::string house_name;                             // The path of the house name.
 
     /* Scoring */
     static const std::size_t kDeadPenalty = 2000;        // The penalty for a dead robot.
