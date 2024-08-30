@@ -22,6 +22,7 @@ class PathTree
         std::optional<std::size_t> parent_index;    // Index of the parent node in the path tree.
         Direction direction;                        // Direction from the parent node to this node.
         Position position;                          // Position of this node.
+        std::size_t depth;                          // Distance between this node and the root node.
     };
 
     std::vector<PathNode> node_pool;                // Pool of path nodes.
@@ -103,6 +104,8 @@ public:
      * @return The direction from the parent node to the node.
      */
     Direction getDirection(std::size_t node_index) const { return safeNodeAccess(node_index).direction; }
+
+    std::size_t getDepth(std::size_t node_index) const { return safeNodeAccess(node_index).depth; }
 };
 
 #endif /* PATH_TREE_H_ */

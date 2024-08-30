@@ -10,8 +10,9 @@
 #include <unordered_set>
 
 std::optional<std::size_t> BaseAlgorithm::performBFS(PathTree& path_tree,
-                                                 std::size_t start_index,
-                                                 std::function<bool(const Position&)> const & found_criteria) const
+                                                     std::size_t max_depth,
+                                                     std::size_t start_index,
+                                                     std::function<bool(const Position&)> const & found_criteria) const
 {
     std::unordered_set<Position> visited_positions;
     std::queue<std::size_t> index_queue;
@@ -39,8 +40,9 @@ std::optional<std::size_t> BaseAlgorithm::performBFS(PathTree& path_tree,
 
             bool is_visited = visited_positions.contains(child_position);
             bool is_navigable = house.wall_map.contains(child_position) && !house.wall_map.at(child_position);
+            bool reached_max_depth = path_tree.getDepth(parent_index) >= max_depth;
 
-            if (is_visited || !is_navigable)
+            if (is_visited || !is_navigable || reached_max_depth)
             {
                 continue;
             }
@@ -61,14 +63,15 @@ std::optional<std::size_t> BaseAlgorithm::performBFS(PathTree& path_tree,
 }
 
 bool BaseAlgorithm::getPathByFoundCriteria(const Position& start_position,
-                                       std::deque<Direction>& path,
-                                       std::function<bool(const Position&)> const & found_criteria)
+                                           std::deque<Direction>& path,
+                                           std::function<bool(const Position&)> const & found_criteria,
+                                           std::size_t max_length)
 {
     PathTree path_tree;
 
     std::size_t root_index = path_tree.insertRoot(start_position);
 
-    auto path_end_index = performBFS(path_tree, root_index, found_criteria);
+    auto path_end_index = performBFS(path_tree, max_length, root_index, found_criteria);
     if (!path_end_index.has_value())
     {
         return false;
@@ -85,12 +88,42 @@ bool BaseAlgorithm::getPathByFoundCriteria(const Position& start_position,
     return true;
 }
 
+bool BaseAlgorithm::getPathByFoundCriteria(const Position& start_position,
+                                           std::deque<Direction>& path,
+                                           std::function<bool(const Position&)> const & found_criteria)
+{
+    return getPathByFoundCriteria(start_position, path, found_criteria, getMaxStepsLeftTillReturnToStation());
+}
+
+bool BaseAlgorithm::getPathToNearestTodo(const Position& start_position, std::deque<Direction>& path, std::size_t max_length)
+{
+    return getPathByFoundCriteria(start_position,
+                                  path,
+                                  [this](const Position& position)
+                                  { return isToDoPosition(position); },
+                                  max_length
+    );
+}
+
 bool BaseAlgorithm::getPathToNearestTodo(const Position& start_position, std::deque<Direction>& path)
 {
     return getPathByFoundCriteria(start_position,
                                   path,
                                   [this](const Position& position)
                                   { return isToDoPosition(position); }
+    );
+}
+
+bool BaseAlgorithm::getPathToPosition(const Position& start_position,
+                                  const Position& target_position,
+                                  std::deque<Direction>& path,
+                                  std::size_t max_length)
+{
+    return getPathByFoundCriteria(start_position,
+                                  path,
+                                  [target_position](const Position& position)
+                                  { return target_position == position; },
+                                  max_length
     );
 }
 
@@ -191,7 +224,7 @@ std::size_t BaseAlgorithm::getMaxReachableDistance() const
 bool BaseAlgorithm::isCleanedAllReachable()
 {
     std::deque<Direction> found_path;
-    bool is_found = getPathToNearestTodo(kDockingStationPosition, found_path);
+    bool is_found = getPathToNearestTodo(kDockingStationPosition, found_path, total_steps_left);
     if (!is_found)
     {
         return true;
@@ -200,6 +233,35 @@ bool BaseAlgorithm::isCleanedAllReachable()
     if (getPathDistance(found_path) > getMaxReachableDistance())
     {
         return true;
+    }
+
+    return false;
+}
+
+bool BaseAlgorithm::isValidTargetPath(const std::deque<Direction>& target_path)
+{
+    Position position = current_tile.position;
+    std::size_t steps_to_position = 0;
+
+    for (Direction direction : target_path)
+    {
+        position = Position::computePosition(position, direction);
+
+        std::deque<Direction> path_from_target_to_station;
+        bool found_path_to_station = getPathToPosition(position, kDockingStationPosition, path_from_target_to_station, total_steps_left);
+        if (!found_path_to_station)
+        {
+            throw std::runtime_error("Simulator cannot find path from back to the docking station!");
+        }
+
+        steps_to_position++;
+
+        std::size_t total_steps_required = steps_to_position + 1 + path_from_target_to_station.size();
+
+        if (isToDoPosition(position) && total_steps_required <= getMaxStepsLeftTillReturnToStation())
+        {
+            return true;
+        }
     }
 
     return false;
@@ -246,8 +308,13 @@ Step BaseAlgorithm::decideNextStep()
     is_found = getPathToNextTarget(current_tile.position, path_to_next_target);
 
     // If there's no path to a TODO position - go to station
-    if (!is_found)
+    if (!is_found || !isValidTargetPath(path_to_next_target))
     {
+        if (current_tile.position == kDockingStationPosition)
+        {
+            return Step::Finish;
+        }
+
         return getPathNextStep(path_to_station);
     }
 

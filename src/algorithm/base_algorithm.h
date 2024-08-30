@@ -93,6 +93,7 @@ class BaseAlgorithm : public AbstractAlgorithm
      * @return The index of the found position in the path_tree.
      */
     std::optional<std::size_t> performBFS(PathTree& path_tree,
+                                          std::size_t max_depth,
                                           std::size_t start_index,
                                           std::function<bool(const Position&)> const & found_criteria) const;
 
@@ -134,8 +135,14 @@ class BaseAlgorithm : public AbstractAlgorithm
      * @param start_position The position to start the path search from.
      * @param path The path to store the result in.
      * @param found_criteria The criteria function to determine if a position is found.
+     * @param max_length Maximum length of the path.
      * @return True if a path is found, false otherwise.
     */
+    bool getPathByFoundCriteria(const Position& start_position,
+                                std::deque<Direction>& path,
+                                std::function<bool(const Position&)> const & found_criteria,
+                                std::size_t max_length);
+
     bool getPathByFoundCriteria(const Position& start_position,
                                 std::deque<Direction>& path,
                                 std::function<bool(const Position&)> const & found_criteria);
@@ -305,7 +312,19 @@ protected:
         Direction::North, Direction::East, Direction::South, Direction::West
     };
 
+    /**
+     * @brief Checks if the given target path is valid.
+     *
+     * This method checks if the given target path is valid by checking if the path can be completed within the remaining battery and steps.
+     *
+     * @param target_path The target path to check.
+     * @return True if the target path is valid, false otherwise.
+     */
+    bool isValidTargetPath(const std::deque<Direction>& target_path);
+
     bool isToDoPosition(const Position& position) const { return house.todo_positions.contains(position); }
+
+    std::size_t getMaxStepsLeftTillReturnToStation() const { return std::min(battery.amount_left, total_steps_left); }
 
     /**
      * @brief Finds a path to the nearest position in the todo_positions set, relatively to a given start_position.
@@ -314,10 +333,20 @@ protected:
      *
      * @param start_position The position to start the path search from.
      * @param path The path to store the result in.
+     * @param max_length Maximum length of the path.
      * @return True if a path is found, false otherwise.
     */
     bool getPathToNearestTodo(const Position& start_position,
+                              std::deque<Direction>& path,
+                              std::size_t max_length);
+
+    bool getPathToNearestTodo(const Position& start_position,
                               std::deque<Direction>& path);
+
+    bool getPathToPosition(const Position& start_position,
+                           const Position& target_position,
+                           std::deque<Direction>& path,
+                           std::size_t max_length);
 
     bool getPathToPosition(const Position& start_position,
                            const Position& target_position,
