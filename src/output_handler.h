@@ -47,7 +47,10 @@ class OutputHandler
 public:
     OutputHandler() = delete;
 
-    static void printError(const std::string& error_message) { std::cerr << error_message << std::endl; }
+    static void printError(const std::string& module_name, const std::string& error_message)
+    {
+        std::cerr << "[ ERROR @ " << module_name << " ] " << error_message << std::endl;
+    }
 
     static void printMessage(const std::string& message) { std::cout << message << std::endl; }
 
@@ -56,7 +59,7 @@ public:
         if (isError(error_message))
         {
             exportToFile(getErrorFileName(module_name), error_message);
-            printError(error_message);
+            printError(module_name, error_message);
         }
     }
 

@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 
     catch(const std::exception& exception)
     {
-        OutputHandler::printError(exception.what());
+        OutputHandler::printError("Main", exception.what());
         return EXIT_FAILURE;
     }
 
