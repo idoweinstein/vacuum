@@ -7,7 +7,7 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
                           pthread_t thread_handler)
 {
     // Make sure timer was not cancelled.
-    if (boost::asio::error::operation_aborted != error_code)
+    if (!error_code)
     {
         bool expected_value = false;
         bool is_simulation_timeout = task.is_task_ended.compare_exchange_strong(expected_value, true);
