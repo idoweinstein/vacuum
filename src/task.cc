@@ -56,8 +56,9 @@ void Task::setUpTask()
     // Set-up a timeout timer for the task simulation
     
     runtime_timer.expires_after(boost::asio::chrono::milliseconds(max_duration));
-    runtime_timer.async_wait([&](const boost::system::error_code& error_code) {
-        timeoutHandler(error_code, *this, pthread_self());
+    auto current_thread = pthread_self();
+    runtime_timer.async_wait([this, current_thread](const boost::system::error_code& error_code) {
+        timeoutHandler(error_code, *this, current_thread);
     });
 }
 
