@@ -14,8 +14,8 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
         if (is_simulation_timeout)
         {
             task.score = task.simulator.getTimeoutScore();
-            pthread_cancel(thread_handler);
             task.onTeardown();
+            pthread_cancel(thread_handler);
         }
     }
 }
