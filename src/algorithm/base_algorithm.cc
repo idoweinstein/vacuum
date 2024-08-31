@@ -14,7 +14,6 @@ std::optional<std::size_t> BaseAlgorithm::performBFS(PathTree& path_tree,
                                                      std::size_t start_index,
                                                      std::function<bool(const Position&)> const & found_criteria) const
 {
-    std::unordered_set<Position> visited_positions;
     std::queue<std::size_t> index_queue;
     std::optional<std::size_t> path_end_index;
 
@@ -38,28 +37,32 @@ std::optional<std::size_t> BaseAlgorithm::performBFS(PathTree& path_tree,
             Position parent_position = path_tree.getPosition(parent_index);
             Position child_position = Position::computePosition(parent_position, direction);
 
-            bool is_visited = visited_positions.contains(child_position);
             bool is_navigable = house.wall_map.contains(child_position) && !house.wall_map.at(child_position);
             bool reached_max_depth = path_tree.getDepth(parent_index) >= max_depth;
 
-            if (is_visited || !is_navigable || reached_max_depth)
+            if (!is_navigable || reached_max_depth)
             {
                 continue;
             }
 
-            std::size_t child_index = path_tree.insertChild(parent_index, direction, child_position);
-            index_queue.push(child_index);
-            visited_positions.insert(child_position);
+            std::optional<std::size_t> child_index = path_tree.insertChild(parent_index, direction, child_position, isToDoPosition(child_position));
+            if (!child_index.has_value())
+            {
+                continue;
+            }
 
             if (found_criteria(child_position))
             {
-                path_end_index = child_index;
-                return path_end_index;
+                max_depth = std::min(max_depth, path_tree.getDepth(child_index.value()));
+                path_tree.registerEndNode(child_index.value());
+            } else 
+            {
+                index_queue.push(child_index.value());
             }
         }
     }
 
-    return path_end_index;
+    return path_tree.getBestEndNodeIndex();
 }
 
 bool BaseAlgorithm::getPathByFoundCriteria(const Position& start_position,
