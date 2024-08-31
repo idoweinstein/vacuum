@@ -81,7 +81,7 @@ class BaseAlgorithm : public AbstractAlgorithm
     }
 
     /**
-     * @brief Performs a breadth-first search (BFS) to find a path that satisfies the given found_criteria.
+     * @brief Performs a breadth-first search (BFS) like traversal to find a path that satisfies the given found_criteria.
      *
      * This method performs a BFS starting from the specified start_index in the path_tree.
      * It stops the search when the found_criteria function returns true for a position.
@@ -92,10 +92,10 @@ class BaseAlgorithm : public AbstractAlgorithm
      * @param found_criteria The criteria function to determine if a position is found.
      * @return The index of the found position in the path_tree.
      */
-    std::optional<std::size_t> performBFS(PathTree& path_tree,
-                                          std::size_t max_depth,
-                                          std::size_t start_index,
-                                          std::function<bool(const Position&)> const & found_criteria) const;
+    std::optional<std::size_t> buildPathTree(PathTree& path_tree,
+                                             std::size_t max_depth,
+                                             std::size_t start_index,
+                                             std::function<bool(const Position&)> const & found_criteria) const;
 
     /**
      * @brief Calculates the distance of a path.
@@ -343,6 +343,17 @@ protected:
     bool getPathToNearestTodo(const Position& start_position,
                               std::deque<Direction>& path);
 
+    /**
+      * @brief Finds a path to a given target position, relatively to a given start_position.
+      *
+      * This method finds a path to a given target position by performing a BFS like traversal.
+      *
+      * @param start_position The position to start the path search from.
+      * @param target_position The target position to find a path to.
+      * @param path The path to store the result in.
+      * @param max_length Maximum length of the path.
+      * @return True if a path is found, false otherwise.
+      */
     bool getPathToPosition(const Position& start_position,
                            const Position& target_position,
                            std::deque<Direction>& path,
@@ -352,6 +363,13 @@ protected:
                            const Position& target_position,
                            std::deque<Direction>& path);
 
+    /**
+     * @brief Gets a path to the next target position.
+     *
+     * @param start_position The start position to get the path from.
+     * @param path The path to store the result in.
+     * @return True if a path is found, false otherwise.
+     */
     virtual bool getPathToNextTarget(const Position& start_position,
                                      std::deque<Direction>& path) = 0;
 

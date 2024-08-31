@@ -9,10 +9,10 @@
 #include <stdexcept>
 #include <unordered_set>
 
-std::optional<std::size_t> BaseAlgorithm::performBFS(PathTree& path_tree,
-                                                     std::size_t max_depth,
-                                                     std::size_t start_index,
-                                                     std::function<bool(const Position&)> const & found_criteria) const
+std::optional<std::size_t> BaseAlgorithm::buildPathTree(PathTree& path_tree,
+                                                        std::size_t max_depth,
+                                                        std::size_t start_index,
+                                                        std::function<bool(const Position&)> const & found_criteria) const
 {
     std::queue<std::size_t> index_queue;
     std::optional<std::size_t> path_end_index;
@@ -26,7 +26,7 @@ std::optional<std::size_t> BaseAlgorithm::performBFS(PathTree& path_tree,
 
     index_queue.push(start_index);
 
-    // Perform BFS
+    // Perform BFS like traversal
     while (!index_queue.empty())
     {
         std::size_t parent_index = index_queue.front();
@@ -74,7 +74,7 @@ bool BaseAlgorithm::getPathByFoundCriteria(const Position& start_position,
 
     std::size_t root_index = path_tree.insertRoot(start_position);
 
-    auto path_end_index = performBFS(path_tree, max_length, root_index, found_criteria);
+    auto path_end_index = buildPathTree(path_tree, max_length, root_index, found_criteria);
     if (!path_end_index.has_value())
     {
         return false;
