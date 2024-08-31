@@ -52,7 +52,9 @@ static void openAlgorithms(const std::string &path, std::vector<void*> &algo_han
         void* handle = dlopen(filePath.c_str(), RTLD_NOW);
         if (handle == nullptr)
         {
+            RobotLogger::getInstance().addErrorFile(filename.substr(0, filename.length() - 3) + ".error");
             RobotLogger::getInstance().logError(dlerror());
+            RobotLogger::getInstance().deleteAllErrorFiles();
             continue;
         }
 
@@ -149,10 +151,30 @@ void Main::runAll(const Main::Arguments& args)
         std::map<std::string, std::size_t> house_scores;
         for (const auto& house_filename: house_filenames) {
             RobotLogger::getInstance().deleteAllLogFiles();
+            std::string house_name = std::filesystem::path(house_filename).filename().replace_extension().string();
+
+            if (!args.summary_only)
+            {
+                std::string algo_name = algo.name();
+                std::cout << "Running " << algo_name << " on " << house_name << std::endl;
+                std::string output_file_name = house_name + "-" + algo_name + ".txt";
+                RobotLogger::getInstance().addLogFile(output_file_name);
+            }
 
             Simulator simulator;
 
-            simulator.readHouseFile(house_filename, !args.summary_only);
+            try
+            {
+                simulator.readHouseFile(house_filename);
+            }
+            catch(const std::exception& exception)
+            {
+                RobotLogger::getInstance().addErrorFile(house_name + ".error");
+                house_scores.insert(std::make_pair(house_filename, -1));
+                RobotLogger::getInstance().logError(exception.what());
+                RobotLogger::getInstance().deleteAllErrorFiles();
+                continue;
+            }
 
             auto algorithm = algo.create();
             simulator.setAlgorithm(*algorithm);

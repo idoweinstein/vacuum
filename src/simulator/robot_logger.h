@@ -29,7 +29,6 @@
 class RobotLogger: public Logger
 {
     // Constant RobotLogger strings
-    inline static constexpr const char kOutputFilePrefix[] = "output_";
     inline static constexpr const char kStepsNumField[] = "NumSteps = ";
     inline static constexpr const char kDirtLeftField[] = "\nDirtLeft = ";
     inline static constexpr const char kStatusField[] = "\nStatus = ";
@@ -62,17 +61,6 @@ public:
     {
         std::string file_name = std::filesystem::path(file_path).filename().string();
         return file_name;
-    }
-
-    /**
-     * @brief Add a log file based on the input house file path.
-     * @param house_file_path The path of the input house file.
-     */
-    void initializeLogFile(const std::string& house_file_path)
-    {
-        std::string house_file_name = getFileName(house_file_path);
-        const std::string log_file_name = kOutputFilePrefix + house_file_name;
-        addLogFile(log_file_name);
     }
 
     /**
@@ -122,6 +110,7 @@ public:
      */
     void logError(const std::string& error_message)
     {
+        logMessage(LogLevel::Error, LogOutput::File, error_message);
         logMessage(LogLevel::Error, LogOutput::Console, error_message);
     }
 };

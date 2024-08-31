@@ -10,11 +10,10 @@
 
 #include "common/enums.h"
 
+#include "common/AlgorithmRegistrar.h"
 #include "simulator/robot_logger.h"
 #include "simulator/deserializer.h"
 #include "simulator/simulator.h"
-
-#include "algorithm/a/algorithm.h" // TODO: change
 
 using namespace std::string_literals;
 
@@ -170,14 +169,13 @@ namespace
         void SetUp(const std::string& input_file, const std::string& output_file)
         {
             RobotLogger& logger = RobotLogger::getInstance();
-
-            logger.initializeLogFile(input_file);
+            logger.addLogFile(input_file);
 
             Simulator simulator;
-            Algorithm algorithm;
+            auto algorithm = AlgorithmRegistrar::getAlgorithmRegistrar().begin()->create();
 
             simulator.readHouseFile(input_file);
-            simulator.setAlgorithm(algorithm);
+            simulator.setAlgorithm(*algorithm);
             simulator.run();
 
             EXPECT_TRUE(deserializer.deserializeOutputFile(output_file));
@@ -393,10 +391,10 @@ namespace
     TEST(SimulatorAPI, RobotAPICallingOrder)
     {
         Simulator simulator;
-        Algorithm algorithm;
+        auto algorithm = AlgorithmRegistrar::getAlgorithmRegistrar().begin()->create();
 
         EXPECT_THROW({
-            simulator.setAlgorithm(algorithm);
+            simulator.setAlgorithm(*algorithm);
         }, std::logic_error);
 
         EXPECT_THROW({
@@ -409,7 +407,7 @@ namespace
             simulator.run();
         }, std::logic_error);
 
-        simulator.setAlgorithm(algorithm);
+        simulator.setAlgorithm(*algorithm);
 
         EXPECT_THROW({
             simulator.readHouseFile("inputs/input_sanity.txt");
@@ -427,7 +425,7 @@ namespace
         MockAlgorithm mock_algorithm;
 
         RobotLogger& logger = RobotLogger::getInstance();
-        logger.initializeLogFile("inputs/input_mockalgo_dead.txt");
+        logger.addLogFile("mockalgo_dead.txt");
 
         simulator.readHouseFile("inputs/input_mockalgo_dead.txt");
         simulator.setAlgorithm(mock_algorithm);
@@ -436,7 +434,7 @@ namespace
             .WillByDefault(testing::Return(Step::East));
 
         simulator.run();
-        EXPECT_TRUE(deserializer.deserializeOutputFile("output_input_mockalgo_dead.txt"));
+        EXPECT_TRUE(deserializer.deserializeOutputFile("mockalgo_dead.txt"));
 
         EXPECT_EQ(Status::Dead, deserializer.robot_state.status);
 
@@ -457,7 +455,7 @@ namespace
         MockAlgorithm mock_algorithm;
 
         RobotLogger& logger = RobotLogger::getInstance();
-        logger.initializeLogFile("inputs/input_mockalgo_working.txt");
+        logger.addLogFile("mockalgo_working.txt");
 
         simulator.readHouseFile("inputs/input_mockalgo_working.txt");
         simulator.setAlgorithm(mock_algorithm);
@@ -466,7 +464,7 @@ namespace
             .WillByDefault(testing::Return(Step::South));
 
         simulator.run();
-        EXPECT_TRUE(deserializer.deserializeOutputFile("output_input_mockalgo_working.txt"));
+        EXPECT_TRUE(deserializer.deserializeOutputFile("mockalgo_working.txt.txt"));
 
         EXPECT_FALSE(deserializer.robot_state.in_dock);
 
@@ -489,7 +487,7 @@ namespace
         MockAlgorithm mock_algorithm;
 
         RobotLogger& logger = RobotLogger::getInstance();
-        logger.initializeLogFile("inputs/input_stepstaken.txt");
+        logger.addLogFile("stepstaken.txt");
 
         simulator.readHouseFile("inputs/input_stepstaken.txt");
         simulator.setAlgorithm(mock_algorithm);
@@ -499,7 +497,7 @@ namespace
             .WillOnce(testing::Return(Step::Finish));
 
         simulator.run();
-        EXPECT_TRUE(deserializer.deserializeOutputFile("output_input_stepstaken.txt"));
+        EXPECT_TRUE(deserializer.deserializeOutputFile("stepstaken.txt"));
 
         EXPECT_FALSE(deserializer.robot_state.in_dock);
 

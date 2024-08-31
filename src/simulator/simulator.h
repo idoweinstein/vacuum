@@ -89,11 +89,10 @@ public:
      * @brief Reads the house representation of a given input file.
      *
      * @param house_file_path The file path which the house will be read from.
-     * @param is_logging The flag to enable/disable logging.
      * @throws std::logic_error If the simulator is already fully initialized.
      * @throws std::runtime_error If couldn't open given file.
      */
-    void readHouseFile(const std::string& house_file_path, bool is_logging = false);
+    void readHouseFile(const std::string& house_file_path);
 
     /**
      * @brief Runs the cleaning operation.
