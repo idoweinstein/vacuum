@@ -42,13 +42,13 @@ class House : public WallsSensor, public DirtSensor
     template <typename T> static bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position);
 
 public:
+    House() = default;
+
     House(const House& house) = default;
     House& operator=(const House& house) = default;
 
     House(House&& house) noexcept = default;
     House& operator=(House&& house) noexcept = default;
-
-    House() = default;
 
     /**
      * @brief Constructs a new House object.
@@ -60,6 +60,14 @@ public:
     House(std::vector<std::vector<bool>>&& wall_map,
           std::vector<std::vector<unsigned int>>&& dirt_map,
           const Position& docking_station_position);
+
+    /**
+     * @brief Gets the initial count of dirt in the environment (before any step was taken).
+     *
+     * @return The initial count of dirt.
+     */
+    std::size_t getInitialDirtCount() const { return initial_dirt_count; }
+
     /**
      * @brief Gets the total count of dirt in the environment.
      *
@@ -102,9 +110,6 @@ public:
      * @return true if there is a wall, false otherwise.
      */
     bool isWall(Direction) const override;
-
-
-    std::size_t getInitialDirtCount() const { return initial_dirt_count; }
 };
 
 #endif /* HOUSE_H_ */

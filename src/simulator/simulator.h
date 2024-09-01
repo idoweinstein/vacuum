@@ -15,6 +15,11 @@
 #include "status.h"
 #include "house.h"
 
+/**
+ * @brief The SimulationStatistics struct represents a simulation results statistics report.
+ * 
+ * Some data members of this struct are computed on demand only!
+ */
 struct SimulationStatistics
 {
     std::size_t num_steps_taken = 0;            // The total number of steps taken by the robot.
@@ -67,12 +72,21 @@ class Simulator
      */
     void move(Step next_step);
 
-    // Scoring helper functions
+    /**
+     * @brief Determines whether or not DEAD scoring condition applies.
+     *
+     * @param next_step The next step to be taken.
+     */
     bool isDeadScoring(Step last_step)
     {
         return (Step::Finish != last_step && battery.isBatteryExhausted() && !house.isAtDockingStation());
     }
 
+    /**
+     * @brief Determines whether or not LYING scoring condition applies.
+     *
+     * @param next_step The next step to be taken.
+     */
     bool isLyingScoring(Step last_step)
     {
         return (Step::Finish == last_step && !house.isAtDockingStation());
@@ -81,6 +95,8 @@ class Simulator
     /**
      * @brief Calculates the score of the cleaning mission (stores result into SimulationStatistics).
      * 
+     * @param next_step The next step to be taken.
+     * 
      * A link to a further explanation about the scoring method:
      * https://moodle.tau.ac.il/mod/forum/discuss.php?d=109220
     */
@@ -88,6 +104,7 @@ class Simulator
 
 public:
     Simulator(const HouseFile& house_file);
+
     /**
      * @brief Deleted copy constructor and assignment operator.
      *
@@ -96,10 +113,19 @@ public:
     Simulator(const Simulator& simulator) = delete;
     Simulator& operator=(const Simulator& simulator) = delete;
 
+    /**
+     * @brief Returns the simulation max steps.
+     */
     std::size_t getMaxSteps() const { return max_simulator_steps; }
 
+    /**
+     * @brief Computes the simulation Timeout score (in case needed - on timeout).
+     */
     std::size_t getTimeoutScore() const { return (2 * max_simulator_steps + house.getInitialDirtCount() * kDirtFactor + kTimeoutPenalty); }
 
+    /**
+     * @brief Returns simulation statistics report.
+     */
     const SimulationStatistics& getSimulationStatistics()
     {
         statistics.dirt_left = house.getTotalDirtCount();
@@ -111,6 +137,7 @@ public:
      * @brief Sets the algorithm to be used by the simulator.
      *
      * @param algorithm The algorithm to be used.
+     * 
      * @throws std::logic_error If this function was not called at the beginning of the initialization.
      */
     void setAlgorithm(AbstractAlgorithm& algorithm);

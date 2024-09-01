@@ -22,10 +22,10 @@ class Battery : public BatteryMeter
     float current_amount;                                    // Remaining capacity of the battery (in steps).
 
 public:
+    Battery() = default;
+
     Battery(const Battery& battery) = default;
     Battery& operator=(const Battery& battery) = default;
-
-    Battery() = default;
 
     /**
      * @brief Constructs a new Battery object with the specified full amount of the battery.
