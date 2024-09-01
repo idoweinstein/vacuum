@@ -20,6 +20,7 @@
   ```
   ./bin/myrobot [-house_path=<path>] [-algo_path=<path>] [-num_threads=<num>] [-summary_only]
   ```
+  NOTE: `num_threads` limits the number of "worker" threads (threads which simulate an algorithm - house pair).
 * For example:
   ```
   ./bin/myrobot -house_path=../examples -algo_path=./bin
