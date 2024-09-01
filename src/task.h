@@ -49,6 +49,8 @@ class Task
     std::ostringstream algorithm_error_buffer;
     std::size_t score;
 
+    static void setIdlePriority(pthread_t& thread_handler);
+
     static void timeoutHandler(const boost::system::error_code& error_code,
                                Task& task,
                                pthread_t thread_handler);

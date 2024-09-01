@@ -1,6 +1,15 @@
 #include "task.h"
 
+#include <sched.h>
+
 #include "output_handler.h"
+
+void Task::setIdlePriority(pthread_t& thread_handler)
+{
+    sched_param parameters;
+    parameters.sched_priority = sched_get_priority_min(SCHED_IDLE);
+    pthread_setschedparam(thread_handler, SCHED_IDLE, &parameters);
+}
 
 void Task::timeoutHandler(const boost::system::error_code& error_code,
                           Task& task,
@@ -15,7 +24,7 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
         {
             task.score = task.simulator.getTimeoutScore();
             task.onTeardown();
-            pthread_cancel(thread_handler);
+            setIdlePriority(thread_handler);
         }
     }
 }
@@ -49,12 +58,7 @@ Task::Task(const std::string& algorithm_name,
 
 void Task::setUpTask(boost::asio::steady_timer& runtime_timer)
 {
-    // Make this thread asynchronously cancel-able from another thread
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, nullptr);
-    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, nullptr);
-
     // Set-up a timeout timer for the task simulation
-    
     runtime_timer.expires_after(boost::asio::chrono::milliseconds(max_duration));
     auto current_thread = pthread_self();
     runtime_timer.async_wait([this, current_thread](const boost::system::error_code& error_code) {
