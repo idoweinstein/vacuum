@@ -31,7 +31,7 @@ Task::Task(const std::string& algorithm_name,
       house_name(house_path.stem().string()),
       is_task_ended(false),
       onTeardown(onTeardown),
-      runtime_timer(timer_context)
+      timer_context(timer_context)
 {
     try
     {
@@ -47,7 +47,7 @@ Task::Task(const std::string& algorithm_name,
     }
 }
 
-void Task::setUpTask()
+void Task::setUpTask(boost::asio::steady_timer& runtime_timer)
 {
     // Make this thread asynchronously cancel-able from another thread
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, nullptr);
@@ -62,7 +62,7 @@ void Task::setUpTask()
     });
 }
 
-void Task::tearDownTask(std::optional<std::size_t> simulation_score)
+void Task::tearDownTask(std::optional<std::size_t> simulation_score, boost::asio::steady_timer& runtime_timer)
 {
     runtime_timer.cancel();
 
@@ -88,7 +88,8 @@ void Task::tearDownTask(std::optional<std::size_t> simulation_score)
 
 void Task::simulatePair()
 {
-    setUpTask();
+    boost::asio::steady_timer runtime_timer(timer_context);
+    setUpTask(runtime_timer);
 
     std::optional<std::size_t> simulation_score;
 
@@ -102,5 +103,5 @@ void Task::simulatePair()
         setAlgorithmError(exception.what());
     }
 
-    tearDownTask(simulation_score);
+    tearDownTask(simulation_score, runtime_timer);
 }

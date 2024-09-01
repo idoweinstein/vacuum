@@ -43,7 +43,7 @@ class Task
 
     // Task Timing Utilities
     std::size_t max_duration;
-    boost::asio::steady_timer runtime_timer;
+    boost::asio::io_context& timer_context;
 
     // Task Results
     std::ostringstream algorithm_error_buffer;
@@ -58,9 +58,9 @@ class Task
         algorithm_error_buffer << kSimulationError1 << house_name << kSimulationError2 << error_message << std::endl;
     }
 
-    void setUpTask();
+    void setUpTask(boost::asio::steady_timer& runtime_timer);
 
-    void tearDownTask(std::optional<std::size_t> simulation_score);
+    void tearDownTask(std::optional<std::size_t> simulation_score, boost::asio::steady_timer& runtime_timer);
 
     void simulatePair();
 
