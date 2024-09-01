@@ -46,11 +46,21 @@ file(
 
 # Create tests executables
 add_executable(
-    path_tree_test
+    greedy_path_tree_test
     path_tree_test.cc
 )
-target_link_libraries(path_tree_test
-    algorithm
+target_link_libraries(greedy_path_tree_test
+    greedyalgorithm
+    vacuum_cleaner
+    GTest::gtest_main
+)
+
+add_executable(
+    dfs_path_tree_test
+    path_tree_test.cc
+)
+target_link_libraries(dfs_path_tree_test
+    dfsalgorithm
     vacuum_cleaner
     GTest::gtest_main
 )
@@ -84,7 +94,7 @@ target_link_libraries(deserializer_test
 )
 
 add_executable(
-    algorithm_test
+    greedy_algorithm_test
     algorithm_test.cc
 )
 target_link_libraries(greedy_algorithm_test
@@ -94,16 +104,16 @@ target_link_libraries(greedy_algorithm_test
     GTest::gmock_main
 )
 
-#add_executable(
-#    dfs_algorithm_test
-#    algorithm_test.cc
-#)
-#target_link_libraries(dfs_algorithm_test
-#    dfsalgorithm
-#    vacuum_cleaner
-#    GTest::gtest_main
-#    GTest::gmock_main
-#)
+add_executable(
+    dfs_algorithm_test
+    algorithm_test.cc
+)
+target_link_libraries(dfs_algorithm_test
+    dfsalgorithm
+    vacuum_cleaner
+    GTest::gtest_main
+    GTest::gmock_main
+)
 
 add_executable(
     simulator_test
@@ -119,8 +129,13 @@ target_link_libraries(simulator_test
 
 # Add unit test targets
 add_test(
-    NAME path_tree_test
-    COMMAND path_tree_test
+    NAME greedy_path_tree_test
+    COMMAND greedy_path_tree_test
+)
+
+add_test(
+    NAME dfs_path_tree_test
+    COMMAND dfs_path_tree_test
 )
 
 add_test(
@@ -143,10 +158,10 @@ add_test(
     COMMAND greedy_algorithm_test
 )
 
-# add_test(
-#     NAME greedy_algorithm_test
-#     COMMAND greedy_algorithm_test
-# )
+add_test(
+    NAME dfs_algorithm_test
+    COMMAND dfs_algorithm_test
+)
 
 add_test(
     NAME simulator_test

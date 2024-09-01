@@ -17,7 +17,7 @@
 #include "simulator/deserializer.h"
 #include "simulator/simulator.h"
 
-#include "algorithm/a/greedy_algorithm.h" // TODO: change
+#include "algorithm/a/greedy_algorithm.h"
 #include "algorithm/b/dfs_algorithm.h"
 
 namespace
@@ -60,7 +60,7 @@ namespace
             algorithm = GetParam()();
 
             simulator.readHouseFile(input_file);
-            simulator.setAlgorithm(algorithm);
+            simulator.setAlgorithm(*algorithm);
             simulator.run();
         }
 
@@ -291,7 +291,7 @@ namespace
         std::unique_ptr<AbstractAlgorithm> algorithm = algo_factories.at(0)();
 
         EXPECT_THROW({
-            simulator.setAlgorithm(algorithm);
+            simulator.setAlgorithm(*algorithm);
         }, std::logic_error);
 
         EXPECT_THROW({
@@ -304,7 +304,7 @@ namespace
             simulator.run();
         }, std::logic_error);
 
-        simulator.setAlgorithm(algorithm);
+        simulator.setAlgorithm(*algorithm);
 
         EXPECT_THROW({
             simulator.readHouseFile("inputs/input_sanity.txt");
