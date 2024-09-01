@@ -78,10 +78,13 @@ void runTaskQueue(std::vector<HouseFile>& house_files, std::size_t num_tasks, st
 void Main::runAll(const Arguments& arguments)
 {
     std::vector<void*> algorithm_handles;
+    std::vector<std::filesystem::path> house_paths;
     std::vector<HouseFile> house_files;
 
     InputHandler::openAlgorithms(arguments.algorithm_path, algorithm_handles);
-    InputHandler::openHouses(arguments.house_path, house_files);
+
+    InputHandler::findHouses(arguments.house_path, house_paths);
+    InputHandler::readHouses(house_paths, house_files);
 
     std::size_t num_tasks = algorithm_handles.size() * house_files.size();
 

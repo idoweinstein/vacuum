@@ -37,7 +37,9 @@ class InputHandler
 public:
     InputHandler() = delete;
 
-    static void openHouses(const std::string& house_directory_path, std::vector<HouseFile>& house_files);
+    static void findHouses(const std::string& house_directory_path, std::vector<std::filesystem::path>& house_paths);
+
+    static void readHouses(const std::vector<std::filesystem::path>& house_paths, std::vector<HouseFile>& house_files);
 
     static void openAlgorithms(const std::string& algorithm_directory_path, std::vector<void*>& algorithm_handles);
 

@@ -42,6 +42,7 @@ Task::Task(const std::string& algorithm_name,
       onTeardown(onTeardown),
       timer_context(timer_context)
 {
+    simulator.setAlgorithm(*(this->algorithm_pointer));
     max_duration = simulator.getMaxSteps();
 }
 

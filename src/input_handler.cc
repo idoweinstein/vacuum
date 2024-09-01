@@ -29,7 +29,7 @@ void InputHandler::searchDirectory(const std::string& directory_path_string,
     }
 }
 
-void InputHandler::openHouses(const std::string& house_directory_path, std::vector<HouseFile>& house_files)
+void InputHandler::findHouses(const std::string& house_directory_path, std::vector<std::filesystem::path>& house_paths)
 {
     auto isHouseFile = [](const std::filesystem::directory_entry& entry) -> bool
     {
@@ -40,7 +40,19 @@ void InputHandler::openHouses(const std::string& house_directory_path, std::vect
         return false;
     };
 
-    auto loadHouse = [&house_files](const std::filesystem::path& house_path)
+    auto storeHouse = [&house_paths](const std::filesystem::path& house_path)
+    {
+        house_paths.emplace_back(house_path);
+    };
+
+    searchDirectory(house_directory_path,
+                    isHouseFile,
+                    storeHouse);
+}
+
+void InputHandler::readHouses(const std::vector<std::filesystem::path>& house_paths, std::vector<HouseFile>& house_files)
+{
+    for (const auto& house_path : house_paths)
     {
         house_files.emplace_back();
 
@@ -55,11 +67,7 @@ void InputHandler::openHouses(const std::string& house_directory_path, std::vect
             std::string house_name = house_path.stem().string();
             OutputHandler::exportError(house_name, exception.what());
         }
-    };
-
-    searchDirectory(house_directory_path,
-                    isHouseFile,
-                    loadHouse);
+    }
 }
 
 bool InputHandler::safeDlOpen(void*& handle, const std::filesystem::path& entry_path)
