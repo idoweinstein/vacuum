@@ -1,18 +1,11 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-#include <string>
+#include "input_handler.h"
 
 namespace Main
 {
-    struct Arguments {
-        std::string house_path;
-        std::string algo_path;
-        std::size_t num_threads;
-        bool summary_only;
-    } ;
-
-    void runAll(const Arguments& args);
+    void runAll(const Arguments& arguments);
 }
 
-#endif // MAIN_H_
+#endif /* MAIN_H_ */

@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-#include "robot_logger.h"
-
 void House::computeTotalDirtCount()
 {
     for (const auto& row : dirt_map)
@@ -13,6 +11,8 @@ void House::computeTotalDirtCount()
             total_dirt_count += static_cast<std::size_t>(dirt);
         }
     }
+
+    initial_dirt_count = total_dirt_count;
 }
 
 House::House(std::vector<std::vector<bool>>&& wall_map,

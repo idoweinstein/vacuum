@@ -104,33 +104,23 @@ target_link_libraries(greedy_algorithm_test
     GTest::gmock_main
 )
 
-#add_executable(
-#    dfs_algorithm_test
-#    algorithm_test.cc
-#)
-#target_link_libraries(dfs_algorithm_test
-#    dfsalgorithm
-#    vacuum_cleaner
-#    GTest::gtest_main
-#    GTest::gmock_main
-#)
-
 add_executable(
-    greedy_simulator_test
-    simulator_test.cc
+    dfs_algorithm_test
+    algorithm_test.cc
 )
-target_link_libraries(greedy_simulator_test
-    greedyalgorithm
+target_link_libraries(dfs_algorithm_test
+    dfsalgorithm
     vacuum_cleaner
     GTest::gtest_main
     GTest::gmock_main
 )
 
 add_executable(
-    dfs_simulator_test
+    simulator_test
     simulator_test.cc
 )
-target_link_libraries(dfs_simulator_test
+target_link_libraries(simulator_test
+    greedyalgorithm
     dfsalgorithm
     vacuum_cleaner
     GTest::gtest_main
@@ -168,17 +158,12 @@ add_test(
     COMMAND greedy_algorithm_test
 )
 
-# add_test(
-#     NAME greedy_algorithm_test
-#     COMMAND greedy_algorithm_test
-# )
-
 add_test(
-    NAME greedy_simulator_test
-    COMMAND greedy_simulator_test
+    NAME dfs_algorithm_test
+    COMMAND dfs_algorithm_test
 )
 
 add_test(
-    NAME dfs_simulator_test
-    COMMAND dfs_simulator_test
+    NAME simulator_test
+    COMMAND simulator_test
 )

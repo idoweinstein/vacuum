@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <sstream>
 
 #include "common/abstract_algorithm.h"
 #include "common/enums.h"
@@ -12,6 +13,16 @@
 #include "battery.h"
 #include "status.h"
 #include "house.h"
+
+struct SimulationStatistics
+{
+    std::size_t num_steps_taken = 0;            // The total number of steps taken by the robot.
+    std::vector<Step> step_history;             // The steps taken by the robot.
+    std::size_t dirt_left;                      // The dirt amount left at simulation end (computed on demand).
+    bool is_at_docking_station;                 // Whether or not the robot is at docking station at simulation end (computed on demand).
+    Status mission_status = Status::Working;    // Simulation's final mission status (Finished / Working / Dead).
+    std::size_t score;                          // Simulation's final score (computed on graceful finish only).
+};
 
 /**
  * @brief The Simulator class represents a vacuum cleaning robot.
@@ -30,22 +41,22 @@ class Simulator
         Ready
     };
 
-    std::size_t total_steps_taken = 0;                  // The total steps taken by the robot.
+    SimulationStatistics statistics;                    // Simulation Statistics (some fields are computed on demand)
     SimulatorState state = SimulatorState::Initial;     // Simulator's initialization current state.
-    Status mission_status = Status::Working;            // Simulator's mission status.
-    unsigned int max_simulator_steps = 0;               // Maximum number of steps the simulator can perform.
+    std::size_t max_simulator_steps = 0;                // Maximum number of steps the simulator can perform.
     std::unique_ptr<Battery> battery = nullptr;         // Simulator's battery (for charging / discharging and getting battery level).
     std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
     AbstractAlgorithm* algorithm = nullptr;             // Simulator's algorithm to suggest its next steps.
 
     /* Scoring */
     static const std::size_t kDeadPenalty = 2000;        // The penalty for a dead robot.
+    static const std::size_t kTimeoutPenalty = 2000;     // The penalty for an algorithm timeout.
     static const std::size_t kLyingPenalty = 3000;       // The penalty for a lying algorithm.
     static const std::size_t kNotInDockPenalty = 1000;   // The penalty for finishing not in docking station.
     static const std::size_t kDirtFactor = 300;          // The factor for each dirt level in the score.
 
     /**
-     * @brief Updates the status of the mission.
+     * @brief Updates the status of the mission (stores result into SimulationStatistics).
      *
      * @param next_step The next step to be taken.
      */
@@ -56,16 +67,24 @@ class Simulator
      */
     void move(Step next_step);
 
+    // Scoring helper functions
+    bool isDeadScoring(Step last_step)
+    {
+        return (Step::Finish != last_step && battery->isBatteryExhausted() && !house->isAtDockingStation());
+    }
+
+    bool isLyingScoring(Step last_step)
+    {
+        return (Step::Finish == last_step && !house->isAtDockingStation());
+    }
+
     /**
-     * @brief Calculates the score of the cleaning mission.
+     * @brief Calculates the score of the cleaning mission (stores result into SimulationStatistics).
      * 
-     * @param last_step The last step taken by the robot.
-     * @param dirt_count The total dirt count in the house.
-     * @param steps_taken The total steps taken by the robot.
-     * @param is_at_docking_station Whether the robot is at the docking station.
-     * @return The score of the cleaning mission.
-     */
-    std::size_t calculateScore(Step last_step, std::size_t dirt_count, std::size_t steps_taken, bool is_at_docking_station) const;
+     * A link to a further explanation about the scoring method:
+     * https://moodle.tau.ac.il/mod/forum/discuss.php?d=109220
+    */
+    void calculateScore(Step last_step);
 
 public:
     Simulator() = default;
@@ -76,6 +95,17 @@ public:
      */
     Simulator(const Simulator& simulator) = delete;
     Simulator& operator=(const Simulator& simulator) = delete;
+
+    std::size_t getMaxSteps() const { return max_simulator_steps; }
+
+    std::size_t getTimeoutScore() const { return (2 * max_simulator_steps + house->getInitialDirtCount() * kDirtFactor + kTimeoutPenalty); }
+
+    SimulationStatistics& getSimulationStatistics()
+    {
+        statistics.dirt_left = house->getTotalDirtCount();
+        statistics.is_at_docking_station = house->isAtDockingStation();
+        return statistics;
+    }
 
     /**
      * @brief Sets the algorithm to be used by the simulator.
@@ -102,7 +132,7 @@ public:
      * 2. the maximum number of steps is reached.
      * 3. vacuum cleaner mapped and cleaned all accessible positions.
      * 
-     * @returns The score of the cleaning mission.
+     * @returns The simulation result of the cleaning mission.
      * 
      * @throws std::logic_error If the simulator is not properly initialized yet.
      */
