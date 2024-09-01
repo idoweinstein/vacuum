@@ -20,7 +20,11 @@
   ```
   ./bin/myrobot [-house_path=<path>] [-algo_path=<path>] [-num_threads=<num>] [-summary_only]
   ```
-  NOTE: `num_threads` limits the number of "worker" threads (threads which simulate an algorithm - house pair).
+  `house_path` is the directory path to read house files from.
+  `algo_path` is the directory path to read algorithm files from.
+  `num_threads` limits the number of "worker" threads (threads which simulate an algorithm - house pair).
+  `summary_only` indicates whether or not to generate summary (and errors) only.
+
 * For example:
   ```
   ./bin/myrobot -house_path=../examples -algo_path=./bin
