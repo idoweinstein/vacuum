@@ -29,14 +29,17 @@ namespace Constants
     const bool kDefaultSummaryOnly = false;
 }
 
-void handleResults(TaskQueue& task_queue)
+void handleResults(TaskQueue& task_queue, bool summary_only)
 {
     std::map<std::string, std::map<std::string, std::size_t>> task_scores;
 
     for (auto& task : task_queue)
     {
-        // Handle tasks outputs
-        OutputHandler::exportStatistics(task.getAlgorithmName(), task.getHouseName(), task.getStatistics());
+        if (!summary_only)
+        {
+            // Handle tasks outputs
+            OutputHandler::exportStatistics(task.getAlgorithmName(), task.getHouseName(), task.getStatistics());
+        }
 
         // Handle tasks errors
         OutputHandler::exportError(task.getAlgorithmName(), task.getAlgorithmError());
@@ -51,7 +54,7 @@ void handleResults(TaskQueue& task_queue)
     OutputHandler::exportSummary(task_scores);
 }
 
-void runTaskQueue(std::vector<std::filesystem::path>& house_paths, std::size_t num_tasks, std::size_t num_threads)
+void runTaskQueue(std::vector<std::filesystem::path>& house_paths, std::size_t num_tasks, std::size_t num_threads, bool summary_only)
 {
     TaskQueue task_queue(num_tasks, num_threads);
 
@@ -69,7 +72,7 @@ void runTaskQueue(std::vector<std::filesystem::path>& house_paths, std::size_t n
 
     task_queue.run();
 
-    handleResults(task_queue);
+    handleResults(task_queue, summary_only);
 }
 
 void Main::runAll(const Arguments& arguments)
@@ -82,7 +85,7 @@ void Main::runAll(const Arguments& arguments)
 
     std::size_t num_tasks = algorithm_handles.size() * house_paths.size();
 
-    runTaskQueue(house_paths, num_tasks, arguments.num_threads);
+    runTaskQueue(house_paths, num_tasks, arguments.num_threads, arguments.summary_only);
 
     AlgorithmRegistrar::getAlgorithmRegistrar().clear();
     InputHandler::closeAlgorithms(algorithm_handles);
