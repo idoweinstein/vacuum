@@ -70,13 +70,13 @@ void InputHandler::readHouses(const std::vector<std::filesystem::path>& house_pa
     }
 }
 
-bool InputHandler::safeDlOpen(void*& handle, const std::filesystem::path& entry_path)
+bool InputHandler::safeDlOpen(void*& handle, const std::filesystem::path& file_path)
 {
-    std::string algorithm_name = entry_path.stem().string(); 
+    std::string algorithm_name = file_path.stem().string(); 
 
     std::size_t pre_dlopen_count = AlgorithmRegistrar::getAlgorithmRegistrar().count();
 
-    handle = dlopen(entry_path.c_str(), RTLD_NOW);
+    handle = dlopen(file_path.c_str(), RTLD_NOW);
     if (nullptr == handle)
     {
         OutputHandler::exportError(algorithm_name, "dlopen() failed!");
