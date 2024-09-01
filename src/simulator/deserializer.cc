@@ -98,14 +98,14 @@ std::size_t Deserializer::deserializeMaxSteps(std::istream& input_stream)
     return max_simulator_steps;
 }
 
-std::unique_ptr<Battery> Deserializer::deserializeBattery(std::istream& input_stream)
+Battery Deserializer::deserializeBattery(std::istream& input_stream)
 {
     std::size_t full_battery_capacity = deserializeParameter(input_stream, kMaxBatteryParameter);
 
-    return std::make_unique<Battery>(full_battery_capacity);
+    return Battery(full_battery_capacity);
 }
 
-std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream)
+House Deserializer::deserializeHouse(std::istream& input_stream)
 {
     std::optional<Position> docking_station_position;
 
@@ -182,5 +182,23 @@ std::unique_ptr<House> Deserializer::deserializeHouse(std::istream& input_stream
         throw std::runtime_error("Missing docking station position in house file!");
     }
 
-    return std::make_unique<House>(std::move(wall_map), std::move(dirt_map), docking_station_position.value());
+    return House(std::move(wall_map), std::move(dirt_map), docking_station_position.value());
+}
+
+void Deserializer::readHouseFile(const std::filesystem::path& house_file_path, HouseFile& house_file)
+{
+    std::ifstream raw_house_file;
+    raw_house_file.open(house_file_path);
+
+    if (!raw_house_file.is_open())
+    {
+        throw std::runtime_error("Couldn't open input house file!");
+    }
+
+    house_file.name = house_file_path.stem().string();
+
+    Deserializer::ignoreInternalName(raw_house_file);
+    house_file.max_steps = Deserializer::deserializeMaxSteps(raw_house_file);
+    house_file.battery = Deserializer::deserializeBattery(raw_house_file);
+    house_file.house = std::move(Deserializer::deserializeHouse(raw_house_file));
 }

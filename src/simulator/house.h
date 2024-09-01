@@ -42,6 +42,14 @@ class House : public WallsSensor, public DirtSensor
     template <typename T> static bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position);
 
 public:
+    House(const House& house) = default;
+    House& operator=(const House& house) = default;
+
+    House(House&& house) noexcept = default;
+    House& operator=(House&& house) noexcept = default;
+
+    House() = default;
+
     /**
      * @brief Constructs a new House object.
      *

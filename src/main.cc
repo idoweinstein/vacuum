@@ -54,18 +54,18 @@ void handleResults(TaskQueue& task_queue, bool summary_only)
     OutputHandler::exportSummary(task_scores);
 }
 
-void runTaskQueue(std::vector<std::filesystem::path>& house_paths, std::size_t num_tasks, std::size_t num_threads, bool summary_only)
+void runTaskQueue(std::vector<HouseFile>& house_files, std::size_t num_tasks, std::size_t num_threads, bool summary_only)
 {
     TaskQueue task_queue(num_tasks, num_threads);
 
     for(const auto& algorithm : AlgorithmRegistrar::getAlgorithmRegistrar())
     {
-        for (const auto& house_path : house_paths)
+        for (const auto& house_file : house_files)
         {
             task_queue.insertTask(
                 algorithm.name(),
                 algorithm.create(),
-                house_path
+                house_file
             );
         }
     }
@@ -78,14 +78,14 @@ void runTaskQueue(std::vector<std::filesystem::path>& house_paths, std::size_t n
 void Main::runAll(const Arguments& arguments)
 {
     std::vector<void*> algorithm_handles;
-    std::vector<std::filesystem::path> house_paths;
+    std::vector<HouseFile> house_files;
 
     InputHandler::openAlgorithms(arguments.algorithm_path, algorithm_handles);
-    InputHandler::openHouses(arguments.house_path, house_paths);
+    InputHandler::openHouses(arguments.house_path, house_files);
 
-    std::size_t num_tasks = algorithm_handles.size() * house_paths.size();
+    std::size_t num_tasks = algorithm_handles.size() * house_files.size();
 
-    runTaskQueue(house_paths, num_tasks, arguments.num_threads, arguments.summary_only);
+    runTaskQueue(house_files, num_tasks, arguments.num_threads, arguments.summary_only);
 
     AlgorithmRegistrar::getAlgorithmRegistrar().clear();
     InputHandler::closeAlgorithms(algorithm_handles);

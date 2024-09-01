@@ -8,10 +8,21 @@
 #include <istream>
 #include <optional>
 #include <stdexcept>
+#include <filesystem>
 
 #include "common/position.h"
 
-#include "simulator.h"
+#include "battery.h"
+#include "house.h"
+
+struct HouseFile
+{
+    std::string name;
+
+    std::size_t max_steps;
+    Battery battery;
+    House house;
+};
 
 /**
  * @brief The Deserializer class is responsible for deserializing simulator data from a file.
@@ -95,14 +106,6 @@ class Deserializer
      */
     static std::size_t deserializeParameter(std::istream& input_stream, const std::string& parameter_name);
 
-public:
-    /**
-    * @brief Deleted deault empty constructor.
-    *
-    * The default empty constructor is deleted since it's useless, as all the Deserializer member functions are `static`.
-    */
-    Deserializer() = delete;
-
     /**
      * @brief Reads the house name from the input stream and ignores it.
      * 
@@ -122,18 +125,28 @@ public:
      * @brief Deserializes the maximum battery capacity from an input stream.
      *
      * @param input_stream The input stream to read the maximum battery capacity from.
-     * @return unique_ptr to the deserialized Battery object.
+     * @param battery The battery to read into.
      */
-    static std::unique_ptr<Battery> deserializeBattery(std::istream& input_stream);
+    static Battery deserializeBattery(std::istream& input_stream);
 
     /**
      * @brief Deserializes the house layout from an input stream.
      *
      * @param input_stream The input stream to read the house layout from.
+     * @param house The house to read into.
      * @throws std::runtime_error If there's more / less than one docking station given.
-     * @return unique_ptr to the deserialized House object.
      */
-    static std::unique_ptr<House> deserializeHouse(std::istream& input_stream);
+    static House deserializeHouse(std::istream& input_stream);
+
+public:
+    /**
+    * @brief Deleted deault empty constructor.
+    *
+    * The default empty constructor is deleted since it's useless, as all the Deserializer member functions are `static`.
+    */
+    Deserializer() = delete;
+
+    static void readHouseFile(const std::filesystem::path& house_file_path, HouseFile& house_file);
 };
 
 #endif /* VACUUM_DESERIALIZER_H_ */

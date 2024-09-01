@@ -10,6 +10,7 @@
 #include "common/enums.h"
 #include "common/position.h"
 
+#include "deserializer.h"
 #include "battery.h"
 #include "status.h"
 #include "house.h"
@@ -36,16 +37,15 @@ class Simulator
      */
     enum class SimulatorState
     {
-        Initial,
-        Deserialized,
+        NoAlgorithm,
         Ready
     };
 
     SimulationStatistics statistics;                    // Simulation Statistics (some fields are computed on demand)
-    SimulatorState state = SimulatorState::Initial;     // Simulator's initialization current state.
-    std::size_t max_simulator_steps = 0;                // Maximum number of steps the simulator can perform.
-    std::unique_ptr<Battery> battery = nullptr;         // Simulator's battery (for charging / discharging and getting battery level).
-    std::unique_ptr<House> house = nullptr;             // Simulator's house representation.
+    SimulatorState state = SimulatorState::NoAlgorithm; // Simulator's initialization current state.
+    std::size_t max_simulator_steps;                    // Maximum number of steps the simulator can perform.
+    House house;                                        // Simulator's house representation.
+    Battery battery;                                    // Simulator's battery (for charging / discharging and getting battery level).
     AbstractAlgorithm* algorithm = nullptr;             // Simulator's algorithm to suggest its next steps.
 
     /* Scoring */
@@ -70,12 +70,12 @@ class Simulator
     // Scoring helper functions
     bool isDeadScoring(Step last_step)
     {
-        return (Step::Finish != last_step && battery->isBatteryExhausted() && !house->isAtDockingStation());
+        return (Step::Finish != last_step && battery.isBatteryExhausted() && !house.isAtDockingStation());
     }
 
     bool isLyingScoring(Step last_step)
     {
-        return (Step::Finish == last_step && !house->isAtDockingStation());
+        return (Step::Finish == last_step && !house.isAtDockingStation());
     }
 
     /**
@@ -87,7 +87,7 @@ class Simulator
     void calculateScore(Step last_step);
 
 public:
-    Simulator() = default;
+    Simulator(const HouseFile& house_file);
     /**
      * @brief Deleted copy constructor and assignment operator.
      *
@@ -98,12 +98,12 @@ public:
 
     std::size_t getMaxSteps() const { return max_simulator_steps; }
 
-    std::size_t getTimeoutScore() const { return (2 * max_simulator_steps + house->getInitialDirtCount() * kDirtFactor + kTimeoutPenalty); }
+    std::size_t getTimeoutScore() const { return (2 * max_simulator_steps + house.getInitialDirtCount() * kDirtFactor + kTimeoutPenalty); }
 
     SimulationStatistics& getSimulationStatistics()
     {
-        statistics.dirt_left = house->getTotalDirtCount();
-        statistics.is_at_docking_station = house->isAtDockingStation();
+        statistics.dirt_left = house.getTotalDirtCount();
+        statistics.is_at_docking_station = house.isAtDockingStation();
         return statistics;
     }
 
@@ -114,15 +114,6 @@ public:
      * @throws std::logic_error If this function was not called at the beginning of the initialization.
      */
     void setAlgorithm(AbstractAlgorithm& algorithm);
-
-    /**
-     * @brief Reads the house representation of a given input file.
-     *
-     * @param house_file_path The file path which the house will be read from.
-     * @throws std::logic_error If the simulator is already fully initialized.
-     * @throws std::runtime_error If couldn't open given file.
-     */
-    void readHouseFile(const std::string& house_file_path);
 
     /**
      * @brief Runs the cleaning operation.

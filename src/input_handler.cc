@@ -29,7 +29,7 @@ void InputHandler::searchDirectory(const std::string& directory_path_string,
     }
 }
 
-void InputHandler::openHouses(const std::string& house_directory_path, std::vector<std::filesystem::path>& house_paths)
+void InputHandler::openHouses(const std::string& house_directory_path, std::vector<HouseFile>& house_files)
 {
     auto isHouseFile = [](const std::filesystem::directory_entry& entry) -> bool
     {
@@ -40,9 +40,21 @@ void InputHandler::openHouses(const std::string& house_directory_path, std::vect
         return false;
     };
 
-    auto loadHouse = [&house_paths](const std::filesystem::path& house_path)
+    auto loadHouse = [&house_files](const std::filesystem::path& house_path)
     {
-        house_paths.emplace_back(house_path);
+        house_files.emplace_back();
+
+        try
+        {
+            Deserializer::readHouseFile(house_path, house_files.back());
+        }
+
+        catch (const std::exception& exception)
+        {
+            house_files.pop_back();
+            std::string house_name = house_path.stem().string();
+            OutputHandler::exportError(house_name, exception.what());
+        }
     };
 
     searchDirectory(house_directory_path,

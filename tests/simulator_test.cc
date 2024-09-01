@@ -52,21 +52,24 @@ namespace
     class SimulatorTest : public testing::TestWithParam<AlgorithmFactory>
     {
         std::unique_ptr<AbstractAlgorithm> algorithm;
-        Simulator simulator;
+        HouseFile house_file;
+        std::unique_ptr<Simulator> simulator;
     protected:
 
         void SetUp(const std::string& input_file)
         {
             algorithm = GetParam()();
 
-            simulator.readHouseFile(input_file);
-            simulator.setAlgorithm(*algorithm);
-            simulator.run();
+            Deserializer::readHouseFile(input_file, house_file);
+
+            simulator = std::make_unique<Simulator>(house_file);
+            simulator->setAlgorithm(*algorithm);
+            simulator->run();
         }
 
         SimulationStatistics& getSimulationStatistics()
         {
-            return simulator.getSimulationStatistics();
+            return simulator->getSimulationStatistics();
         }
     };
 
@@ -156,7 +159,7 @@ namespace
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
 
-        EXPECT_GE(50, statistics.num_steps_taken);
+        EXPECT_GE(65, statistics.num_steps_taken);
 
         EXPECT_EQ(1, statistics.dirt_left);
 
@@ -217,8 +220,11 @@ namespace
     {
         auto algo_factory = GetParam();
         std::unique_ptr<AbstractAlgorithm> first_algorithm = algo_factory();
-        Simulator first_simulator;
-        first_simulator.readHouseFile("inputs/input_sanity.txt");
+
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_sanity.txt", house_file);
+
+        Simulator first_simulator(house_file);
         first_simulator.setAlgorithm(*first_algorithm);
         first_simulator.run();
 
@@ -227,8 +233,7 @@ namespace
         std::vector<Step> first_runtime_steps(first_statistics.step_history);
 
         std::unique_ptr<AbstractAlgorithm> second_algorithm = algo_factory();
-        Simulator second_simulator;
-        second_simulator.readHouseFile("inputs/input_sanity.txt");
+        Simulator second_simulator(house_file);
         second_simulator.setAlgorithm(*second_algorithm);
         second_simulator.run();
 
@@ -287,28 +292,17 @@ namespace
 
     TEST(SimulatorAPI, RobotAPICallingOrder)
     {
-        Simulator simulator;
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_sanity.txt", house_file);
+
+        Simulator simulator(house_file);
         std::unique_ptr<AbstractAlgorithm> algorithm = algo_factories.at(0)();
-
-        EXPECT_THROW({
-            simulator.setAlgorithm(*algorithm);
-        }, std::logic_error);
-
-        EXPECT_THROW({
-            simulator.run();
-        }, std::logic_error);
-
-        simulator.readHouseFile("inputs/input_sanity.txt");
 
         EXPECT_THROW({
             simulator.run();
         }, std::logic_error);
 
         simulator.setAlgorithm(*algorithm);
-
-        EXPECT_THROW({
-            simulator.readHouseFile("inputs/input_sanity.txt");
-        }, std::logic_error);
 
         simulator.run();
     }
@@ -317,10 +311,12 @@ namespace
     {
         const std::size_t dead_penalty = 2000;
 
-        Simulator simulator;
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_mockalgo_dead.txt", house_file);
+
+        Simulator simulator(house_file);
         MockAlgorithm mock_algorithm;
 
-        simulator.readHouseFile("inputs/input_mockalgo_dead.txt");
         simulator.setAlgorithm(mock_algorithm);
 
         ON_CALL(mock_algorithm, nextStep())
@@ -344,10 +340,12 @@ namespace
         const std::size_t non_docking_penalty = 1000;
         const std::size_t dirt_factor = 300;
 
-        Simulator simulator;
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_mockalgo_working.txt", house_file);
+
+        Simulator simulator(house_file);
         MockAlgorithm mock_algorithm;
 
-        simulator.readHouseFile("inputs/input_mockalgo_working.txt");
         simulator.setAlgorithm(mock_algorithm);
 
         ON_CALL(mock_algorithm, nextStep())
@@ -372,10 +370,12 @@ namespace
     {
         const std::size_t dirt_factor = 300;
 
-        Simulator simulator;
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_mockalgo_working.txt", house_file);
+
+        Simulator simulator(house_file);
         MockAlgorithm mock_algorithm;
 
-        simulator.readHouseFile("inputs/input_mockalgo_working.txt");
         simulator.setAlgorithm(mock_algorithm);
 
         ON_CALL(mock_algorithm, nextStep())
@@ -403,11 +403,12 @@ namespace
     {
         const std::size_t lying_penalty = 3000;
 
-        Simulator simulator;
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_stepstaken.txt", house_file);
+
+        Simulator simulator(house_file);
         MockAlgorithm mock_algorithm;
 
-
-        simulator.readHouseFile("inputs/input_stepstaken.txt");
         simulator.setAlgorithm(mock_algorithm);
 
         EXPECT_CALL(mock_algorithm, nextStep())

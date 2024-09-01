@@ -2,6 +2,7 @@
 #define INPUT_HANDLER_H_
 
 #include "simulator/simulator.h"
+#include "simulator/deserializer.h"
 
 #include <filesystem>
 #include <functional>
@@ -36,7 +37,7 @@ class InputHandler
 public:
     InputHandler() = delete;
 
-    static void openHouses(const std::string& house_directory_path, std::vector<std::filesystem::path>& house_paths);
+    static void openHouses(const std::string& house_directory_path, std::vector<HouseFile>& house_files);
 
     static void openAlgorithms(const std::string& algorithm_directory_path, std::vector<void*>& algorithm_handles);
 

@@ -14,7 +14,7 @@
 class TaskQueue
 {
     // Queue Synchronization Metadata
-    std::size_t num_runnable_tasks;
+    std::size_t num_tasks;
     std::latch todo_tasks_counter;
     std::counting_semaphore<> active_threads_semaphore; // An up-to-date counter of the number of active WORKER (task) threads.
 
@@ -28,14 +28,12 @@ class TaskQueue
 
     void createTimer();
 
-    void checkTaskInsertion();
-
 public:
     TaskQueue(std::size_t number_of_tasks, std::size_t number_of_threads);
 
     void insertTask(const std::string& algorithm_name,
                     std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-                    const std::filesystem::path& house_path);
+                    const HouseFile& house_file);
 
     void run();
 

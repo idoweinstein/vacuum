@@ -18,10 +18,15 @@ class Battery : public BatteryMeter
     static constexpr const float kStepsToFullAmount = 20.0f; // Charging duration (in steps).
     static constexpr const float kDischargeUnit = 1.0f;      // Discharging rate (in steps).
 
-    const float full_amount;                                 // Full capacity of the battery (in steps).
+    float full_amount;                                       // Full capacity of the battery (in steps).
     float current_amount;                                    // Remaining capacity of the battery (in steps).
 
 public:
+    Battery(const Battery& battery) = default;
+    Battery& operator=(const Battery& battery) = default;
+
+    Battery() = default;
+
     /**
      * @brief Constructs a new Battery object with the specified full amount of the battery.
      *

@@ -8,11 +8,17 @@
 #include "deserializer.h"
 #include "status.h"
 
+Simulator::Simulator(const HouseFile& house_file)
+    : max_simulator_steps(house_file.max_steps),
+      house(house_file.house),
+      battery(house_file.battery)
+{}
+
 void Simulator::updateMissionStatus(Step next_step)
 {
     if (Step::Finish == next_step)
     {
-        if (house->isAtDockingStation())
+        if (house.isAtDockingStation())
         {
             statistics.mission_status = Status::Finished;
         }
@@ -23,7 +29,7 @@ void Simulator::updateMissionStatus(Step next_step)
         }
     }
 
-    else if (!house->isAtDockingStation() && battery->isBatteryExhausted())
+    else if (!house.isAtDockingStation() && battery.isBatteryExhausted())
     {
         statistics.mission_status = Status::Dead;
     }
@@ -42,65 +48,37 @@ void Simulator::move(Step next_step)
     /* If no battery left - discharge() throws an Empty Battery exception */
     if (Step::Stay == next_step)
     {
-        if (house->isAtDockingStation())
+        if (house.isAtDockingStation())
         {
-            battery->charge();
+            battery.charge();
         }
 
         else
         {
-            battery->discharge();
-            house->cleanCurrentPosition();
+            battery.discharge();
+            house.cleanCurrentPosition();
         }
     }
 
     else
     {
-        battery->discharge();
+        battery.discharge();
     }
  
-    house->move(next_step);
+    house.move(next_step);
     statistics.num_steps_taken++;
 
     updateMissionStatus(next_step);
 }
 
-void Simulator::readHouseFile(const std::string& house_file_path)
-{
-    if (SimulatorState::Ready == state)
-    {
-        throw std::logic_error("Called Simulator::readHouseFile() after calling Simulator::setAlgorithm()");
-    }
-
-    std::ifstream house_file;
-    house_file.open(house_file_path);
-
-    if (!house_file.is_open())
-    {
-        throw std::runtime_error("Couldn't open input house file!");
-    }
-
-    Deserializer::ignoreInternalName(house_file);
-    max_simulator_steps = Deserializer::deserializeMaxSteps(house_file);
-    battery = Deserializer::deserializeBattery(house_file);
-    house = Deserializer::deserializeHouse(house_file);
-
-    state = SimulatorState::Deserialized;
-}
-
 void Simulator::setAlgorithm(AbstractAlgorithm& chosen_algorithm)
 {
-    if (SimulatorState::Initial == state)
-    {
-        throw std::logic_error("Called Simulator::setAlgorithm() before calling Simulator::readHouseFile()");
-    }
-
     algorithm = &chosen_algorithm;
 
     algorithm->setMaxSteps(max_simulator_steps);
-    algorithm->setWallsSensor(static_cast<const WallsSensor&>(*house));
-    algorithm->setDirtSensor(static_cast<const DirtSensor&>(*house));
-    algorithm->setBatteryMeter(static_cast<const BatteryMeter&>(*battery));
+    algorithm->setWallsSensor(static_cast<const WallsSensor&>(house));
+    algorithm->setDirtSensor(static_cast<const DirtSensor&>(house));
+    algorithm->setBatteryMeter(static_cast<const BatteryMeter&>(battery));
 
     state = SimulatorState::Ready;
 }
@@ -122,19 +100,19 @@ void Simulator::calculateScore(Step last_step)
         penalty = kLyingPenalty;
     }
 
-    else if (!house->isAtDockingStation())
+    else if (!house.isAtDockingStation())
     {
         penalty = kNotInDockPenalty;
     }
 
-    statistics.score = steps + house->getTotalDirtCount() * kDirtFactor + penalty;
+    statistics.score = steps + house.getTotalDirtCount() * kDirtFactor + penalty;
 }
 
 std::size_t Simulator::run()
 {
     if (SimulatorState::Ready != state)
     {
-        throw std::logic_error("Called Simulator::run() before calling Simulator::readHouseFile() or Simulator::setAlgorithm()");
+        throw std::logic_error("Called Simulator::run() before calling Simulator::setAlgorithm()");
     }
 
     Step next_step;

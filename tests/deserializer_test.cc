@@ -3,8 +3,9 @@
 #include <string>
 #include <sstream>
 #include <streambuf>
+#include <filesystem>
 
-#include "simulator/simulator.h"
+#include "simulator/deserializer.h"
 
 namespace
 {
@@ -12,8 +13,8 @@ namespace
     {
         try
         {
-            Simulator simulator;
-            simulator.readHouseFile(input_file_path);
+            HouseFile house_file;
+            Deserializer::readHouseFile(std::filesystem::path(input_file_path), house_file);
         }
         catch(const std::runtime_error& error)
         {
@@ -29,8 +30,8 @@ namespace
 
     TEST(DeserializerTest, DeserializerSanity)
     {
-        Simulator simulator;
-        simulator.readHouseFile("inputs/input_sanity.txt");
+        HouseFile house_file;
+        Deserializer::readHouseFile(std::filesystem::path("inputs/input_sanity.txt"), house_file);
     }
 
     TEST(DeserializerTest, InvalidParameters)
@@ -65,7 +66,7 @@ namespace
 
     TEST(DeserializerTest, InvalidHouseCharacter)
     {
-        Simulator simulator;
-        simulator.readHouseFile("inputs/input_invchar.txt");
+        HouseFile house_file;
+        Deserializer::readHouseFile(std::filesystem::path("inputs/input_invchar.txt"), house_file);
     }
 }

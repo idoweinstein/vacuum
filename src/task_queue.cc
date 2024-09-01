@@ -14,7 +14,7 @@ void TaskQueue::createTimer()
 }
 
 TaskQueue::TaskQueue(std::size_t number_of_tasks, std::size_t number_of_threads)
-    : num_runnable_tasks(number_of_tasks),
+    : num_tasks(number_of_tasks),
       todo_tasks_counter(number_of_tasks),
       active_threads_semaphore(number_of_threads),
       work_guard(boost::asio::make_work_guard(timer_context))
@@ -22,21 +22,11 @@ TaskQueue::TaskQueue(std::size_t number_of_tasks, std::size_t number_of_threads)
     createTimer();
 }
 
-void TaskQueue::checkTaskInsertion()
-{
-    if (!tasks.back().isRunnable())
-    {
-        tasks.pop_back();
-        num_runnable_tasks--;
-        todo_tasks_counter.count_down();
-    }
-}
-
 void TaskQueue::insertTask(const std::string& algorithm_name,
                            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-                           const std::filesystem::path& house_path)
+                           const HouseFile& house_file)
 {
-    if (tasks.size() >= num_runnable_tasks)
+    if (tasks.size() >= num_tasks)
     {
         throw std::out_of_range("TaskQueue::insertTask() was called after all tasks were inserted.");
     }
@@ -50,17 +40,15 @@ void TaskQueue::insertTask(const std::string& algorithm_name,
     tasks.emplace_back(
         algorithm_name,
         std::move(algorithm_pointer),
-        house_path,
+        house_file,
         taskTearDown,
         timer_context
     );
-
-    checkTaskInsertion();
 }
 
 void TaskQueue::run()
 {
-    if (tasks.size() < num_runnable_tasks)
+    if (tasks.size() < num_tasks)
     {
         throw std::logic_error("TaskQueue::run() was called before all tasks were inserted.");
     }

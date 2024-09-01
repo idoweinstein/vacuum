@@ -31,29 +31,18 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
 
 Task::Task(const std::string& algorithm_name,
            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-           const std::filesystem::path& house_path,
+           const HouseFile& house_file,
            std::function<void()> onTeardown,
            boost::asio::io_context& timer_context)
-    : is_runnable(true),
-      algorithm_name(algorithm_name),
+    : algorithm_name(algorithm_name),
       algorithm_pointer(std::move(algorithm_pointer)),
-      house_name(house_path.stem().string()),
+      house_name(house_file.name),
+      simulator(house_file),
       is_task_ended(false),
       onTeardown(onTeardown),
       timer_context(timer_context)
 {
-    try
-    {
-        simulator.readHouseFile(house_path);
-        simulator.setAlgorithm(*(this->algorithm_pointer));
-        max_duration = simulator.getMaxSteps();
-    }
-
-    catch(const std::exception& exception)
-    {
-        is_runnable = false;
-        OutputHandler::exportError(house_name, exception.what());
-    }
+    max_duration = simulator.getMaxSteps();
 }
 
 void Task::setUpTask(boost::asio::steady_timer& runtime_timer)

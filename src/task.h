@@ -4,6 +4,8 @@
 #include "output_handler.h"
 
 #include "simulator/simulator.h"
+#include "simulator/deserializer.h"
+
 #include "common/AlgorithmRegistrar.h"
 
 #include <boost/asio.hpp>
@@ -28,12 +30,10 @@ class Task
     inline static const char kSimulationError1[] = "[house=";
     inline static const char kSimulationError2 = ']';
 
-    bool is_runnable; // Whether or not Task is runnable
-
     // Task Simulation Data
     const std::string& algorithm_name;
     const std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
-    const std::string house_name;
+    const std::string& house_name;
     Simulator simulator;
 
     // Task Execution Data
@@ -70,11 +70,9 @@ public:
 
     Task(const std::string& algorithm_name,
          std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-         const std::filesystem::path& house_path,
+         const HouseFile& house_file,
          std::function<void()> onTeardown,
          boost::asio::io_context& timer_context);
-
-    bool isRunnable() { return is_runnable; }
 
     void run() { executing_thread = std::jthread(&Task::simulatePair, this); }
 
