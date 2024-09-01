@@ -141,7 +141,7 @@ public:
     /**
      * @brief Registers an end node index in the path tree.
      * 
-     * @param end_node_index The index of the end node.
+     * @param end_node_index The index of the node to be registered as an end node.
      */
     void registerEndNode(std::size_t end_node_index)
     {
