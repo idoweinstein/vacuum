@@ -26,7 +26,7 @@
   ```
  * Other make targets:
  ```
- # Make simulator and algorithms and run them on houses in `examples` directory:
+ # Make simulator and algorithms and run them with houses in `examples` directory:
  make run
 
  # Make just the first algorithm
