@@ -143,7 +143,11 @@ public:
      * 
      * @param end_node_index The index of the end node.
      */
-    void registerEndNode(std::size_t end_node_index) { end_node_indices.push_back(end_node_index); }
+    void registerEndNode(std::size_t end_node_index)
+    {
+        validateIndex(end_node_index);
+        end_node_indices.push_back(end_node_index);
+    }
 
     /**
      * @brief Gets the index of the end node with the highest score.
