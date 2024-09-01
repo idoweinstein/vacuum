@@ -78,7 +78,7 @@ public:
 
     std::size_t getScore() const { return score; }
 
-    SimulationStatistics& getStatistics() { return simulator.getSimulationStatistics(); }
+    const SimulationStatistics& getStatistics() { return simulator.getSimulationStatistics(); }
 
     std::string getAlgorithmName() const { return algorithm_name; }
 

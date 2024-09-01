@@ -54,8 +54,8 @@ namespace
         std::unique_ptr<AbstractAlgorithm> algorithm;
         HouseFile house_file;
         std::unique_ptr<Simulator> simulator;
-    protected:
 
+    protected:
         void SetUp(const std::string& input_file)
         {
             algorithm = GetParam()();
@@ -67,7 +67,7 @@ namespace
             simulator->run();
         }
 
-        SimulationStatistics& getSimulationStatistics()
+        const SimulationStatistics& getSimulationStatistics()
         {
             return simulator->getSimulationStatistics();
         }
@@ -77,7 +77,7 @@ namespace
     {
         SetUp("inputs/input_sanity.txt");
 
-        SimulationStatistics& statistics = getSimulationStatistics();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Make sure robot did 'total_steps_taken' steps, and its first step wasn't Direction::STAY
         std::size_t path_length = statistics.step_history.size();
@@ -98,7 +98,7 @@ namespace
     {
         SetUp("inputs/input_trappeddirt.txt");
 
-        SimulationStatistics& statistics = getSimulationStatistics();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected program results (Robot is not dead, cleaned all ACCESSIBLE dirt, but there's more trapped dirt)
         EXPECT_EQ(Status::Finished, statistics.mission_status);
@@ -111,7 +111,7 @@ namespace
     {
         SetUp("inputs/input_maze.txt");
 
-        SimulationStatistics& statistics = getSimulationStatistics();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
@@ -123,7 +123,7 @@ namespace
     {
         SetUp("inputs/input_minbattery.txt");
 
-        SimulationStatistics& statistics = getSimulationStatistics();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
@@ -154,7 +154,7 @@ namespace
     {
         SetUp("inputs/input_distantdirt.txt");
 
-        SimulationStatistics& statistics = getSimulationStatistics();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
@@ -170,7 +170,7 @@ namespace
     {
         SetUp("inputs/input_allchars.txt");
 
-        SimulationStatistics& statistics = getSimulationStatistics();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
@@ -196,7 +196,7 @@ namespace
     {
         SetUp("inputs/input_filledline.txt");
 
-        SimulationStatistics& statistics = getSimulationStatistics();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
@@ -208,7 +208,7 @@ namespace
     {
         SetUp("inputs/input_filledcol.txt");
 
-        SimulationStatistics& statistics = getSimulationStatistics();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
@@ -228,7 +228,7 @@ namespace
         first_simulator.setAlgorithm(*first_algorithm);
         first_simulator.run();
 
-        SimulationStatistics& first_statistics = first_simulator.getSimulationStatistics();
+        const SimulationStatistics& first_statistics = first_simulator.getSimulationStatistics();
 
         std::vector<Step> first_runtime_steps(first_statistics.step_history);
 
@@ -237,7 +237,7 @@ namespace
         second_simulator.setAlgorithm(*second_algorithm);
         second_simulator.run();
 
-        SimulationStatistics& second_statistics = second_simulator.getSimulationStatistics();
+        const SimulationStatistics& second_statistics = second_simulator.getSimulationStatistics();
 
         std::vector<Step> second_runtime_steps(second_statistics.step_history);
 
@@ -257,7 +257,7 @@ namespace
         const std::size_t dirt_factor = 300;
         SetUp("inputs/input_immediatefinish.txt");
 
-        SimulationStatistics& statistics = getSimulationStatistics();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
@@ -273,7 +273,7 @@ namespace
     {
         SetUp("inputs/input_stepstaken.txt");
 
-        SimulationStatistics& statistics = getSimulationStatistics();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
         EXPECT_EQ(Status::Finished, statistics.mission_status);
@@ -324,7 +324,7 @@ namespace
 
         simulator.run();
 
-        SimulationStatistics& statistics = simulator.getSimulationStatistics();
+        const SimulationStatistics& statistics = simulator.getSimulationStatistics();
 
         // Check that isDead condition applies here:
         EXPECT_NE(Step::Finish, statistics.step_history.back());
@@ -353,7 +353,7 @@ namespace
 
         simulator.run();
 
-        SimulationStatistics& statistics = simulator.getSimulationStatistics();
+        const SimulationStatistics& statistics = simulator.getSimulationStatistics();
 
         // Check that isWorking condition applies here:
         bool is_dead = Step::Finish != statistics.step_history.back() && !statistics.is_at_docking_station && false; // && battery is exhausted (which is false)
@@ -383,7 +383,7 @@ namespace
 
         simulator.run();
 
-        SimulationStatistics& statistics = simulator.getSimulationStatistics();
+        const SimulationStatistics& statistics = simulator.getSimulationStatistics();
 
         // Check that isWorking condition applies here:
         bool is_dead = Step::Finish != statistics.step_history.back() && !statistics.is_at_docking_station && false; // && battery is exhausted (which is false)
@@ -417,7 +417,7 @@ namespace
 
         simulator.run();
 
-        SimulationStatistics& statistics = simulator.getSimulationStatistics();
+        const SimulationStatistics& statistics = simulator.getSimulationStatistics();
 
         // Check that isLying condition applies here:
         EXPECT_FALSE(statistics.is_at_docking_station);

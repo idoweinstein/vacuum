@@ -100,7 +100,7 @@ public:
 
     std::size_t getTimeoutScore() const { return (2 * max_simulator_steps + house.getInitialDirtCount() * kDirtFactor + kTimeoutPenalty); }
 
-    SimulationStatistics& getSimulationStatistics()
+    const SimulationStatistics& getSimulationStatistics()
     {
         statistics.dirt_left = house.getTotalDirtCount();
         statistics.is_at_docking_station = house.isAtDockingStation();
