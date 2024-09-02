@@ -116,6 +116,11 @@ std::size_t Simulator::run()
     }
 
     Step next_step;
+    if (statistics.num_steps_taken > max_simulator_steps)
+    {
+        throw std::runtime_error("Simulator exceeded the maximal allowed steps!");
+    }
+
     while (statistics.num_steps_taken <= max_simulator_steps)
     {
         next_step = algorithm->nextStep();
