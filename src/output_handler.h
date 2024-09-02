@@ -119,7 +119,8 @@ public:
      */
     static void exportStatistics(const std::string& algorithm_name,
                                  const std::string& house_name,
-                                 const SimulationStatistics& statistics);
+                                 const SimulationStatistics& statistics,
+                                 std::size_t score);
 
     /**
      * @brief Export run summary for all tasks, into a `summary.csv` file, from a given scores data structure.
