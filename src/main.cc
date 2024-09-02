@@ -38,7 +38,7 @@ void handleResults(TaskQueue& task_queue, bool summary_only)
         if (!summary_only)
         {
             // Handle tasks outputs
-            OutputHandler::exportStatistics(task.getAlgorithmName(), task.getHouseName(), task.getStatistics());
+            OutputHandler::exportStatistics(task.getAlgorithmName(), task.getHouseName(), task.getStatistics(), task.getScore());
         }
 
         // Handle tasks errors

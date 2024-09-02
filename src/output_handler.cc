@@ -24,14 +24,15 @@ void OutputHandler::exportToFile(const std::string& file_name, const std::string
 
 void OutputHandler::exportStatistics(const std::string& algorithm_name,
                                      const std::string& house_name,
-                                     const SimulationStatistics& statistics)
+                                     const SimulationStatistics& statistics,
+                                     std::size_t score)
 {
     std::ostringstream string_stream;
     string_stream << kStepsNumField << statistics.num_steps_taken \
                     << kDirtLeftField << statistics.dirt_left \
                     << kStatusField << statistics.mission_status \
                     << kInDockField << (statistics.is_at_docking_station ? "TRUE" : "FALSE") \
-                    << kScoreField << statistics.score \
+                    << kScoreField << score \
                     << kStepsField;
 
     for (const auto& step : statistics.step_history)
