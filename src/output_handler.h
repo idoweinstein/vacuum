@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iostream>
 #include <filesystem>
+#include <unordered_set>
 
 #include "simulator/enum_operators.h"
 #include "simulator/simulator.h"
@@ -32,6 +33,8 @@ class OutputHandler
     inline static constexpr const char kStepsField[] = "\nSteps:\n";
     inline static constexpr const char kInDockField[] = "\nInDock = ";
     inline static constexpr const char kScoreField[] = "\nScore = ";
+
+    inline static std::unordered_set<std::string> output_files;
 
     /**
      * @brief Constructs the error file name of a given module (algorithm / house).

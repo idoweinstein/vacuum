@@ -7,12 +7,15 @@
 void OutputHandler::exportToFile(const std::string& file_name, const std::string& message)
 {
     std::ofstream output_file;
+    std::ios_base::openmode mode = output_files.contains(file_name) ? std::ios_base::app : std::ios_base::trunc;
 
-    output_file.open(file_name, std::ios_base::app);
+    output_file.open(file_name, mode);
     if (!output_file.is_open())
     {
         throw std::runtime_error("Couldn't open output file \"" + file_name + "\"");
     }
+
+    output_files.insert(file_name);
 
     output_file << message << std::endl;
 
