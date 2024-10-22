@@ -1,6 +1,7 @@
 #include "task.h"
 
 #include <sched.h>
+#include <stop_token>
 
 #include "output_handler.h"
 
@@ -22,9 +23,10 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
         bool is_simulation_timeout = task.is_task_ended.compare_exchange_strong(expected_value, true);
         if (is_simulation_timeout)
         {
-            task.score = task.simulator.getTimeoutScore();
+            task.score = task.timeout_score;
             task.onTeardown();
             setIdlePriority(thread_handler);
+            task.stop();
         }
     }
 }
@@ -37,13 +39,12 @@ Task::Task(const std::string& algorithm_name,
     : algorithm_name(algorithm_name),
       algorithm_pointer(std::move(algorithm_pointer)),
       house_name(house_file.name),
-      simulator(house_file),
+      house_file(house_file),
       is_task_ended(false),
       onTeardown(onTeardown),
       timer_context(timer_context)
 {
-    simulator.setAlgorithm(*(this->algorithm_pointer));
-    max_duration = simulator.getMaxSteps();
+
 }
 
 void Task::setUpTask(boost::asio::steady_timer& runtime_timer)
@@ -56,7 +57,7 @@ void Task::setUpTask(boost::asio::steady_timer& runtime_timer)
     });
 }
 
-void Task::tearDownTask(std::optional<std::size_t> simulation_score, boost::asio::steady_timer& runtime_timer)
+void Task::tearDownTask(Simulator& simulator, std::optional<std::size_t> simulation_score, boost::asio::steady_timer& runtime_timer)
 {
     runtime_timer.cancel();
 
@@ -80,8 +81,13 @@ void Task::tearDownTask(std::optional<std::size_t> simulation_score, boost::asio
     }
 }
 
-void Task::simulatePair()
+void Task::simulatePair(std::stop_token stop_token)
 {
+    Simulator simulator(house_file);
+    simulator.setAlgorithm(*(this->algorithm_pointer));
+    max_duration = simulator.getMaxSteps();
+    timeout_score = simulator.getTimeoutScore();
+
     boost::asio::steady_timer runtime_timer(timer_context);
     setUpTask(runtime_timer);
 
@@ -89,7 +95,8 @@ void Task::simulatePair()
 
     try
     {
-        simulation_score = simulator.run();
+        simulation_score = simulator.run(stop_token);
+        statistics = simulator.getSimulationStatistics();
     }
 
     catch(const std::exception& exception)
@@ -97,5 +104,5 @@ void Task::simulatePair()
         setAlgorithmError(exception.what());
     }
 
-    tearDownTask(simulation_score, runtime_timer);
+    tearDownTask(simulator, simulation_score, runtime_timer);
 }

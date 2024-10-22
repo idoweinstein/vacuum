@@ -13,6 +13,7 @@
 
 #include <pthread.h>
 
+#include <stop_token>
 #include <optional>
 #include <string>
 #include <atomic>
@@ -34,7 +35,8 @@ class Task
     const std::string& algorithm_name;
     const std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
     const std::string& house_name;
-    Simulator simulator;
+    const HouseFile& house_file;
+    // Simulator simulator;
 
     // Task Execution Data
     std::jthread worker_thread;
@@ -47,6 +49,8 @@ class Task
 
     // Task Results
     std::ostringstream algorithm_error_buffer;
+    SimulationStatistics statistics;
+    std::size_t timeout_score;
     std::size_t score;
 
     /**
@@ -91,13 +95,13 @@ class Task
      * @param simulation_score The resultant score of the task (if there's no score std::nullopt).
      * @param runtime_timer The task's timeout timer.
      */
-    void tearDownTask(std::optional<std::size_t> simulation_score, boost::asio::steady_timer& runtime_timer);
+    void tearDownTask(Simulator& simulator, std::optional<std::size_t> simulation_score, boost::asio::steady_timer& runtime_timer);
 
     /**
      * @brief Simulates an house - algorithm pair.
      * Being executed by the task's distinct worker thread.
      */
-    void simulatePair();
+    void simulatePair(std::stop_token stop_token);
 
 public:
 
@@ -111,7 +115,7 @@ public:
      * @brief Runs the task.
      * Spawns the worker thread, which simulates the task.
      */
-    void run() { worker_thread = std::jthread(&Task::simulatePair, this); }
+    void run() { worker_thread = std::jthread([this](std::stop_token stop_token) { simulatePair(stop_token); }); }
 
     /**
      * @brief Returns task's simulation score.
@@ -125,7 +129,7 @@ public:
      * 
      * @return The simulation statistics report.
      */
-    const SimulationStatistics& getStatistics() { return simulator.getSimulationStatistics(); }
+    const SimulationStatistics& getStatistics() { return statistics; }
 
     /**
      * @brief Returns task's simulated algorithm name.
@@ -148,16 +152,7 @@ public:
      */
     std::string getAlgorithmError() const { return algorithm_error_buffer.str(); }
 
-    /**
-     * @brief Detaches the task's worker thread.
-     */
-    void detach()
-    {
-        if (worker_thread.joinable())
-        {
-            worker_thread.detach();
-        }
-    }
+    void stop() { worker_thread.request_stop(); }
 };
 
 #endif // TASK_H_

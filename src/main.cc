@@ -48,7 +48,7 @@ void handleResults(TaskQueue& task_queue, bool summary_only)
         task_scores[task.getAlgorithmName()].insert(std::make_pair(task.getHouseName(), task.getScore()));
 
         // Detaching tasks after reading their score as an extra measure for stuck thread (although they should be already cancelled).
-        task.detach();
+        // task.detach();
     }
 
     OutputHandler::exportSummary(task_scores);
@@ -56,6 +56,7 @@ void handleResults(TaskQueue& task_queue, bool summary_only)
 
 void runTaskQueue(std::vector<HouseFile>& house_files, std::size_t num_tasks, std::size_t num_threads, bool summary_only)
 {
+    std::cout << "STARTED runTaskQueue()" << std::endl;
     TaskQueue task_queue(num_tasks, num_threads);
 
     for(const auto& algorithm : AlgorithmRegistrar::getAlgorithmRegistrar())
@@ -73,6 +74,7 @@ void runTaskQueue(std::vector<HouseFile>& house_files, std::size_t num_tasks, st
     task_queue.run();
 
     handleResults(task_queue, summary_only);
+    std::cout << "FINISHED runTaskQueue()" << std::endl;
 }
 
 void Main::runAll(const Arguments& arguments)
@@ -89,6 +91,7 @@ void Main::runAll(const Arguments& arguments)
     std::size_t num_tasks = algorithm_handles.size() * house_files.size();
 
     runTaskQueue(house_files, num_tasks, arguments.num_threads, arguments.summary_only);
+    std::cout << "AFTER runTaskQueue()" << std::endl;
 
     AlgorithmRegistrar::getAlgorithmRegistrar().clear();
     InputHandler::closeAlgorithms(algorithm_handles);
