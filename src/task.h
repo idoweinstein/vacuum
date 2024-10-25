@@ -33,7 +33,8 @@ class Task
 
     // Task Simulation Data
     const std::string& algorithm_name;
-    const std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
+    std::shared_ptr<void>& algorithm_handle;
+    std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
     const std::string& house_name;
     const HouseFile& house_file;
     // Simulator simulator;
@@ -70,7 +71,8 @@ class Task
      */
     static void timeoutHandler(const boost::system::error_code& error_code,
                                Task& task,
-                               pthread_t thread_handler);
+                               pthread_t thread_handler,
+                               boost::asio::steady_timer& runtime_timer);
 
     /**
      * @brief Adds an error message to the task's error buffer.
@@ -106,6 +108,7 @@ class Task
 public:
 
     Task(const std::string& algorithm_name,
+         std::shared_ptr<void>& algorithm_handle,
          std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
          const HouseFile& house_file,
          std::function<void()> onTeardown,
@@ -153,6 +156,8 @@ public:
     std::string getAlgorithmError() const { return algorithm_error_buffer.str(); }
 
     void stop() { worker_thread.request_stop(); }
+
+    void detach() { worker_thread.detach(); }
 };
 
 #endif // TASK_H_

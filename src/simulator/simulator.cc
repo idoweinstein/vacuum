@@ -124,6 +124,7 @@ std::size_t Simulator::run(std::stop_token stop_token)
 
     while (statistics.num_steps_taken <= max_simulator_steps)
     {
+        // std::cout << "Step " << statistics.num_steps_taken << std::endl;
         if (stop_token.stop_requested())
         {
             break;

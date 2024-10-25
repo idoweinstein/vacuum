@@ -17,8 +17,8 @@ add_library(vacuum_cleaner
 
 target_include_directories(vacuum_cleaner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_compile_options(vacuum_cleaner PUBLIC -fsanitize=address -g3)
-target_link_options(vacuum_cleaner PUBLIC -fsanitize=address)
+target_compile_options(vacuum_cleaner PUBLIC)
+target_link_options(vacuum_cleaner PUBLIC)
 
 # Add an executable for the main program
 add_executable(myrobot main.cc)

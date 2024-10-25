@@ -91,41 +91,53 @@ bool InputHandler::safeDlOpen(void*& handle, const std::filesystem::path& file_p
         return false;
     }
 
+    std::cout << "Algorithm " << algorithm_name << " loaded successfully with handle " << handle << std::endl;
+
     return true;
 }
 
-void InputHandler::openAlgorithms(const std::string& algorithm_directory_path, std::vector<void*>& algorithm_handles)
+void InputHandler::openAlgorithms(const std::string& algorithm_directory_path, 
+                                  std::vector<std::shared_ptr<void>>& algorithm_handles) 
 {
-    auto isAlgorithmFile = [](const std::filesystem::directory_entry& entry) -> bool
-    {
-        if (entry.is_regular_file() && kAlgorithmExtension == entry.path().extension())
-        {
-            return true;
-        }
-        return false;
+    // Lambda to determine if the file is a valid algorithm file.
+    auto isAlgorithmFile = [](const std::filesystem::directory_entry& entry) -> bool {
+        return entry.is_regular_file() && kAlgorithmExtension == entry.path().extension();
     };
 
-    auto loadAlgorithm = [&algorithm_handles](const std::filesystem::path& entry_path)
-    {
-        void* handle;
-        if (safeDlOpen(handle, entry_path))
-        {
-            algorithm_handles.emplace_back(handle);
+    // Lambda to load an algorithm and store it in the shared_ptr vector.
+    auto loadAlgorithm = [&algorithm_handles](const std::filesystem::path& entry_path) {
+        void* handle = nullptr;
+        if (safeDlOpen(handle, entry_path)) {
+            // Create a shared_ptr with a custom deleter and emplace it in the vector.
+            algorithm_handles.emplace_back(
+                std::shared_ptr<void>(handle, [](void* h) {
+                    if (h) {
+                        std::cout << "Closing library handle..." << std::endl;
+                        dlclose(h);
+                    }
+                })
+            );
         }
     };
 
-    searchDirectory(algorithm_directory_path,
-                    isAlgorithmFile,
-                    loadAlgorithm);
+    // Search the directory and apply the appropriate filters and loading logic.
+    searchDirectory(algorithm_directory_path, isAlgorithmFile, loadAlgorithm);
 }
 
-void InputHandler::closeAlgorithms(std::vector<void*>& algorithm_handles)
+/*void InputHandler::closeAlgorithms(std::vector<std::shared_ptr<void*>>& algorithm_handles)
 {
-    for (void* handle : algorithm_handles)
+    for (std::shared_ptr<void*> handle_ptr : algorithm_handles)
     {
+        if (nullptr == *handle_ptr || 
+        {
+            continue;
+        }
+        std::cout << "Closing handle " << handle << std::endl;
         dlclose(handle);
     }
-}
+
+    std::cout << "All handles closed" << std::endl;
+}*/
 
 bool InputHandler::parseArgument(const std::string& raw_argument, Arguments& arguments)
 {

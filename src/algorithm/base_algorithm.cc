@@ -9,6 +9,19 @@
 #include <stdexcept>
 #include <unordered_set>
 
+
+#include <iostream>
+#include <syncstream>
+#include <thread>
+
+#include <unistd.h>   // for getpid()
+#include <sys/syscall.h> // for syscall() and SYS_gettid
+
+static void print(const std::string& message)
+{
+    std::osyncstream(std::cout) << "(" << syscall(SYS_gettid) << ") " << message << std::endl;
+}
+
 std::optional<std::size_t> BaseAlgorithm::buildPathTree(PathTree& path_tree,
                                                         std::size_t max_depth,
                                                         std::size_t start_index,
@@ -17,12 +30,19 @@ std::optional<std::size_t> BaseAlgorithm::buildPathTree(PathTree& path_tree,
     std::queue<std::size_t> index_queue;
     std::optional<std::size_t> path_end_index;
 
+    print("buildPathTree start");
+
     // If current position satisfies found_criteria - Return empty path
     if (found_criteria(path_tree.getPosition(start_index)))
     {
         path_end_index = start_index;
         return path_end_index;
     }
+
+    // std::cout << "Entered buildPathTree with position not satisfying found_criteria" << std::endl;
+    // std::cout << "Max depth allowed: " << max_depth << std::endl;
+
+    // std::size_t current_depth = 0;
 
     index_queue.push(start_index);
 
@@ -32,12 +52,24 @@ std::optional<std::size_t> BaseAlgorithm::buildPathTree(PathTree& path_tree,
         std::size_t parent_index = index_queue.front();
         index_queue.pop();
 
+        // if (path_tree.getDepth(parent_index) > current_depth)
+        // {
+        //     current_depth = path_tree.getDepth(parent_index);
+        //     std::cout << "Current depth: " << current_depth << std::endl;
+        // }
+
         for (Direction direction : kDirections)
         {
+            // std::cout << "Entered loop" << std::endl;
+            // std::cout << "wall_map size: " << house.wall_map.size() << std::endl;
+
             Position parent_position = path_tree.getPosition(parent_index);
             Position child_position = Position::computePosition(parent_position, direction);
 
+            // std::cout << "before is_navigable" <<  std::endl;
+            // std::cout << "wall_map size: " << house.wall_map.size() << std::endl;
             bool is_navigable = house.wall_map.contains(child_position) && !house.wall_map.at(child_position);
+            // std::cout << "after is_navigable" << std::endl;
             bool reached_max_depth = path_tree.getDepth(parent_index) >= max_depth;
 
             if (!is_navigable || reached_max_depth)
@@ -45,11 +77,17 @@ std::optional<std::size_t> BaseAlgorithm::buildPathTree(PathTree& path_tree,
                 continue;
             }
 
+            // std::cout << "Parent index: " << parent_index << std::endl;
+            // std::cout << "wall_map size: " << house.wall_map.size() << std::endl;
+
             std::optional<std::size_t> child_index = path_tree.insertChild(parent_index, direction, child_position, isToDoPosition(child_position));
             if (!child_index.has_value())
             {
                 continue;
             }
+
+            // std::cout << "Inserted child at index: " << child_index.value() << std::endl;
+            // std::cout << "wall_map size: " << house.wall_map.size() << std::endl;
 
             if (found_criteria(child_position))
             {
@@ -59,8 +97,14 @@ std::optional<std::size_t> BaseAlgorithm::buildPathTree(PathTree& path_tree,
             {
                 index_queue.push(child_index.value());
             }
+
+            // std::cout << "End loop" << std::endl;
+            // std::cout << "wall_map size: " << house.wall_map.size() << std::endl;
         }
     }
+
+    print("buildPathTree end");
+    //std::cout << "buildPathTree path_end_index.has_value(): " << path_end_index.has_value() << std::endl;
 
     return path_tree.getBestEndNodeIndex();
 }
@@ -72,9 +116,13 @@ bool BaseAlgorithm::getPathByFoundCriteria(const Position& start_position,
 {
     PathTree path_tree;
 
+    // std::cout << "Entered getPathByFoundCriteria" << std::endl;
+
     std::size_t root_index = path_tree.insertRoot(start_position);
 
     auto path_end_index = buildPathTree(path_tree, max_length, root_index, found_criteria);
+
+    // std::cout << "getPathByFoundCriteria path_end_index.has_value(): " << path_end_index.has_value() << std::endl;
     if (!path_end_index.has_value())
     {
         return false;
@@ -227,7 +275,9 @@ std::size_t BaseAlgorithm::getMaxReachableDistance() const
 bool BaseAlgorithm::isCleanedAllReachable()
 {
     std::deque<Direction> found_path;
+    // std::cout << "Entered isCleanedAllReachable" << std::endl;
     bool is_found = getPathToNearestTodo(kDockingStationPosition, found_path, total_steps_left);
+    // std::cout << "isCleanedAllReachable is_found: " << is_found << std::endl;
     if (!is_found)
     {
         return true;
@@ -273,42 +323,60 @@ bool BaseAlgorithm::isValidTargetPath(const std::deque<Direction>& target_path)
 Step BaseAlgorithm::decideNextStep()
 {
     std::deque<Direction> path_to_station;
+    // std::cout << "decideNextStep enter" << std::endl;
     bool is_found = getPathToStation(path_to_station);
     if (!is_found)
     {
         throw std::runtime_error("Simulator cannot find path back to the docking station!");
     }
 
+    // std::cout << "Found path to station" << std::endl;
+
     std::size_t station_distance = getPathDistance(path_to_station);
+
+    // std::cout << "Found distance to station: " << station_distance << std::endl;
     bool is_cleaned_all_reachable = isCleanedAllReachable();
 
+    // std::cout << "decideNextStep is_cleaned_all_reachable: " << is_cleaned_all_reachable << std::endl;
     if (shouldFinish(is_cleaned_all_reachable))
     {
         return Step::Finish;
     }
+
+    // std::cout << "decideNextStep shouldKeepCharging: " << shouldKeepCharging() << std::endl;
 
     if (shouldKeepCharging())
     {
         return Step::Stay;
     }
 
+    // std::cout << "decideNextStep isTooLowBatteryToStay: " << isTooLowBatteryToStay(station_distance) << std::endl;
+
     if (isTooLowBatteryToStay(station_distance) || is_cleaned_all_reachable)
     {
         return getPathNextStep(path_to_station);
     }
+
+    // std::cout << "decideNextStep isCurrentPositionDirty: " << isCurrentPositionDirty() << std::endl;
 
     if (isCurrentPositionDirty())
     {
         return Step::Stay;
     }
 
+    // std::cout << "decideNextStep isTooLowBatteryToGetFurther: " << isTooLowBatteryToGetFurther(station_distance) << std::endl;
+
     if (isTooLowBatteryToGetFurther(station_distance))
     {
         return getPathNextStep(path_to_station);
     }
 
+    // std::cout << "decideNextStep enoughStepsLeftToClean: " << enoughStepsLeftToClean() << std::endl;
+
     std::deque<Direction> path_to_next_target;
     is_found = getPathToNextTarget(current_tile.position, path_to_next_target);
+
+    // std::cout << "decideNextStep is_found: " << is_found << std::endl;
 
     // If there's no path to a TODO position - go to station
     if (!is_found || !isValidTargetPath(path_to_next_target))
@@ -320,6 +388,8 @@ Step BaseAlgorithm::decideNextStep()
 
         return getPathNextStep(path_to_station);
     }
+
+    // std::cout << "decideNextStep path_to_next_target.size(): " << path_to_next_target.size() << std::endl;
 
     return getPathNextStep(path_to_next_target);
 }
@@ -371,7 +441,7 @@ Step BaseAlgorithm::nextStep()
     sampleSensors();
 
     Step step = decideNextStep();
-
+    // std::cout << "Moving nextStep step" << std::endl;
     move(step);
 
     return step;

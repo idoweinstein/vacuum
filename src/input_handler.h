@@ -90,14 +90,14 @@ public:
      * @param algorithm_directory_path The directory path to search the `.so` files at.
      * @param algorithm_handles The vector to store opened algorithm handles into.
      */
-    static void openAlgorithms(const std::string& algorithm_directory_path, std::vector<void*>& algorithm_handles);
+    static void openAlgorithms(const std::string& algorithm_directory_path, std::vector<std::shared_ptr<void>>& algorithm_handles);
 
     /**
      * @brief dlclose() all previously dlopen()ed algorithms `.so` files.
      * 
      * @param algorithm_handles The previously dlopen()ed algorithm files.
      */
-    static void closeAlgorithms(std::vector<void*>& algorithm_handles);
+    //static void closeAlgorithms(std::vector<void*>& algorithm_handles);
 
     /**
      * @brief Parses command line arguments.

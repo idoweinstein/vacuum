@@ -1,6 +1,8 @@
 #ifndef ABSTRACT_ALGORITHM_H_
 #define ABSTRACT_ALGORITHM_H_
 
+#include <iostream>
+
 #include "battery_meter.h"
 #include "dirt_sensor.h"
 #include "wall_sensor.h"
@@ -15,7 +17,7 @@ public:
     /**
      * @brief Virtual destructor for the AbstractAlgorithm class.
      */
-    virtual ~AbstractAlgorithm() {}
+    virtual ~AbstractAlgorithm() { std::cout << "AbstractAlgorithm destructor" << std::endl; }
 
     /**
      * @brief Set the maximum number of steps the algorithm can take.

@@ -14,7 +14,8 @@ void Task::setIdlePriority(pthread_t& thread_handler)
 
 void Task::timeoutHandler(const boost::system::error_code& error_code,
                           Task& task,
-                          pthread_t thread_handler)
+                          pthread_t thread_handler,
+                          boost::asio::steady_timer& runtime_timer)
 {
     // Make sure timer was not cancelled.
     if (!error_code)
@@ -27,16 +28,19 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
             task.onTeardown();
             setIdlePriority(thread_handler);
             task.stop();
+            runtime_timer.cancel();
         }
     }
 }
 
 Task::Task(const std::string& algorithm_name,
+           std::shared_ptr<void>& algorithm_handle,
            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
            const HouseFile& house_file,
            std::function<void()> onTeardown,
            boost::asio::io_context& timer_context)
     : algorithm_name(algorithm_name),
+      algorithm_handle(algorithm_handle),
       algorithm_pointer(std::move(algorithm_pointer)),
       house_name(house_file.name),
       house_file(house_file),
@@ -52,8 +56,8 @@ void Task::setUpTask(boost::asio::steady_timer& runtime_timer)
     // Set-up a timeout timer for the task simulation
     runtime_timer.expires_after(boost::asio::chrono::milliseconds(max_duration));
     auto current_thread = pthread_self();
-    runtime_timer.async_wait([this, current_thread](const boost::system::error_code& error_code) {
-        timeoutHandler(error_code, *this, current_thread);
+    runtime_timer.async_wait([this, current_thread, &runtime_timer](const boost::system::error_code& error_code) {
+        timeoutHandler(error_code, *this, current_thread, runtime_timer);
     });
 }
 
@@ -79,12 +83,16 @@ void Task::tearDownTask(Simulator& simulator, std::optional<std::size_t> simulat
 
         onTeardown();
     }
+
+    algorithm_handle.reset();
 }
 
 void Task::simulatePair(std::stop_token stop_token)
 {
+    std::shared_ptr<void> algorithm_handle_copy = algorithm_handle;
+    std::unique_ptr<AbstractAlgorithm> algorithm_pointer_copy = std::move(algorithm_pointer);
     Simulator simulator(house_file);
-    simulator.setAlgorithm(*(this->algorithm_pointer));
+    simulator.setAlgorithm(*(algorithm_pointer_copy));
     max_duration = simulator.getMaxSteps();
     timeout_score = simulator.getTimeoutScore();
 

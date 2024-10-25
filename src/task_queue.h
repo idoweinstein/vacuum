@@ -43,7 +43,8 @@ public:
      */
     void insertTask(const std::string& algorithm_name,
                     std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-                    const HouseFile& house_file);
+                    const HouseFile& house_file,
+                    std::shared_ptr<void>& algorithm_handle);
 
     /**
      * @brief Runs all tasks in the task queue.
