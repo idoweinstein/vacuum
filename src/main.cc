@@ -90,20 +90,26 @@ void Main::runAll(const Arguments& arguments)
     std::vector<std::filesystem::path> house_paths;
     std::vector<HouseFile> house_files;
 
-    InputHandler::openAlgorithms(arguments.algorithm_path, algorithm_handles);
+    try {
+        InputHandler::openAlgorithms(arguments.algorithm_path, algorithm_handles);
 
-    InputHandler::findHouses(arguments.house_path, house_paths);
-    InputHandler::readHouses(house_paths, house_files);
+        InputHandler::findHouses(arguments.house_path, house_paths);
+        InputHandler::readHouses(house_paths, house_files);
 
-    std::size_t num_tasks = algorithm_handles.size() * house_files.size();
+        std::size_t num_tasks = algorithm_handles.size() * house_files.size();
 
-    runTaskQueue(house_files, algorithm_handles, num_tasks, arguments.num_threads, arguments.summary_only);
-    std::cout << "AFTER runTaskQueue()" << std::endl;
+        runTaskQueue(house_files, algorithm_handles, num_tasks, arguments.num_threads, arguments.summary_only);
 
-    AlgorithmRegistrar::getAlgorithmRegistrar().clear();
-    // InputHandler::closeAlgorithms(algorithm_handles);
+        AlgorithmRegistrar::getAlgorithmRegistrar().clear();
 
-    std::cout << "FINISHED runAll()" << std::endl;
+    }
+    catch(const std::exception& exception)
+    {
+        // Ensure all instances of the algorithm dealocate before dlclosing even
+        // when an exception happened.
+        AlgorithmRegistrar::getAlgorithmRegistrar().clear();
+        throw;
+    }
 }
 
 int main(int argc, char* argv[])

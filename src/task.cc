@@ -83,8 +83,6 @@ void Task::tearDownTask(Simulator& simulator, std::optional<std::size_t> simulat
 
         onTeardown();
     }
-
-    algorithm_handle.reset();
 }
 
 void Task::simulatePair(std::stop_token stop_token)

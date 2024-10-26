@@ -93,13 +93,6 @@ public:
     static void openAlgorithms(const std::string& algorithm_directory_path, std::vector<std::shared_ptr<void>>& algorithm_handles);
 
     /**
-     * @brief dlclose() all previously dlopen()ed algorithms `.so` files.
-     * 
-     * @param algorithm_handles The previously dlopen()ed algorithm files.
-     */
-    //static void closeAlgorithms(std::vector<void*>& algorithm_handles);
-
-    /**
      * @brief Parses command line arguments.
      * 
      * @param argc Command line arguments count.

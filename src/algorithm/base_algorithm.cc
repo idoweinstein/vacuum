@@ -17,9 +17,9 @@
 #include <unistd.h>   // for getpid()
 #include <sys/syscall.h> // for syscall() and SYS_gettid
 
-static void print(const std::string& message)
+static void print([[maybe_unused]] const std::string& message)
 {
-    std::osyncstream(std::cout) << "(" << syscall(SYS_gettid) << ") " << message << std::endl;
+    // std::osyncstream(std::cout) << "(" << syscall(SYS_gettid) << ") " << message << std::endl;
 }
 
 std::optional<std::size_t> BaseAlgorithm::buildPathTree(PathTree& path_tree,

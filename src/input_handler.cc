@@ -91,8 +91,6 @@ bool InputHandler::safeDlOpen(void*& handle, const std::filesystem::path& file_p
         return false;
     }
 
-    std::cout << "Algorithm " << algorithm_name << " loaded successfully with handle " << handle << std::endl;
-
     return true;
 }
 
@@ -112,7 +110,6 @@ void InputHandler::openAlgorithms(const std::string& algorithm_directory_path,
             algorithm_handles.emplace_back(
                 std::shared_ptr<void>(handle, [](void* h) {
                     if (h) {
-                        std::cout << "Closing library handle..." << std::endl;
                         dlclose(h);
                     }
                 })
@@ -123,21 +120,6 @@ void InputHandler::openAlgorithms(const std::string& algorithm_directory_path,
     // Search the directory and apply the appropriate filters and loading logic.
     searchDirectory(algorithm_directory_path, isAlgorithmFile, loadAlgorithm);
 }
-
-/*void InputHandler::closeAlgorithms(std::vector<std::shared_ptr<void*>>& algorithm_handles)
-{
-    for (std::shared_ptr<void*> handle_ptr : algorithm_handles)
-    {
-        if (nullptr == *handle_ptr || 
-        {
-            continue;
-        }
-        std::cout << "Closing handle " << handle << std::endl;
-        dlclose(handle);
-    }
-
-    std::cout << "All handles closed" << std::endl;
-}*/
 
 bool InputHandler::parseArgument(const std::string& raw_argument, Arguments& arguments)
 {
