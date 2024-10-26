@@ -17,7 +17,7 @@ public:
     /**
      * @brief Virtual destructor for the AbstractAlgorithm class.
      */
-    virtual ~AbstractAlgorithm() { std::cout << "AbstractAlgorithm destructor" << std::endl; }
+    virtual ~AbstractAlgorithm() { }
 
     /**
      * @brief Set the maximum number of steps the algorithm can take.

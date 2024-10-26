@@ -58,7 +58,6 @@ static void runTaskQueue(std::vector<HouseFile>& house_files,
                          std::vector<std::shared_ptr<void>>& algorithm_handles,
                          std::size_t num_tasks, std::size_t num_threads, bool summary_only)
 {
-    std::cout << "STARTED runTaskQueue()" << std::endl;
     TaskQueue task_queue(num_tasks, num_threads);
 
     std::size_t i = 0;
@@ -81,7 +80,6 @@ static void runTaskQueue(std::vector<HouseFile>& house_files,
     task_queue.run();
 
     handleResults(task_queue, summary_only);
-    std::cout << "FINISHED runTaskQueue()" << std::endl;
 }
 
 void Main::runAll(const Arguments& arguments)
@@ -128,8 +126,6 @@ int main(int argc, char* argv[])
         {
             Main::runAll(arguments);
         }
-
-        std::cout << "AFTER Main::runAll()" << std::endl;
     }
 
     catch(const std::exception& exception)
@@ -138,7 +134,5 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-
-    std::cout << "FINISHED main()" << std::endl;
     return EXIT_SUCCESS;
 }

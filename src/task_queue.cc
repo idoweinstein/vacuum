@@ -65,7 +65,5 @@ void TaskQueue::run()
     // Wait for all tasks to finish running (gracefully or due to a timeout).
     todo_tasks_counter.wait();
 
-    std::cout << "All tasks finished running" << std::endl;
     timer_context.stop();
-    std::cout << "Timer context stopped" << std::endl;
 }
