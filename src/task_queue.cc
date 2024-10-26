@@ -66,4 +66,12 @@ void TaskQueue::run()
     todo_tasks_counter.wait();
 
     timer_context.stop();
+
+    // Join the timer thread.
+    if (timer_thread.joinable())
+    {
+        timer_thread.join();
+    }
+
+    work_guard.reset();
 }
