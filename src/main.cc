@@ -112,6 +112,7 @@ void Main::runAll(const Arguments& arguments)
 
 int main(int argc, char* argv[])
 {
+    const auto t1 = std::chrono::high_resolution_clock::now();
     Arguments arguments = {
         .house_path = Constants::kDefaultHousePath,
         .algorithm_path = Constants::kDefaultAlgorithmPath,
@@ -131,8 +132,16 @@ int main(int argc, char* argv[])
     catch(const std::exception& exception)
     {
         OutputHandler::printError("Main", exception.what());
+        const auto t2 = std::chrono::high_resolution_clock::now();
+
+        std::cout << "Total elapsed time: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << "us" << std::endl;
         return EXIT_FAILURE;
     }
 
+
+    std::cout << "FINISHED main()" << std::endl;
+    const auto t2 = std::chrono::high_resolution_clock::now();
+
+    std::cout << "Total elapsed time: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << "us" << std::endl;
     return EXIT_SUCCESS;
 }

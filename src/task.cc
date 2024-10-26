@@ -110,5 +110,9 @@ void Task::simulatePair(std::stop_token stop_token)
         setAlgorithmError(exception.what());
     }
 
+    std::cout << "Task " << algorithm_name << " finished" << std::endl;
+    std::cout << "build_tree time: " << algorithm_pointer_copy->build_tree_time << std::endl;
+    std::cout << "next_step time: " << algorithm_pointer_copy->next_step_time << std::endl;
+
     tearDownTask(simulator, simulation_score, runtime_timer);
 }

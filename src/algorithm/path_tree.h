@@ -35,13 +35,12 @@ class PathTree
         Direction direction;                            // Direction from the parent node to this node.
         Position position;                              // Position of this node.
         std::size_t depth;                              // Distance between this node and the root node.
-
         std::size_t score;                              // Score of the node.
-        std::unordered_set<Position> visited_positions; // Visited positions in current branch (path).
     };
 
     std::vector<PathNode> node_pool;                // Pool of path nodes.
     std::vector<std::size_t> end_node_indices;      // Indices of the end nodes in the path tree.
+    std::unordered_set<Position> visited_positions; // Visited positions in tree
 
     /**
      * @brief Validates the given node index.

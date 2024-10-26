@@ -18,6 +18,8 @@
 
 #include "algorithm/path_tree.h"
 
+#include <chrono>
+
 /**
  * @class BaseAlgorithm 
  * @brief The BaseAlgorithm class represents an implementation of the navigation algorithm of a vacuum cleaner.
@@ -31,6 +33,7 @@
  */
 class BaseAlgorithm : public AbstractAlgorithm
 {
+
     inline static const Position kDockingStationPosition = {0,0};       // Docking Station (relative) position.
 
     struct HouseModel
@@ -374,6 +377,7 @@ protected:
                                      std::deque<Direction>& path) = 0;
 
 public:
+
     BaseAlgorithm() = default;
     /**
      * @brief Deleted copy constructor and assignment operator.

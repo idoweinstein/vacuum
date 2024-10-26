@@ -27,6 +27,7 @@ std::optional<std::size_t> BaseAlgorithm::buildPathTree(PathTree& path_tree,
                                                         std::size_t start_index,
                                                         std::function<bool(const Position&)> const & found_criteria) const
 {
+    auto start = std::chrono::high_resolution_clock::now();
     std::queue<std::size_t> index_queue;
     std::optional<std::size_t> path_end_index;
 
@@ -106,6 +107,8 @@ std::optional<std::size_t> BaseAlgorithm::buildPathTree(PathTree& path_tree,
     print("buildPathTree end");
     //std::cout << "buildPathTree path_end_index.has_value(): " << path_end_index.has_value() << std::endl;
 
+    auto end = std::chrono::high_resolution_clock::now();
+    build_tree_time += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     return path_tree.getBestEndNodeIndex();
 }
 
@@ -436,6 +439,7 @@ void BaseAlgorithm::setBatteryMeter(const BatteryMeter& battery_meter)
 
 Step BaseAlgorithm::nextStep()
 {
+    auto start = std::chrono::high_resolution_clock::now();
     assertAllInitialied();
 
     sampleSensors();
@@ -443,6 +447,9 @@ Step BaseAlgorithm::nextStep()
     Step step = decideNextStep();
     // std::cout << "Moving nextStep step" << std::endl;
     move(step);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    next_step_time += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
     return step;
 }

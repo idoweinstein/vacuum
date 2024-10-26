@@ -14,6 +14,9 @@
 class AbstractAlgorithm
 {
 public:
+
+    mutable std::size_t next_step_time; // Time spent on deciding the next step.
+    mutable std::size_t build_tree_time; // Time spent on building the path tree.
     /**
      * @brief Virtual destructor for the AbstractAlgorithm class.
      */

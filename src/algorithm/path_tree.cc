@@ -9,12 +9,10 @@ std::size_t PathTree::insertRoot(const Position& position)
         Direction::North,              // PathNode.direction (doesn't matter - it's the first path node)
         position,                      // PathNode.position
         0,                             // PathNode.depth
-        0,                             // PathNode.score
-        std::unordered_set<Position>{} // PathNode.visited_positions
+        0                              // PathNode.score
     );
 
-    PathNode& root = node_pool.back();
-    root.visited_positions.insert(position);
+    visited_positions.insert(position);
 
     return 0; // Root Node Index
 }
@@ -24,7 +22,7 @@ std::optional<std::size_t> PathTree::insertChild(std::size_t parent_index, Direc
     validateIndex(parent_index);
     PathNode& parent = node_pool.at(parent_index);
 
-    if (parent.visited_positions.contains(child_position))
+    if (visited_positions.contains(child_position))
     {
         return std::nullopt;
     }
@@ -37,12 +35,10 @@ std::optional<std::size_t> PathTree::insertChild(std::size_t parent_index, Direc
         direction_to_child,         // PathNode.direction
         child_position,             // PathNode.position
         depth,                      // PathNode.depth
-        score,                      // PathNode.score
-        parent.visited_positions    // PathNode.visited_positions
+        score                       // PathNode.score
     );
 
-    PathNode& child = node_pool.back();
-    child.visited_positions.insert(child_position);
+    visited_positions.insert(child_position);
 
     std::size_t child_index = node_pool.size() - 1;
     return child_index;
