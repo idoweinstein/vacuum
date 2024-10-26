@@ -17,11 +17,7 @@ add_library(vacuum_cleaner
 
 target_include_directories(vacuum_cleaner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_compile_options(vacuum_cleaner PUBLIC)
-target_link_options(vacuum_cleaner PUBLIC)
-
 # Add an executable for the main program
 add_executable(myrobot main.cc)
-
 set_target_properties(myrobot PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 target_link_libraries(myrobot vacuum_cleaner)

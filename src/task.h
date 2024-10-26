@@ -37,7 +37,6 @@ class Task
     std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
     const std::string& house_name;
     const HouseFile& house_file;
-    // Simulator simulator;
 
     // Task Execution Data
     std::jthread worker_thread;
@@ -157,7 +156,16 @@ public:
 
     void stop() { worker_thread.request_stop(); }
 
-    void detach() { worker_thread.detach(); }
+    /**
+     * @brief Detaches the task's worker thread.
+     */
+    void detach()
+    {
+        if (worker_thread.joinable())
+        {
+            worker_thread.detach();
+        }
+    }
 };
 
 #endif // TASK_H_
