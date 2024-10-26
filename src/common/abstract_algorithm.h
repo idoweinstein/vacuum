@@ -1,8 +1,6 @@
 #ifndef ABSTRACT_ALGORITHM_H_
 #define ABSTRACT_ALGORITHM_H_
 
-#include <iostream>
-
 #include "battery_meter.h"
 #include "dirt_sensor.h"
 #include "wall_sensor.h"
@@ -14,13 +12,10 @@
 class AbstractAlgorithm
 {
 public:
-
-    mutable std::size_t next_step_time; // Time spent on deciding the next step.
-    mutable std::size_t build_tree_time; // Time spent on building the path tree.
     /**
      * @brief Virtual destructor for the AbstractAlgorithm class.
      */
-    virtual ~AbstractAlgorithm() { }
+    virtual ~AbstractAlgorithm() {}
 
     /**
      * @brief Set the maximum number of steps the algorithm can take.

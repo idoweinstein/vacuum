@@ -72,7 +72,7 @@ void InputHandler::readHouses(const std::vector<std::filesystem::path>& house_pa
 
 bool InputHandler::safeDlOpen(void*& handle, const std::filesystem::path& file_path)
 {
-    std::string algorithm_name = file_path.stem().string(); 
+    std::string algorithm_name = file_path.stem().string();
 
     std::size_t pre_dlopen_count = AlgorithmRegistrar::getAlgorithmRegistrar().count();
 
@@ -94,15 +94,13 @@ bool InputHandler::safeDlOpen(void*& handle, const std::filesystem::path& file_p
     return true;
 }
 
-void InputHandler::openAlgorithms(const std::string& algorithm_directory_path, 
-                                  std::vector<std::shared_ptr<void>>& algorithm_handles) 
+void InputHandler::openAlgorithms(const std::string& algorithm_directory_path,
+                                  std::vector<std::shared_ptr<void>>& algorithm_handles)
 {
-    // Lambda to determine if the file is a valid algorithm file.
     auto isAlgorithmFile = [](const std::filesystem::directory_entry& entry) -> bool {
         return entry.is_regular_file() && kAlgorithmExtension == entry.path().extension();
     };
 
-    // Lambda to load an algorithm and store it in the shared_ptr vector.
     auto loadAlgorithm = [&algorithm_handles](const std::filesystem::path& entry_path) {
         void* handle = nullptr;
         if (safeDlOpen(handle, entry_path)) {
@@ -117,8 +115,9 @@ void InputHandler::openAlgorithms(const std::string& algorithm_directory_path,
         }
     };
 
-    // Search the directory and apply the appropriate filters and loading logic.
-    searchDirectory(algorithm_directory_path, isAlgorithmFile, loadAlgorithm);
+    searchDirectory(algorithm_directory_path,
+                    isAlgorithmFile,
+                    loadAlgorithm);
 }
 
 bool InputHandler::parseArgument(const std::string& raw_argument, Arguments& arguments)
