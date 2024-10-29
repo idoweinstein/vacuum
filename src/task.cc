@@ -85,10 +85,16 @@ void Task::tearDownTask(Simulator& simulator, std::optional<std::size_t> simulat
 
 void Task::simulatePair()
 {
+    // Make the new thread own a copy of the algorithm handle so it won't be closed when the main thread finishes.
     std::shared_ptr<void> algorithm_handle_copy = algorithm_handle;
+
+    // Make the new thread own a copy of the algorithm pointer so it won't be deleted when the main thread finishes.
     std::unique_ptr<AbstractAlgorithm> algorithm_pointer_copy = std::move(algorithm_pointer);
+
+    // Make the new thread own its simulator object.
     Simulator simulator(house_file);
     simulator.setAlgorithm(*(algorithm_pointer_copy));
+
     max_duration = simulator.getMaxSteps();
     timeout_score = simulator.getTimeoutScore();
 

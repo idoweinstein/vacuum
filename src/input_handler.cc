@@ -97,8 +97,13 @@ bool InputHandler::safeDlOpen(void*& handle, const std::filesystem::path& file_p
 void InputHandler::openAlgorithms(const std::string& algorithm_directory_path,
                                   std::vector<std::shared_ptr<void>>& algorithm_handles)
 {
-    auto isAlgorithmFile = [](const std::filesystem::directory_entry& entry) -> bool {
-        return entry.is_regular_file() && kAlgorithmExtension == entry.path().extension();
+    auto isAlgorithmFile = [](const std::filesystem::directory_entry& entry) -> bool
+    {
+        if (entry.is_regular_file() && kAlgorithmExtension == entry.path().extension())
+        {
+            return true;
+        }
+        return false;
     };
 
     auto loadAlgorithm = [&algorithm_handles](const std::filesystem::path& entry_path) {

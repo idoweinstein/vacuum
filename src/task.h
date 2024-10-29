@@ -66,6 +66,7 @@ class Task
      * @param error_code The error code of the timeout event.
      * @param task The task the timeout occurred to.
      * @param thread_handler The thread the timeout occurred to.
+     * @param runtime_timer The task's timeout timer.
      */
     static void timeoutHandler(const boost::system::error_code& error_code,
                                Task& task,
@@ -91,7 +92,8 @@ class Task
 
     /**
      * @brief Task tear-down function to be executed after performing the task.
-     * 
+     *
+     * @param simulator The task's simulator.
      * @param simulation_score The resultant score of the task (if there's no score std::nullopt).
      * @param runtime_timer The task's timeout timer.
      */
@@ -153,6 +155,9 @@ public:
      */
     std::string getAlgorithmError() const { return algorithm_error_buffer.str(); }
 
+    /**
+     * @brief Stops the task's worker thread.
+     */
     void stop() { worker_thread.request_stop(); }
 
     /**
