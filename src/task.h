@@ -13,7 +13,6 @@
 
 #include <pthread.h>
 
-#include <stop_token>
 #include <optional>
 #include <string>
 #include <atomic>
@@ -102,7 +101,7 @@ class Task
      * @brief Simulates an house - algorithm pair.
      * Being executed by the task's distinct worker thread.
      */
-    void simulatePair(std::stop_token stop_token);
+    void simulatePair();
 
 public:
 
@@ -117,7 +116,7 @@ public:
      * @brief Runs the task.
      * Spawns the worker thread, which simulates the task.
      */
-    void run() { worker_thread = std::jthread([this](std::stop_token stop_token) { simulatePair(stop_token); }); }
+    void run() { worker_thread = std::jthread([this]() { simulatePair(); }); }
 
     /**
      * @brief Returns task's simulation score.

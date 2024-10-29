@@ -90,8 +90,8 @@ namespace
             children[0],
             children[1],
             children[2],
-            path_tree.insertChild(children[2], Direction::South, Position(-1,9), false).value(),
-            path_tree.insertChild(6, Direction::West, Position(2,2564), false).value()
+            path_tree.insertChild(children[2], Direction::South, Position(1,9), false).value(),
+            path_tree.insertChild(6, Direction::West, Position(2,25640), false).value()
         };
 
         for (unsigned int i = 1; i < 5; i++)

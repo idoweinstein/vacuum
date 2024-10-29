@@ -1,7 +1,6 @@
 #include "task.h"
 
 #include <sched.h>
-#include <stop_token>
 
 #include "output_handler.h"
 
@@ -84,7 +83,7 @@ void Task::tearDownTask(Simulator& simulator, std::optional<std::size_t> simulat
     }
 }
 
-void Task::simulatePair(std::stop_token stop_token)
+void Task::simulatePair()
 {
     std::shared_ptr<void> algorithm_handle_copy = algorithm_handle;
     std::unique_ptr<AbstractAlgorithm> algorithm_pointer_copy = std::move(algorithm_pointer);
@@ -100,7 +99,7 @@ void Task::simulatePair(std::stop_token stop_token)
 
     try
     {
-        simulation_score = simulator.run(stop_token);
+        simulation_score = simulator.run();
         statistics = simulator.getSimulationStatistics();
     }
 
