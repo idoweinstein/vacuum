@@ -26,7 +26,6 @@ void Task::timeoutHandler(const boost::system::error_code& error_code,
             task.score = task.timeout_score;
             task.onTeardown();
             setIdlePriority(thread_handler);
-            task.stop();
             runtime_timer.cancel();
         }
     }

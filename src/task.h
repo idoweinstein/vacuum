@@ -156,11 +156,6 @@ public:
     std::string getAlgorithmError() const { return algorithm_error_buffer.str(); }
 
     /**
-     * @brief Stops the task's worker thread.
-     */
-    void stop() { worker_thread.request_stop(); }
-
-    /**
      * @brief Detaches the task's worker thread.
      */
     void detach()
