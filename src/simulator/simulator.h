@@ -5,7 +5,6 @@
 #include <string>
 #include <memory>
 #include <sstream>
-#include <stop_token>
 
 #include "common/abstract_algorithm.h"
 #include "common/enums.h"
@@ -155,7 +154,7 @@ public:
      * 
      * @throws std::logic_error If the simulator is not properly initialized yet.
      */
-    std::size_t run(std::stop_token stop_token);
+    std::size_t run();
 };
 
 #endif /* ROBOT_SIMULATOR_H_ */

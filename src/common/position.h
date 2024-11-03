@@ -14,13 +14,6 @@
  */
 class Position : public std::pair<int, int>
 {
-        inline static const std::unordered_map<Direction, std::pair<int, int>> direction_map = {
-            {Direction::North, std::make_pair(-1, 0)},
-            {Direction::South, std::make_pair(1, 0)},
-            {Direction::West, std::make_pair(0, -1)},
-            {Direction::East, std::make_pair(0, 1)},
-        };
-
     public:
         /**
          * @brief Default constructor.
@@ -43,6 +36,12 @@ class Position : public std::pair<int, int>
          */
         static Position computePosition(const Position& position, Direction direction)
         {
+            const std::unordered_map<Direction, std::pair<int, int>> direction_map = {
+                {Direction::North, std::make_pair(-1, 0)},
+                {Direction::South, std::make_pair(1, 0)},
+                {Direction::West, std::make_pair(0, -1)},
+                {Direction::East, std::make_pair(0, 1)},
+            };
             std::pair<int, int> shift_direction = direction_map.at(direction);
             return Position(position.first + shift_direction.first, position.second + shift_direction.second);
         }

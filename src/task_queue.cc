@@ -24,7 +24,8 @@ TaskQueue::TaskQueue(std::size_t number_of_tasks, std::size_t number_of_threads)
 
 void TaskQueue::insertTask(const std::string& algorithm_name,
                            std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-                           const HouseFile& house_file)
+                           const HouseFile& house_file,
+                           std::shared_ptr<void>& algorithm_handle)
 {
     if (tasks.size() >= num_tasks)
     {
@@ -39,6 +40,7 @@ void TaskQueue::insertTask(const std::string& algorithm_name,
 
     tasks.emplace_back(
         algorithm_name,
+        algorithm_handle,
         std::move(algorithm_pointer),
         house_file,
         taskTearDown,
@@ -64,4 +66,12 @@ void TaskQueue::run()
     todo_tasks_counter.wait();
 
     timer_context.stop();
+
+    // Join the timer thread.
+    if (timer_thread.joinable())
+    {
+        timer_thread.join();
+    }
+
+    work_guard.reset();
 }

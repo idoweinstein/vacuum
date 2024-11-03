@@ -29,7 +29,7 @@ namespace Constants
     const bool kDefaultSummaryOnly = false;
 }
 
-void handleResults(TaskQueue& task_queue, bool summary_only)
+static void handleResults(TaskQueue& task_queue, bool summary_only)
 {
     std::map<std::string, std::map<std::string, std::size_t>> task_scores;
 
@@ -48,16 +48,19 @@ void handleResults(TaskQueue& task_queue, bool summary_only)
         task_scores[task.getAlgorithmName()].insert(std::make_pair(task.getHouseName(), task.getScore()));
 
         // Detaching tasks after reading their score as an extra measure for stuck thread (although they should be already cancelled).
-        // task.detach();
+        task.detach();
     }
 
     OutputHandler::exportSummary(task_scores);
 }
 
-void runTaskQueue(std::vector<HouseFile>& house_files, std::size_t num_tasks, std::size_t num_threads, bool summary_only)
+static void runTaskQueue(std::vector<HouseFile>& house_files,
+                         std::vector<std::shared_ptr<void>>& algorithm_handles,
+                         std::size_t num_tasks, std::size_t num_threads, bool summary_only)
 {
-    std::cout << "STARTED runTaskQueue()" << std::endl;
     TaskQueue task_queue(num_tasks, num_threads);
+
+    std::size_t i = 0;
 
     for(const auto& algorithm : AlgorithmRegistrar::getAlgorithmRegistrar())
     {
@@ -66,35 +69,45 @@ void runTaskQueue(std::vector<HouseFile>& house_files, std::size_t num_tasks, st
             task_queue.insertTask(
                 algorithm.name(),
                 algorithm.create(),
-                house_file
+                house_file,
+                algorithm_handles[i]
             );
         }
+
+        ++i;
     }
 
     task_queue.run();
 
     handleResults(task_queue, summary_only);
-    std::cout << "FINISHED runTaskQueue()" << std::endl;
 }
 
 void Main::runAll(const Arguments& arguments)
 {
-    std::vector<void*> algorithm_handles;
+    std::vector<std::shared_ptr<void>> algorithm_handles;
     std::vector<std::filesystem::path> house_paths;
     std::vector<HouseFile> house_files;
 
-    InputHandler::openAlgorithms(arguments.algorithm_path, algorithm_handles);
+    try {
+        InputHandler::openAlgorithms(arguments.algorithm_path, algorithm_handles);
 
-    InputHandler::findHouses(arguments.house_path, house_paths);
-    InputHandler::readHouses(house_paths, house_files);
+        InputHandler::findHouses(arguments.house_path, house_paths);
+        InputHandler::readHouses(house_paths, house_files);
 
-    std::size_t num_tasks = algorithm_handles.size() * house_files.size();
+        std::size_t num_tasks = algorithm_handles.size() * house_files.size();
 
-    runTaskQueue(house_files, num_tasks, arguments.num_threads, arguments.summary_only);
-    std::cout << "AFTER runTaskQueue()" << std::endl;
+        runTaskQueue(house_files, algorithm_handles, num_tasks, arguments.num_threads, arguments.summary_only);
 
-    AlgorithmRegistrar::getAlgorithmRegistrar().clear();
-    InputHandler::closeAlgorithms(algorithm_handles);
+        AlgorithmRegistrar::getAlgorithmRegistrar().clear();
+
+    }
+    catch(const std::exception& exception)
+    {
+        // Ensure all instances of the algorithm dealocate before dlclosing even
+        // when an exception happened.
+        AlgorithmRegistrar::getAlgorithmRegistrar().clear();
+        throw;
+    }
 }
 
 int main(int argc, char* argv[])

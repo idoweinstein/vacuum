@@ -40,10 +40,12 @@ public:
      * @param algorithm_name The name of the algorithm to be executed by the inserted task.
      * @param algorithm_pointer The pointer to the algorithm to be executed by the inserted task.
      * @param house_file The house file to be executed by the inserted task.
+     * @param algorithm_handle The handle of the algorithm to be executed by the inserted task.
      */
     void insertTask(const std::string& algorithm_name,
                     std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
-                    const HouseFile& house_file);
+                    const HouseFile& house_file,
+                    std::shared_ptr<void>& algorithm_handle);
 
     /**
      * @brief Runs all tasks in the task queue.

@@ -72,7 +72,7 @@ void InputHandler::readHouses(const std::vector<std::filesystem::path>& house_pa
 
 bool InputHandler::safeDlOpen(void*& handle, const std::filesystem::path& file_path)
 {
-    std::string algorithm_name = file_path.stem().string(); 
+    std::string algorithm_name = file_path.stem().string();
 
     std::size_t pre_dlopen_count = AlgorithmRegistrar::getAlgorithmRegistrar().count();
 
@@ -94,7 +94,8 @@ bool InputHandler::safeDlOpen(void*& handle, const std::filesystem::path& file_p
     return true;
 }
 
-void InputHandler::openAlgorithms(const std::string& algorithm_directory_path, std::vector<void*>& algorithm_handles)
+void InputHandler::openAlgorithms(const std::string& algorithm_directory_path,
+                                  std::vector<std::shared_ptr<void>>& algorithm_handles)
 {
     auto isAlgorithmFile = [](const std::filesystem::directory_entry& entry) -> bool
     {
@@ -105,26 +106,23 @@ void InputHandler::openAlgorithms(const std::string& algorithm_directory_path, s
         return false;
     };
 
-    auto loadAlgorithm = [&algorithm_handles](const std::filesystem::path& entry_path)
-    {
-        void* handle;
-        if (safeDlOpen(handle, entry_path))
-        {
-            algorithm_handles.emplace_back(handle);
+    auto loadAlgorithm = [&algorithm_handles](const std::filesystem::path& entry_path) {
+        void* handle = nullptr;
+        if (safeDlOpen(handle, entry_path)) {
+            // Create a shared_ptr with a custom deleter and emplace it in the vector.
+            algorithm_handles.emplace_back(
+                std::shared_ptr<void>(handle, [](void* h) {
+                    if (h) {
+                        dlclose(h);
+                    }
+                })
+            );
         }
     };
 
     searchDirectory(algorithm_directory_path,
                     isAlgorithmFile,
                     loadAlgorithm);
-}
-
-void InputHandler::closeAlgorithms(std::vector<void*>& algorithm_handles)
-{
-    for (void* handle : algorithm_handles)
-    {
-        dlclose(handle);
-    }
 }
 
 bool InputHandler::parseArgument(const std::string& raw_argument, Arguments& arguments)

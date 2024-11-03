@@ -13,7 +13,6 @@
 
 #include <pthread.h>
 
-#include <stop_token>
 #include <optional>
 #include <string>
 #include <atomic>
@@ -33,10 +32,10 @@ class Task
 
     // Task Simulation Data
     const std::string& algorithm_name;
-    const std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
+    std::shared_ptr<void>& algorithm_handle;
+    std::unique_ptr<AbstractAlgorithm> algorithm_pointer;
     const std::string& house_name;
     const HouseFile& house_file;
-    // Simulator simulator;
 
     // Task Execution Data
     std::jthread worker_thread;
@@ -67,10 +66,12 @@ class Task
      * @param error_code The error code of the timeout event.
      * @param task The task the timeout occurred to.
      * @param thread_handler The thread the timeout occurred to.
+     * @param runtime_timer The task's timeout timer.
      */
     static void timeoutHandler(const boost::system::error_code& error_code,
                                Task& task,
-                               pthread_t thread_handler);
+                               pthread_t thread_handler,
+                               boost::asio::steady_timer& runtime_timer);
 
     /**
      * @brief Adds an error message to the task's error buffer.
@@ -91,7 +92,8 @@ class Task
 
     /**
      * @brief Task tear-down function to be executed after performing the task.
-     * 
+     *
+     * @param simulator The task's simulator.
      * @param simulation_score The resultant score of the task (if there's no score std::nullopt).
      * @param runtime_timer The task's timeout timer.
      */
@@ -101,11 +103,12 @@ class Task
      * @brief Simulates an house - algorithm pair.
      * Being executed by the task's distinct worker thread.
      */
-    void simulatePair(std::stop_token stop_token);
+    void simulatePair();
 
 public:
 
     Task(const std::string& algorithm_name,
+         std::shared_ptr<void>& algorithm_handle,
          std::unique_ptr<AbstractAlgorithm>&& algorithm_pointer,
          const HouseFile& house_file,
          std::function<void()> onTeardown,
@@ -115,7 +118,7 @@ public:
      * @brief Runs the task.
      * Spawns the worker thread, which simulates the task.
      */
-    void run() { worker_thread = std::jthread([this](std::stop_token stop_token) { simulatePair(stop_token); }); }
+    void run() { worker_thread = std::jthread([this]() { simulatePair(); }); }
 
     /**
      * @brief Returns task's simulation score.
@@ -152,7 +155,16 @@ public:
      */
     std::string getAlgorithmError() const { return algorithm_error_buffer.str(); }
 
-    void stop() { worker_thread.request_stop(); }
+    /**
+     * @brief Detaches the task's worker thread.
+     */
+    void detach()
+    {
+        if (worker_thread.joinable())
+        {
+            worker_thread.detach();
+        }
+    }
 };
 
 #endif // TASK_H_

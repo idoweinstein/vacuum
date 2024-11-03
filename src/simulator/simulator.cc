@@ -3,7 +3,6 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include <stop_token>
 
 #include "enum_operators.h"
 #include "deserializer.h"
@@ -109,7 +108,7 @@ void Simulator::calculateScore(Step last_step)
     statistics.score = steps + house.getTotalDirtCount() * kDirtFactor + penalty;
 }
 
-std::size_t Simulator::run(std::stop_token stop_token)
+std::size_t Simulator::run()
 {
     if (SimulatorState::Ready != state)
     {
@@ -124,13 +123,7 @@ std::size_t Simulator::run(std::stop_token stop_token)
 
     while (statistics.num_steps_taken <= max_simulator_steps)
     {
-        if (stop_token.stop_requested())
-        {
-            break;
-        }
-
         next_step = algorithm->nextStep();
-
         if (statistics.num_steps_taken == max_simulator_steps && Step::Finish != next_step)
         {
             break;
