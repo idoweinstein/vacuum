@@ -4,10 +4,10 @@
 #include <memory>
 #include <vector>
 
-#include "dirt_sensor.h"
-#include "wall_sensor.h"
-#include "position.h"
-#include "enums.h"
+#include "common/dirt_sensor.h"
+#include "common/wall_sensor.h"
+#include "common/position.h"
+#include "common/enums.h"
 
 /**
  * @brief The House class represents the house by means of cleaning operations and house state at robot's current location.
@@ -18,11 +18,12 @@ class House : public WallsSensor, public DirtSensor
 {
     static constexpr const unsigned int kDirtCleaningUnit = 1;        // Units of dirt to clean when cleaning a position
 
-    std::unique_ptr<std::vector<std::vector<bool>>> wall_map;         // The map representing the walls in the environment.
-    std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map; // The map representing the dirt levels in the environment.
+    std::vector<std::vector<bool>> wall_map;                          // The map representing the walls in the environment.
+    std::vector<std::vector<unsigned int>> dirt_map;                  // The map representing the dirt levels in the environment.
     Position current_position;                                        // The current position of the vacuum cleaner.
     Position docking_station_position;                                // The position of the docking station.
     std::size_t total_dirt_count;                                     // The total count of dirt in the environment.
+    std::size_t initial_dirt_count;                                   // The initial total count of dirt (used for scoring)
 
     /**
      * @brief Computes the total dirt count in the house.
@@ -41,6 +42,14 @@ class House : public WallsSensor, public DirtSensor
     template <typename T> static bool isOutOfBounds(const std::vector<std::vector<T>>& map, const Position& position);
 
 public:
+    House() = default;
+
+    House(const House& house) = default;
+    House& operator=(const House& house) = default;
+
+    House(House&& house) noexcept = default;
+    House& operator=(House&& house) noexcept = default;
+
     /**
      * @brief Constructs a new House object.
      *
@@ -48,9 +57,17 @@ public:
      * @param dirt_map The map representing the dirt levels in the environment.
      * @param docking_station_position The position of the docking station.
      */
-    House(std::unique_ptr<std::vector<std::vector<bool>>>&& wall_map,
-          std::unique_ptr<std::vector<std::vector<unsigned int>>>&& dirt_map,
+    House(std::vector<std::vector<bool>>&& wall_map,
+          std::vector<std::vector<unsigned int>>&& dirt_map,
           const Position& docking_station_position);
+
+    /**
+     * @brief Gets the initial count of dirt in the environment (before any step was taken).
+     *
+     * @return The initial count of dirt.
+     */
+    std::size_t getInitialDirtCount() const { return initial_dirt_count; }
+
     /**
      * @brief Gets the total count of dirt in the environment.
      *

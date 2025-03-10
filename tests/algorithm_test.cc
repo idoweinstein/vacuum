@@ -3,10 +3,12 @@
 
 #include <iostream>
 
-#include "enum_operators.h"
-#include "algorithm.h"
-#include "position.h"
-#include "enums.h"
+#include "common/position.h"
+#include "common/enums.h"
+
+#include "simulator/enum_operators.h"
+
+#include "algorithm/a/greedy_algorithm.h"
 
 namespace
 {
@@ -45,7 +47,7 @@ namespace
         MockDirtSensor dirt_sensor;
         MockWallsSensor wall_sensor;
 
-        Algorithm algorithm;
+        GreedyAlgorithm algorithm;
 
         AlgorithmTest() : battery_meter(), dirt_sensor(), wall_sensor(), algorithm()
         {

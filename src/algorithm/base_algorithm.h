@@ -1,5 +1,5 @@
-#ifndef ALGORITHM_H_
-#define ALGORITHM_H_
+#ifndef BASE_ALGORITHM_H_
+#define BASE_ALGORITHM_H_
 
 #include <deque>
 #include <utility>
@@ -9,31 +9,29 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include "abstract_algorithm.h"
-#include "battery_meter.h"
-#include "dirt_sensor.h"
-#include "wall_sensor.h"
-#include "path_tree.h"
-#include "position.h"
-#include "enums.h"
+#include "common/abstract_algorithm.h"
+#include "common/battery_meter.h"
+#include "common/dirt_sensor.h"
+#include "common/wall_sensor.h"
+#include "common/position.h"
+#include "common/enums.h"
+
+#include "algorithm/path_tree.h"
 
 /**
- * @class Algorithm 
- * @brief The Algorithm class represents an implementation of the navigation algorithm of a vacuum cleaner.
+ * @class BaseAlgorithm 
+ * @brief The BaseAlgorithm class represents an implementation of the navigation algorithm of a vacuum cleaner.
  *
- * The Algorithm class is responsible for managing the movement and navigation of the vacuum cleaner.
+ * The BaseAlgorithm class is responsible for managing the movement and navigation of the vacuum cleaner.
  * It uses various sensors such as BatteryMeter, DirtSensor, and WallsSensor to make decisions about the next step.
  * The navigation system keeps track of the current position, wall map, and a set of positions to visit.
  * It uses a path tree to store the paths explored during navigation.
  *
  * The class provides methods for suggesting the next step and moving the vacuum cleaner in a specific direction.
  */
-class Algorithm : public AbstractAlgorithm
+class BaseAlgorithm : public AbstractAlgorithm
 {
     inline static const Position kDockingStationPosition = {0,0};       // Docking Station (relative) position.
-    inline static const Direction kDirections[] = {                     // Directions of movement.
-        Direction::North, Direction::East, Direction::South, Direction::West
-    };
 
     struct HouseModel
     {
@@ -83,7 +81,7 @@ class Algorithm : public AbstractAlgorithm
     }
 
     /**
-     * @brief Performs a breadth-first search (BFS) to find a path that satisfies the given found_criteria.
+     * @brief Performs a breadth-first search (BFS) like traversal to find a path that satisfies the given found_criteria.
      *
      * This method performs a BFS starting from the specified start_index in the path_tree.
      * It stops the search when the found_criteria function returns true for a position.
@@ -92,11 +90,12 @@ class Algorithm : public AbstractAlgorithm
      * @param path_tree The path tree to search in.
      * @param start_index The index to start the BFS from.
      * @param found_criteria The criteria function to determine if a position is found.
-     * @return The index of the found position in the path_tree, or kNotFound if not found.
+     * @return The index of the found position in the path_tree.
      */
-    std::optional<std::size_t> performBFS(PathTree& path_tree,
-                                          std::size_t start_index,
-                                          std::function<bool(const Position&)> const & found_criteria) const;
+    std::optional<std::size_t> buildPathTree(PathTree& path_tree,
+                                             std::size_t max_depth,
+                                             std::size_t start_index,
+                                             std::function<bool(const Position&)> const & found_criteria) const;
 
     /**
      * @brief Calculates the distance of a path.
@@ -136,23 +135,17 @@ class Algorithm : public AbstractAlgorithm
      * @param start_position The position to start the path search from.
      * @param path The path to store the result in.
      * @param found_criteria The criteria function to determine if a position is found.
+     * @param max_length Maximum length of the path.
      * @return True if a path is found, false otherwise.
     */
     bool getPathByFoundCriteria(const Position& start_position,
                                 std::deque<Direction>& path,
-                                std::function<bool(const Position&)> const & found_criteria);
+                                std::function<bool(const Position&)> const & found_criteria,
+                                std::size_t max_length);
 
-    /**
-     * @brief Finds a path to the nearest position in the todo_positions set, relatively to a given start_position.
-     *
-     * This method finds a path to the nearest position in the todo_positions set by performing a BFS.
-     *
-     * @param start_position The position to start the path search from.
-     * @param path The path to store the result in.
-     * @return True if a path is found, false otherwise.
-    */
-    bool getPathToNearestTodo(const Position& start_position,
-                              std::deque<Direction>& path);
+    bool getPathByFoundCriteria(const Position& start_position,
+                                std::deque<Direction>& path,
+                                std::function<bool(const Position&)> const & found_criteria);
 
     /**
      * @brief Finds a path to the station position.
@@ -314,15 +307,81 @@ class Algorithm : public AbstractAlgorithm
      */
     void move(Step);
 
+protected:
+    inline static const Direction kDirections[] = {                     // Directions of movement.
+        Direction::North, Direction::East, Direction::South, Direction::West
+    };
+
+    /**
+     * @brief Checks if the given target path is valid.
+     *
+     * This method checks if the given target path is valid by checking if the path can be completed within the remaining battery and steps.
+     *
+     * @param target_path The target path to check.
+     * @return True if the target path is valid, false otherwise.
+     */
+    bool isValidTargetPath(const std::deque<Direction>& target_path);
+
+    bool isToDoPosition(const Position& position) const { return house.todo_positions.contains(position); }
+
+    std::size_t getMaxStepsLeftTillReturnToStation() const { return std::min(battery.amount_left, total_steps_left); }
+
+    /**
+     * @brief Finds a path to the nearest position in the todo_positions set, relatively to a given start_position.
+     *
+     * This method finds a path to the nearest position in the todo_positions set by performing a BFS.
+     *
+     * @param start_position The position to start the path search from.
+     * @param path The path to store the result in.
+     * @param max_length Maximum length of the path.
+     * @return True if a path is found, false otherwise.
+    */
+    bool getPathToNearestTodo(const Position& start_position,
+                              std::deque<Direction>& path,
+                              std::size_t max_length);
+
+    bool getPathToNearestTodo(const Position& start_position,
+                              std::deque<Direction>& path);
+
+    /**
+      * @brief Finds a path to a given target position, relatively to a given start_position.
+      *
+      * This method finds a path to a given target position by performing a BFS like traversal.
+      *
+      * @param start_position The position to start the path search from.
+      * @param target_position The target position to find a path to.
+      * @param path The path to store the result in.
+      * @param max_length Maximum length of the path.
+      * @return True if a path is found, false otherwise.
+      */
+    bool getPathToPosition(const Position& start_position,
+                           const Position& target_position,
+                           std::deque<Direction>& path,
+                           std::size_t max_length);
+
+    bool getPathToPosition(const Position& start_position,
+                           const Position& target_position,
+                           std::deque<Direction>& path);
+
+    /**
+     * @brief Gets a path to the next target position.
+     *
+     * @param start_position The start position to get the path from.
+     * @param path The path to store the result in.
+     * @return True if a path is found, false otherwise.
+     */
+    virtual bool getPathToNextTarget(const Position& start_position,
+                                     std::deque<Direction>& path) = 0;
+
 public:
-    Algorithm() = default;
+    BaseAlgorithm() = default;
     /**
      * @brief Deleted copy constructor and assignment operator.
      *
      * The copy constructor and assignment operator are deleted to prevent using the 'shallow' raw pointers address copying made by `std::optional`.
      */
-    Algorithm(const Algorithm& algorithm) = delete;
-    Algorithm& operator=(const Algorithm& algorithm) = delete;
+    BaseAlgorithm(const BaseAlgorithm& algorithm) = delete;
+    BaseAlgorithm& operator=(const BaseAlgorithm& algorithm) = delete;
 
     /**
      * @brief Set the maximum number of steps the algorithm can take.
@@ -360,4 +419,4 @@ public:
     Step nextStep() override;
 };
 
-#endif /* ALGORITHM_H_ */
+#endif /* BASE_ALGORITHM_H_ */

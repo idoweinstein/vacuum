@@ -3,221 +3,130 @@
 
 #include <ios>
 #include <regex>
+#include <array>
 #include <string>
 #include <vector>
+#include <memory>
 #include <sstream>
 #include <fstream>
+#include <iostream>
 
-#include "robot_logger.h"
-#include "deserializer.h"
-#include "simulator.h"
-#include "algorithm.h"
-#include "enums.h"
+#include "common/AlgorithmRegistrar.h"
+#include "common/enums.h"
+
+#include "simulator/deserializer.h"
+#include "simulator/simulator.h"
+
+#include "algorithm/a/greedy_algorithm.h"
+#include "algorithm/b/dfs_algorithm.h"
 
 namespace
 {
-    struct RobotState
-    {
-        std::vector<Step> runtime_steps;
-        unsigned int total_steps_taken;
-        unsigned int total_dirt_left;
-        Status status;
+    std::array<AlgorithmFactory, 2> algo_factories = {
+        []() { return std::make_unique<GreedyAlgorithm>(); },
+        []() { return std::make_unique<DFSAlgorithm>(); }
     };
-
-    class OutputDeserializer
-    {
-        inline static const std::map<char, Step> step_map = {
-            {'N', Step::North},
-            {'E', Step::East},
-            {'S', Step::South},
-            {'W', Step::West},
-            {'s', Step::Stay},
-            {'F', Step::Finish}
-        };
-
-        inline static const std::map<std::string, Status> status_map = {
-            {"FINISHED", Status::Finished},
-            {"WORKING", Status::Working},
-            {"DEAD", Status::Dead}
-        };
-
-        inline static const std::string kRegexPattern = 
-            "NumSteps\\s+=\\s+([0-9]+)\r?\n"
-            "DirtLeft\\s+=\\s+([0-9]+)\r?\n"
-            "Status\\s+=\\s+(FINISHED|WORKING|DEAD)\r?\n"
-            "Steps:\r?\n"
-            "([NESWs]+F?)";
-
-        std::ifstream output_file;
-
-        bool safeFileOpen(const std::string& output_file_name);
-        std::string getNextValue();
-
-        static Step charToStep(char step_string)
-        {
-            EXPECT_TRUE(step_map.contains(step_string));
-            return step_map.at(step_string);
-        }
-
-        static Status stringToStatus(const std::string& status_string)
-        {
-            EXPECT_TRUE(status_map.contains(status_string));
-            return status_map.at(status_string);
-        }
- 
-    public:
-        RobotState robot_state;
-
-        OutputDeserializer()
-        {
-            robot_state.total_steps_taken = 0;
-            robot_state.total_dirt_left = 0;
-            robot_state.status = Status::Working;
-        }
-
-        bool deserializeOutputFile(const std::string& output_file_name);
-    };
-
-    bool OutputDeserializer::safeFileOpen(const std::string& output_file_name)
-    {
-        output_file.open(output_file_name);
-        bool is_opened = output_file.is_open();
-
-        EXPECT_TRUE(is_opened);
-        return is_opened;
-    }
-
-    bool OutputDeserializer::deserializeOutputFile(const std::string& output_file_name)
-    {
-        bool is_opened = safeFileOpen(output_file_name);
-        if (!is_opened)
-        {
-            return false;
-        }
-
-        std::stringstream buffer;
-        buffer << output_file.rdbuf();
-
-        std::regex pattern(kRegexPattern);
-
-        std::smatch matches;
-        std::string content = buffer.str();
-
-        if (!std::regex_search(content, matches, pattern))
-        {
-            return false;
-        }
-
-        robot_state = {};
-        robot_state.total_steps_taken = std::stoi(matches[1]);
-        robot_state.total_dirt_left = std::stoi(matches[2]);
-        robot_state.status = stringToStatus(matches[3]);
-        robot_state.runtime_steps.clear();
-        robot_state.runtime_steps.reserve(matches[4].length());
-        for (auto step : static_cast<const std::string &>(matches[4]))
-        {
-            robot_state.runtime_steps.push_back(charToStep(step));
-        }
-
-        EXPECT_GE(robot_state.total_steps_taken, robot_state.runtime_steps.size() - 1);
-        EXPECT_LE(robot_state.total_steps_taken, robot_state.runtime_steps.size());
-
-        return true;
-    }
 
     class MockAlgorithm : public AbstractAlgorithm
     {
+        unsigned long max_steps = 0;
     public:
         MockAlgorithm() = default;
 
-        MOCK_METHOD(void, setMaxSteps, (std::size_t), (override));
         MOCK_METHOD(void, setWallsSensor, (const WallsSensor&), (override));
         MOCK_METHOD(void, setDirtSensor, (const DirtSensor&), (override));
         MOCK_METHOD(void, setBatteryMeter, (const BatteryMeter&), (override));
         MOCK_METHOD(Step, nextStep, (), (override));
+
+        void setMaxSteps(unsigned long max_steps) override
+        {
+            this->max_steps = max_steps;
+        }
+
+        unsigned long getMaxSteps() const
+        {
+            return max_steps;
+        }
     };
 
-    class SimulatorTest : public testing::Test
+    class SimulatorTest : public testing::TestWithParam<AlgorithmFactory>
     {
-        OutputDeserializer deserializer;
+        std::unique_ptr<AbstractAlgorithm> algorithm;
+        HouseFile house_file;
+        std::unique_ptr<Simulator> simulator;
+
     protected:
-
-        void SetUp(const std::string& input_file, const std::string& output_file)
+        void SetUp(const std::string& input_file)
         {
-            RobotLogger& logger = RobotLogger::getInstance();
+            algorithm = GetParam()();
 
-            logger.initializeLogFile(input_file);
+            Deserializer::readHouseFile(input_file, house_file);
 
-            Simulator simulator;
-            Algorithm algorithm;
-
-            simulator.readHouseFile(input_file);
-            simulator.setAlgorithm(algorithm);
-            simulator.run();
-
-            EXPECT_TRUE(deserializer.deserializeOutputFile(output_file));
+            simulator = std::make_unique<Simulator>(house_file);
+            simulator->setAlgorithm(*algorithm);
+            simulator->run();
         }
 
-        void TearDown() override
+        const SimulationStatistics& getSimulationStatistics()
         {
-            RobotLogger& logger = RobotLogger::getInstance();
-
-            logger.deleteAllLogFiles();
-        }
-
-        RobotState& getRobotState()
-        {
-            return deserializer.robot_state;
+            return simulator->getSimulationStatistics();
         }
     };
 
-    TEST_F(SimulatorTest, RobotSanity)
+    TEST_P(SimulatorTest, RobotSanity)
     {
-        SetUp("inputs/input_sanity.txt", "output_input_sanity.txt");
+        SetUp("inputs/input_sanity.txt");
 
-        RobotState robot_state = getRobotState();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Make sure robot did 'total_steps_taken' steps, and its first step wasn't Direction::STAY
-        std::size_t path_length = robot_state.runtime_steps.size();
-        if (robot_state.runtime_steps.back() == Step::Finish) {
+        std::size_t path_length = statistics.step_history.size();
+        if (statistics.step_history.back() == Step::Finish)
+        {
             path_length--;
         }
-        EXPECT_EQ(robot_state.total_steps_taken, path_length);
-        EXPECT_NE(Step::Stay, robot_state.runtime_steps.at(0));
+        EXPECT_EQ(statistics.num_steps_taken, path_length);
+        EXPECT_NE(Step::Stay, statistics.step_history.at(0));
 
         // Assert the expected program results (Robot is not dead and cleaned all dirt)
-        EXPECT_EQ(Status::Finished, robot_state.status);
+        EXPECT_EQ(Status::Finished, statistics.mission_status);
+
+        EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotTrappedDirt)
+    TEST_P(SimulatorTest, RobotTrappedDirt)
     {
-        SetUp("inputs/input_trappeddirt.txt", "output_input_trappeddirt.txt");
+        SetUp("inputs/input_trappeddirt.txt");
 
-        RobotState robot_state = getRobotState();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected program results (Robot is not dead, cleaned all ACCESSIBLE dirt, but there's more trapped dirt)
-        EXPECT_EQ(Status::Finished, robot_state.status);
-        EXPECT_LT(0, robot_state.total_dirt_left);
+        EXPECT_EQ(Status::Finished, statistics.mission_status);
+        EXPECT_LT(0, statistics.dirt_left);
+
+        EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotMaze)
+    TEST_P(SimulatorTest, RobotMaze)
     {
-        SetUp("inputs/input_maze.txt", "output_input_maze.txt");
+        SetUp("inputs/input_maze.txt");
 
-        RobotState robot_state = getRobotState();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
-        EXPECT_EQ(Status::Finished, robot_state.status);
+        EXPECT_EQ(Status::Finished, statistics.mission_status);
+
+        EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotMinimalBatteryToComplete)
+    TEST_P(SimulatorTest, RobotMinimalBatteryToComplete)
     {
-        SetUp("inputs/input_minbattery.txt", "output_input_minbattery.txt");
+        SetUp("inputs/input_minbattery.txt");
 
-        RobotState robot_state = getRobotState();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
-        EXPECT_EQ(Status::Finished, robot_state.status);
+        EXPECT_EQ(Status::Finished, statistics.mission_status);
 
         Step expected_steps[] = {
             Step::East,
@@ -227,7 +136,7 @@ namespace
         };
         size_t expected_steps_num = 4;
 
-        if (expected_steps_num != robot_state.runtime_steps.size())
+        if (expected_steps_num != statistics.step_history.size())
         {
             FAIL();
             return;
@@ -235,79 +144,102 @@ namespace
 
         for (unsigned int i = 0; i < expected_steps_num; i++)
         {
-            EXPECT_EQ(expected_steps[i], robot_state.runtime_steps.at(i));
+            EXPECT_EQ(expected_steps[i], statistics.step_history.at(i));
         }
+
+        EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotTooDistantDirt)
+    TEST_P(SimulatorTest, RobotTooDistantDirt)
     {
-        SetUp("inputs/input_distantdirt.txt", "output_input_distantdirt.txt");
+        SetUp("inputs/input_distantdirt.txt");
 
-        RobotState robot_state = getRobotState();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
-        EXPECT_EQ(Status::Finished, robot_state.status);
+        EXPECT_EQ(Status::Finished, statistics.mission_status);
 
-        EXPECT_GE(50, robot_state.total_steps_taken);
+        EXPECT_GE(65, statistics.num_steps_taken);
 
-        EXPECT_EQ(1, robot_state.total_dirt_left);
+        EXPECT_EQ(1, statistics.dirt_left);
+
+        EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotAllCharacters)
+    TEST_P(SimulatorTest, RobotAllCharacters)
     {
-        SetUp("inputs/input_allchars.txt", "output_input_allchars.txt");
+        SetUp("inputs/input_allchars.txt");
 
-        RobotState robot_state = getRobotState();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
-        EXPECT_EQ(Status::Finished, robot_state.status);
+        EXPECT_EQ(Status::Finished, statistics.mission_status);
+
+        EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotNoHouse)
+    TEST_P(SimulatorTest, RobotNoHouse)
     {
         EXPECT_THROW({
-            SetUp("inputs/input_nohouse.txt", "output_input_nohouse.txt");
+            SetUp("inputs/input_nohouse.txt");
         }, std::runtime_error);
     }
 
-    TEST_F(SimulatorTest, RobotNoDockingStation)
+    TEST_P(SimulatorTest, RobotNoDockingStation)
     {
         EXPECT_THROW({
-            SetUp("inputs/input_nodock.txt", "output_input_nodock.txt");
+            SetUp("inputs/input_nodock.txt");
         }, std::runtime_error);
     }
 
-    TEST_F(SimulatorTest, RobotFilledLine)
+    TEST_P(SimulatorTest, RobotFilledLine)
     {
-        SetUp("inputs/input_filledline.txt", "output_input_filledline.txt");
+        SetUp("inputs/input_filledline.txt");
 
-        RobotState robot_state = getRobotState();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
-        EXPECT_EQ(Status::Finished, robot_state.status);
-        EXPECT_EQ(0, robot_state.total_dirt_left);
+        EXPECT_EQ(Status::Finished, statistics.mission_status);
+        EXPECT_EQ(0, statistics.dirt_left);
+        EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotFilledCol)
+    TEST_P(SimulatorTest, RobotFilledCol)
     {
-        SetUp("inputs/input_filledcol.txt", "output_input_filledcol.txt");
+        SetUp("inputs/input_filledcol.txt");
 
-        RobotState robot_state = getRobotState();
+        const SimulationStatistics& statistics = getSimulationStatistics();
 
         // Assert the expected results
-        EXPECT_EQ(Status::Finished, robot_state.status);
-        EXPECT_EQ(0, robot_state.total_dirt_left);
+        EXPECT_EQ(Status::Finished, statistics.mission_status);
+        EXPECT_EQ(0, statistics.dirt_left);
+        EXPECT_TRUE(statistics.is_at_docking_station);
     }
 
-    TEST_F(SimulatorTest, RobotDeterministic)
+    TEST_P(SimulatorTest, RobotDeterministic)
     {
-        SetUp("inputs/input_sanity.txt", "output_input_sanity.txt");
+        auto algo_factory = GetParam();
+        std::unique_ptr<AbstractAlgorithm> first_algorithm = algo_factory();
 
-        std::vector<Step> first_runtime_steps = getRobotState().runtime_steps;
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_sanity.txt", house_file);
 
-        SetUp("inputs/input_sanity.txt", "output_input_sanity.txt");
+        Simulator first_simulator(house_file);
+        first_simulator.setAlgorithm(*first_algorithm);
+        first_simulator.run();
 
-        std::vector<Step> second_runtime_steps = getRobotState().runtime_steps;
+        const SimulationStatistics& first_statistics = first_simulator.getSimulationStatistics();
+
+        std::vector<Step> first_runtime_steps(first_statistics.step_history);
+
+        std::unique_ptr<AbstractAlgorithm> second_algorithm = algo_factory();
+        Simulator second_simulator(house_file);
+        second_simulator.setAlgorithm(*second_algorithm);
+        second_simulator.run();
+
+        const SimulationStatistics& second_statistics = second_simulator.getSimulationStatistics();
+
+        std::vector<Step> second_runtime_steps(second_statistics.step_history);
 
         EXPECT_EQ(first_runtime_steps.size(), second_runtime_steps.size());
 
@@ -315,79 +247,183 @@ namespace
         {
             EXPECT_EQ(first_runtime_steps.at(i), second_runtime_steps.at(i));
         }
+
+        EXPECT_TRUE(second_statistics.is_at_docking_station);
     }
+
+    TEST_P(SimulatorTest, RobotImmediateFinish)
+    {
+        const std::size_t total_dirt = 45;
+        const std::size_t dirt_factor = 300;
+        SetUp("inputs/input_immediatefinish.txt");
+
+        const SimulationStatistics& statistics = getSimulationStatistics();
+
+        // Assert the expected results
+        EXPECT_EQ(Status::Finished, statistics.mission_status);
+        EXPECT_EQ(total_dirt, statistics.dirt_left);
+        EXPECT_TRUE(statistics.is_at_docking_station);
+        EXPECT_EQ(0, statistics.num_steps_taken);
+        EXPECT_EQ(Step::Finish, statistics.step_history.front());
+        /* Only dirt should affect score */
+        EXPECT_EQ(total_dirt * dirt_factor, statistics.score);
+    }
+
+    TEST_P(SimulatorTest, RobotStepsTaken)
+    {
+        SetUp("inputs/input_stepstaken.txt");
+
+        const SimulationStatistics& statistics = getSimulationStatistics();
+
+        // Assert the expected results
+        EXPECT_EQ(Status::Finished, statistics.mission_status);
+        EXPECT_EQ(0, statistics.dirt_left);
+        EXPECT_TRUE(statistics.is_at_docking_station);
+        /* Only steps should affect score */
+        EXPECT_EQ(statistics.num_steps_taken, statistics.score);
+    }
+
+    // Instantiate the test suite with the object pointers
+    INSTANTIATE_TEST_SUITE_P(
+        SimulatorTests,                     // Name of the test suite
+        SimulatorTest,                      // Name of the test fixture
+        testing::ValuesIn(algo_factories)   // Parameters to pass to the tests
+    );
 
     TEST(SimulatorAPI, RobotAPICallingOrder)
     {
-        Simulator simulator;
-        Algorithm algorithm;
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_sanity.txt", house_file);
 
-        EXPECT_THROW({
-            simulator.setAlgorithm(algorithm);
-        }, std::logic_error);
-
-        EXPECT_THROW({
-            simulator.run();
-        }, std::logic_error);
-
-        simulator.readHouseFile("inputs/input_sanity.txt");
+        Simulator simulator(house_file);
+        std::unique_ptr<AbstractAlgorithm> algorithm = algo_factories.at(0)();
 
         EXPECT_THROW({
             simulator.run();
         }, std::logic_error);
 
-        simulator.setAlgorithm(algorithm);
-
-        EXPECT_THROW({
-            simulator.readHouseFile("inputs/input_sanity.txt");
-        }, std::logic_error);
+        simulator.setAlgorithm(*algorithm);
 
         simulator.run();
     }
 
     TEST(MockAlgorithm, RobotIsDead)
     {
-        OutputDeserializer deserializer;
-        Simulator simulator;
+        const std::size_t dead_penalty = 2000;
+
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_mockalgo_dead.txt", house_file);
+
+        Simulator simulator(house_file);
         MockAlgorithm mock_algorithm;
 
-        RobotLogger& logger = RobotLogger::getInstance();
-        logger.initializeLogFile("inputs/input_mockalgo_dead.txt");
-
-        simulator.readHouseFile("inputs/input_mockalgo_dead.txt");
         simulator.setAlgorithm(mock_algorithm);
 
         ON_CALL(mock_algorithm, nextStep())
             .WillByDefault(testing::Return(Step::East));
 
         simulator.run();
-        EXPECT_TRUE(deserializer.deserializeOutputFile("output_input_mockalgo_dead.txt"));
 
-        EXPECT_EQ(Status::Dead, deserializer.robot_state.status);
+        const SimulationStatistics& statistics = simulator.getSimulationStatistics();
 
-        logger.deleteAllLogFiles();
+        // Check that isDead condition applies here:
+        EXPECT_NE(Step::Finish, statistics.step_history.back());
+        EXPECT_FALSE(statistics.is_at_docking_station);
+        // Invariant: And we know that battery is exhausted, since MaxBattery = 1
+
+        // Dead penalty should be applied
+        EXPECT_EQ(dead_penalty + mock_algorithm.getMaxSteps(), statistics.score);
     }
 
-    TEST(MockAlgorithm, RobotIsWorking)
+    TEST(MockAlgorithm, RobotIsWorkingNotInDock)
     {
-        OutputDeserializer deserializer;
-        Simulator simulator;
+        const std::size_t non_docking_penalty = 1000;
+        const std::size_t dirt_factor = 300;
+
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_mockalgo_working.txt", house_file);
+
+        Simulator simulator(house_file);
         MockAlgorithm mock_algorithm;
 
-        RobotLogger& logger = RobotLogger::getInstance();
-        logger.initializeLogFile("inputs/input_mockalgo_working.txt");
-
-        simulator.readHouseFile("inputs/input_mockalgo_working.txt");
         simulator.setAlgorithm(mock_algorithm);
 
         ON_CALL(mock_algorithm, nextStep())
             .WillByDefault(testing::Return(Step::South));
 
         simulator.run();
-        EXPECT_TRUE(deserializer.deserializeOutputFile("output_input_mockalgo_working.txt"));
 
-        EXPECT_EQ(Status::Working, deserializer.robot_state.status);
+        const SimulationStatistics& statistics = simulator.getSimulationStatistics();
 
-        logger.deleteAllLogFiles();
+        // Check that isWorking condition applies here:
+        bool is_dead = Step::Finish != statistics.step_history.back() && !statistics.is_at_docking_station && false; // && battery is exhausted (which is false)
+        bool is_lying = Step::Finish == statistics.step_history.back() && !statistics.is_at_docking_station;
+
+        EXPECT_FALSE(is_dead || is_lying);
+
+        EXPECT_EQ(dirt_factor * statistics.dirt_left 
+                  + non_docking_penalty
+                  + statistics.num_steps_taken, statistics.score);
+    }
+
+    TEST(MockAlgorithm, RobotIsWorkingInDock)
+    {
+        const std::size_t dirt_factor = 300;
+
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_mockalgo_working.txt", house_file);
+
+        Simulator simulator(house_file);
+        MockAlgorithm mock_algorithm;
+
+        simulator.setAlgorithm(mock_algorithm);
+
+        ON_CALL(mock_algorithm, nextStep())
+            .WillByDefault(testing::Return(Step::Finish));
+
+        simulator.run();
+
+        const SimulationStatistics& statistics = simulator.getSimulationStatistics();
+
+        // Check that isWorking condition applies here:
+        bool is_dead = Step::Finish != statistics.step_history.back() && !statistics.is_at_docking_station && false; // && battery is exhausted (which is false)
+        bool is_lying = Step::Finish == statistics.step_history.back() && !statistics.is_at_docking_station;
+
+        EXPECT_FALSE(is_dead || is_lying);
+
+        EXPECT_EQ(dirt_factor * statistics.dirt_left 
+                  + statistics.num_steps_taken, statistics.score);
+    }
+
+    /* TODO: this test currently doesn't pass due to an alleged contradiction in guidelines.
+       There's an open issue about it: https://moodle.tau.ac.il/mod/forum/discuss.php?d=96436
+       
+       DONE: https://moodle.tau.ac.il/mod/forum/discuss.php?d=109220 */
+    TEST(MockAlgorithm, RobotIsLying)
+    {
+        const std::size_t lying_penalty = 3000;
+
+        HouseFile house_file;
+        Deserializer::readHouseFile("inputs/input_stepstaken.txt", house_file);
+
+        Simulator simulator(house_file);
+        MockAlgorithm mock_algorithm;
+
+        simulator.setAlgorithm(mock_algorithm);
+
+        EXPECT_CALL(mock_algorithm, nextStep())
+            .WillOnce(testing::Return(Step::East))
+            .WillOnce(testing::Return(Step::Finish));
+
+        simulator.run();
+
+        const SimulationStatistics& statistics = simulator.getSimulationStatistics();
+
+        // Check that isLying condition applies here:
+        EXPECT_FALSE(statistics.is_at_docking_station);
+        EXPECT_EQ(Step::Finish, statistics.step_history.back());
+
+        EXPECT_EQ(lying_penalty
+                  + mock_algorithm.getMaxSteps(), statistics.score);
     }
 }

@@ -4,7 +4,7 @@
 #include <memory>
 #include <cstdlib>
 
-#include "house.h"
+#include "simulator/house.h"
 
 namespace
 {
@@ -58,12 +58,9 @@ namespace
             static void SetUpTestCase()
             {
                 
-                std::unique_ptr<std::vector<std::vector<bool>>> wall_map =
-                    std::make_unique<std::vector<std::vector<bool>>>();
-                std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map =
-                    std::make_unique<std::vector<std::vector<unsigned int>>>();
-
-                initializeMaps(*wall_map, *dirt_map);
+                std::vector<std::vector<bool>> wall_map;
+                std::vector<std::vector<unsigned int>> dirt_map;
+                initializeMaps(wall_map, dirt_map);
 
                 house = std::make_unique<House>(
                     std::move(wall_map),
@@ -124,13 +121,11 @@ namespace
 
     TEST_F(HouseTest, MoveOutOfBounds)
     {
-        std::unique_ptr<std::vector<std::vector<bool>>> wall_map =
-            std::make_unique<std::vector<std::vector<bool>>>();
-        std::unique_ptr<std::vector<std::vector<unsigned int>>> dirt_map =
-            std::make_unique<std::vector<std::vector<unsigned int>>>();
+        std::vector<std::vector<bool>> wall_map; 
+        std::vector<std::vector<unsigned int>> dirt_map;
 
-        (*wall_map).push_back({false});
-        (*dirt_map).push_back({0});
+        wall_map.push_back({false});
+        dirt_map.push_back({0});
 
         House simple_location(std::move(wall_map), std::move(dirt_map), Position(0,0));
 

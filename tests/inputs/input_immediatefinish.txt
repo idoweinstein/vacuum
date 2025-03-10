@@ -1,0 +1,8 @@
+Immediate Finish
+MaxSteps = 100
+MaxBattery = 100
+Rows = 3
+Cols = 5
+59W82
+4WDW1
+37W60

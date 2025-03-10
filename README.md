@@ -18,9 +18,34 @@
   ```
 * Run it:
   ```
-  ./myrobot <inputfile>
+  ./bin/myrobot [-house_path=<path>] [-algo_path=<path>] [-num_threads=<num>] [-summary_only]
   ```
-  * Example input and output files can be found in `examples`, `tests`, and `tests/inputs`.
+  - `house_path` is the directory path to read house files from.
+  - `algo_path` is the directory path to read algorithm files from.
+  - `num_threads` limits the number of "worker" threads (threads which simulate an algorithm - house pair).
+  - `summary_only` indicates whether or not to generate summary (and errors) only.
+
+* For example:
+  ```
+  ./bin/myrobot -house_path=../examples -algo_path=./bin
+  ```
+ * Other make targets:
+ ```
+ # Make simulator and algorithms and run them with houses in `examples` directory:
+ make run
+
+ # Make just the first algorithm
+ make algorithm1 # Will be found in ./bin directory
+ 
+ # Make just the second algorithm
+ make algorithm2
+
+ # Make both algorithms
+ make algorithms
+
+ # Make the simulator
+ make myrobot
+ ```
 
 ## Solution Approach
 The house is a 4-connected grid, where each node contains either a wall, an empty space (with a predefined amount of dirt) or a docking station. <br>
@@ -57,12 +82,13 @@ W	wall (non-navigable position)
 ### Output File
 The output file format is:
 ```
-NumSteps = <value>
-DirtLeft = <value>
-Status = <value>
+NumSteps = <NUMBER>
+DirtLeft = <NUMBER>
+Status = <WORKING/FINISHED/DEAD>
+InDock = <TRUE/FALSE>
+Score = <NUMBER>
 Steps:
 <values>
 ```
 
-Where `NumSteps` and `DirtLeft` have numerical value, and `Status` can be either `WORKING`, `FINISHED` or `DEAD`. <br>
 The `Steps` attribute is a list of steps where each steps is either *N*orth, *E*ast, *S*outh, *W*est, *s*tay, or *F*inished, denoted as N, E, S, W, s, or F respectively.

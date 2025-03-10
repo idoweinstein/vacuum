@@ -1,3 +1,59 @@
+BONUS Ex3
+
+New feature:
+
+- Path scoring
+
+Updated to already existing feature:
+
+- Automatic testing
+
+Path Scoring
+============
+
+IMPORTANT NOTE: the scoring method of a path is different from the scoring of an entire simulation.
+
+Our algorithms rely heavily on getting the shortest path between two positions.
+In previous assignments, we calculated the shortest path by simply running a BFS.
+In this assignment, we decided to take a slightly different approach.
+
+To find the shortest path between two positions, we create a path tree of *all* possible paths.
+Each path has its own score, based on the number of unvisited/dirty positions in the path.
+We then choose the shortest path which maximizes that number.
+
+This method encourages the robot to explore unvisited positions opportunistically,
+gathering additional information without sacrifising any step.
+
+Example
+-------
+
+Suppose this is the state of our house (`R` represents the current position of the robot),
+and all `0` positions have been visited, while `1` positions haven't:
+D000
+111R
+
+There are 4 shortest paths to the station:
+- WWWN
+- WWNW
+- WNWW
+- NWWW
+
+The first path maximizes the number of dirty/unvisited positions and therefore is chosen.
+
+Automatic testing
+=================
+
+New tests introduces:
+- RobotImmediateFinish
+- RobotStepsTaken
+- RobotIsWorkingNotInDock
+- RobotIsWorkingInDock
+- RobotIsLying
+
+In addition, most tests and infra required significant refactoring to be able to run with the new code.
+
+---------------------------------------------------------------------------------------------
+
 BONUS Ex2
 
 There are several updated to the already existing features:

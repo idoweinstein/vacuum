@@ -1,5 +1,7 @@
 NumSteps = 74
 DirtLeft = 2
 Status = FINISHED
+InDock = TRUE
+Score = 674
 Steps:
 EsENsSSsWSssssssWsssssssssNWNsssWssNssSSWNsWWSsssssssssSsssssEENNWWWEEEEEEF

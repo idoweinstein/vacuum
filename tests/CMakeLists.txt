@@ -35,6 +35,8 @@ set(INPUT_FILES
     inputs/input_filledcol.txt
     inputs/input_mockalgo_dead.txt
     inputs/input_mockalgo_working.txt
+    inputs/input_immediatefinish.txt
+    inputs/input_stepstaken.txt
 )
 
 file(
@@ -48,6 +50,7 @@ add_executable(
     path_tree_test.cc
 )
 target_link_libraries(path_tree_test
+    greedyalgorithm
     vacuum_cleaner
     GTest::gtest_main
 )
@@ -81,10 +84,22 @@ target_link_libraries(deserializer_test
 )
 
 add_executable(
-    algorithm_test
+    greedy_algorithm_test
     algorithm_test.cc
 )
-target_link_libraries(algorithm_test
+target_link_libraries(greedy_algorithm_test
+    greedyalgorithm
+    vacuum_cleaner
+    GTest::gtest_main
+    GTest::gmock_main
+)
+
+add_executable(
+    dfs_algorithm_test
+    algorithm_test.cc
+)
+target_link_libraries(dfs_algorithm_test
+    dfsalgorithm
     vacuum_cleaner
     GTest::gtest_main
     GTest::gmock_main
@@ -95,6 +110,8 @@ add_executable(
     simulator_test.cc
 )
 target_link_libraries(simulator_test
+    greedyalgorithm
+    dfsalgorithm
     vacuum_cleaner
     GTest::gtest_main
     GTest::gmock_main
@@ -122,8 +139,13 @@ add_test(
 )
 
 add_test(
-    NAME algorithm_test
-    COMMAND algorithm_test
+    NAME greedy_algorithm_test
+    COMMAND greedy_algorithm_test
+)
+
+add_test(
+    NAME dfs_algorithm_test
+    COMMAND dfs_algorithm_test
 )
 
 add_test(
